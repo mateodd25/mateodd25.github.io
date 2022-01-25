@@ -8,12 +8,55 @@
     <language>en-us</language><atom:link href="https://mateodd25.github.io/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Mateo Díaz</title>
-      <link>https://mateodd25.github.io/</link>
+      <link>https://mateodd25.github.io/index.html</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://mateodd25.github.io/</guid>
+      <guid>https://mateodd25.github.io/index.html</guid>
       <description>Postdoctoral Scholar Computing and Mathematical Sciences Caltech
 About I am Postdoctoral Scholar at Caltech hosted by Venkat Chandrasekaran and Joel Tropp. I obtained my PhD in Applied Mathematics from Cornell University advised by Damek Davis. Before Cornell, I completed my MSc in Mathematics and two BS in Mathematics, and Systems and Computing Engineering at Los Andes University. There I was co-advised by Mauricio Junca and Mauricio Velasco. I spent the Fall of 2020 with the Algorithms and Optimization team at Google Research, hosted by Miles Lubin and David Applegate.</description>
+    </item>
+    
+    <item>
+      <title>Publications</title>
+      <link>https://mateodd25.github.io/publications/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://mateodd25.github.io/publications/</guid>
+      <description>Clustering a Mixture of Gaussians with Unknown Covariance (with D. Davis and K. Wang) Submitted, 2021.
+  Escaping strict saddle points of the Moreau envelope in nonsmooth optimization (with D. Davis and D. Drusvyatskiy) Submitted, 2021.
+  Optimal Convergence Rates for the Proximal Bundle Method (with B. Grimmer) Submitted, 2021.
+  Infeasibility detection with primal-dual hybrid gradient for large-scale linear programming (with D. Applegate, H. Lu, and M.</description>
+    </item>
+    
+    <item>
+      <title>Random photos</title>
+      <link>https://mateodd25.github.io/random/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://mateodd25.github.io/random/</guid>
+      <description>Here are some pictures of places where I have lived.
+Leticia, Amazonas, Colombia Sunset at the Amazon river - December 2018
+ Bogotá, Colombia Uniandes - December 2017
+ Upstate New York Biking near Ithaca - September 2018
+ Watkins Glen in the winter - January 2021
+ Watkins Glen in the summer - June 2021
+ Los Angeles Sunset behind the Hollywood sign - November 2021
+ </description>
+    </item>
+    
+    <item>
+      <title>Teaching</title>
+      <link>https://mateodd25.github.io/teaching/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://mateodd25.github.io/teaching/</guid>
+      <description>Cornell   ORIE 6340: Mathematics of Data Science Spring 2021 (Teaching Assistant).
+  ORIE 5270: Big Data Technologies Spring 2020 (Instructor).
+  ORIE 6125: Computational Methods in Operations Research Spring 2020 (Instructor).
+  ORIE 3300: Optimization I Summer 2017 (Teaching Assistant).
+  Uniandes   MATE-2604 Numerical Analysis Spring 2015 (Lecturer).
+  MATE-1201 Precalculus Fall 2015 (Lecturer).
+  MATE-1105 Linear Algebra Fall 2012, Spring 2013, Fall 2014 (Lecturer).</description>
     </item>
     
   </channel>
