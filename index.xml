@@ -1,1 +1,73 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Mateo Díaz</title><link>/</link><description>Recent content on Mateo Díaz</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="/index.xml" rel="self" type="application/rss+xml"/><item><title/><link>/all-contents/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/all-contents/</guid><description>Mateo Díaz # Postdoctoral Scholar Computing and Mathematical Sciences Caltech About # I am Postdoctoral Scholar at Caltech hosted by Venkat Chandrasekaran and Joel Tropp.</description></item><item><title/><link>/posts/all-contents/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/posts/all-contents/</guid><description>Mateo Díaz\\(^2\) # I will join the Department of Applied Mathematics and Statistics at Johns Hopkins University in the Fall of 2023 as an Assistant Professor.</description></item><item><title>Contact</title><link>/contact/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/contact/</guid><description>&amp;lt;first_name&amp;gt; dd caltech edu</description></item><item><title>Publications</title><link>/publications/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/publications/</guid><description>In the pipeline # Stochastic approximation with decision-dependent distributions: asymptotic normality and optimality (with J.</description></item><item><title>Random photos</title><link>/other/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/other/</guid><description>Here are some pictures of places where I have lived (or visited).</description></item><item><title>Random photos</title><link>/random/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/random/</guid><description>Here are some pictures of places where I have lived.</description></item><item><title>Teaching</title><link>/teaching/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/teaching/</guid><description>Cornell # ORIE 6340: Mathematics of Data Science Spring 2021 (Teaching Assistant).</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Mateo Díaz</title>
+    <link>/</link>
+    <description>Recent content on Mateo Díaz</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title></title>
+      <link>/all-contents/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/all-contents/</guid>
+      <description>Mateo Díaz # Postdoctoral Scholar Computing and Mathematical Sciences Caltech About # I am Postdoctoral Scholar at Caltech hosted by Venkat Chandrasekaran and Joel Tropp.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>/posts/all-contents/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/posts/all-contents/</guid>
+      <description>Mateo Díaz\\(^2\) # I will join the Department of Applied Mathematics and Statistics at Johns Hopkins University in the Fall of 2023 as an Assistant Professor.</description>
+    </item>
+    
+    <item>
+      <title>Contact</title>
+      <link>/contact/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/contact/</guid>
+      <description>&amp;lt;first_name&amp;gt; dd caltech edu</description>
+    </item>
+    
+    <item>
+      <title>Publications</title>
+      <link>/publications/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/publications/</guid>
+      <description>In the pipeline # Robust, randomized preconditioning for kernel ridge regression (with E.</description>
+    </item>
+    
+    <item>
+      <title>Random photos</title>
+      <link>/other/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/other/</guid>
+      <description>Here are some pictures of places where I have lived (or visited).</description>
+    </item>
+    
+    <item>
+      <title>Random photos</title>
+      <link>/random/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/random/</guid>
+      <description>Here are some pictures of places where I have lived.</description>
+    </item>
+    
+    <item>
+      <title>Teaching</title>
+      <link>/teaching/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/teaching/</guid>
+      <description>Cornell # ORIE 6340: Mathematics of Data Science Spring 2021 (Teaching Assistant).</description>
+    </item>
+    
+  </channel>
+</rss>
