@@ -34,6 +34,15 @@
     </item>
     
     <item>
+      <title>Desigualdades de concentracion</title>
+      <link>/desigualdades/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/desigualdades/</guid>
+      <description>import networkx as nx import matplotlib.</description>
+    </item>
+    
+    <item>
       <title>Nonlinear Optimization I - 553.761</title>
       <link>/nonlinear/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
