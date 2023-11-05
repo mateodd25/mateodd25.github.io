@@ -19,10 +19,10 @@
   <meta name="theme-color" content="rgb(255,255,255)" />
   <meta http-equiv="X-UA-Compatible" content="ie=edge" />
   
-  <title>Desigualdades de concentracion &middot; Mateo Díaz</title>
-    <meta name="title" content="Desigualdades de concentracion &middot; Mateo Díaz" />
+  <title>Desigualdades de concentración &middot; Mateo Díaz</title>
+    <meta name="title" content="Desigualdades de concentración &middot; Mateo Díaz" />
   
-  <meta name="description" content="import networkx as nx import matplotlib." />
+  <meta name="description" content="This website hosts the materials for a minicourse on concentration inequalities that I taught at the National University of Colombia in November of 2023." />
   
   
   
@@ -64,16 +64,16 @@
   
   
   
-  <meta property="og:title" content="Desigualdades de concentracion" />
-<meta property="og:description" content="import networkx as nx import matplotlib." />
+  <meta property="og:title" content="Desigualdades de concentración" />
+<meta property="og:description" content="This website hosts the materials for a minicourse on concentration inequalities that I taught at the National University of Colombia in November of 2023." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="/desigualdades/" /><meta property="article:section" content="" />
 
 
 
   <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Desigualdades de concentracion"/>
-<meta name="twitter:description" content="import networkx as nx import matplotlib."/>
+<meta name="twitter:title" content="Desigualdades de concentración"/>
+<meta name="twitter:description" content="This website hosts the materials for a minicourse on concentration inequalities that I taught at the National University of Colombia in November of 2023."/>
 
   
   <script type="application/ld+json">
@@ -81,10 +81,10 @@
     "@context": "https://schema.org",
     "@type": "Article",
     "articleSection": "Mateo Díaz",
-    "name": "Desigualdades de concentracion",
-    "headline": "Desigualdades de concentracion",
+    "name": "Desigualdades de concentración",
+    "headline": "Desigualdades de concentración",
     
-    "abstract": "import networkx as nx import matplotlib.",
+    "abstract": "This website hosts the materials for a minicourse on concentration inequalities that I taught at the National University of Colombia in November of 2023.",
     "inLanguage": "en",
     "url" : "\/desigualdades\/",
     "author" : {
@@ -100,7 +100,7 @@
     
     
     "mainEntityOfPage": "true",
-    "wordCount": "195"
+    "wordCount": "1045"
   }]
   </script>
 
@@ -124,6 +124,142 @@
 
 
 
+
+  
+  
+  <link
+    type="text/css" rel="stylesheet"
+    href="/lib/katex/katex.min.ee74dae429f16f37d082342b3661d707b6f11935153bf0dc617eaba60b74e8c933334ad55cfdc4602bff3a3c60e47d1d29b63b9656db61aaa07d98e718e01618.css"
+    integrity="sha512-7nTa5CnxbzfQgjQrNmHXB7bxGTUVO/DcYX6rpgt06MkzM0rVXP3EYCv/Ojxg5H0dKbY7llbbYaqgfZjnGOAWGA=="
+  />
+  
+  
+  <script defer src="/lib/katex/katex.min.6a864286ffbc8a663f5353bb2881d7bcef3b10ecc2b8a3b41a116da43e86d82ca3a3fc4f79381d7f7fdb721075d2207e0288cc4c390c1c33cb28dc4f255a8373.js" integrity="sha512-aoZChv&#43;8imY/U1O7KIHXvO87EOzCuKO0GhFtpD6G2Cyjo/xPeTgdf3/bchB10iB&#43;AojMTDkMHDPLKNxPJVqDcw=="></script>
+  
+  
+  <script defer src="/lib/katex/auto-render.min.8968ae052e67b7aafad1f0b3dba35dd19a9ed276e4d594c841b9772afee462c5fec8a314147ce3687dbe02733abe9d97b3e80d99a0405562634a6b8fc3be847e.js" integrity="sha512-iWiuBS5nt6r60fCz26Nd0Zqe0nbk1ZTIQbl3Kv7kYsX&#43;yKMUFHzjaH2&#43;AnM6vp2Xs&#43;gNmaBAVWJjSmuPw76Efg==" onload="renderMathInElement(document.body);"></script>
+  
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
 
 
   
@@ -243,11 +379,75 @@
     <header>
       
       <h1 class="mt-0 text-4xl font-extrabold text-neutral-900 dark:text-neutral">
-        Desigualdades de concentracion
+        Desigualdades de concentración
       </h1>
     </header>
     <section class="max-w-full mt-6 prose dark:prose-invert">
-      <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+      <div class="flex px-4 py-3 rounded-md bg-primary-100 dark:bg-primary-900">
+  <span class="pe-3 text-primary-400">
+    <span class="relative inline-block align-text-bottom px-1 icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256s256-114.6 256-256S397.4 0 256 0zM256 128c17.67 0 32 14.33 32 32c0 17.67-14.33 32-32 32S224 177.7 224 160C224 142.3 238.3 128 256 128zM296 384h-80C202.8 384 192 373.3 192 360s10.75-24 24-24h16v-64H224c-13.25 0-24-10.75-24-24S210.8 224 224 224h32c13.25 0 24 10.75 24 24v88h16c13.25 0 24 10.75 24 24S309.3 384 296 384z"/></svg>
+</span>
+  </span>
+  <span class="dark:text-neutral-300">This website hosts the materials for a minicourse on concentration inequalities that I taught at the National University of Colombia in November of 2023. Thus, the course was delivered in Spanish. If you are interested in learning more about this subject, I strongly recommend the <strong>free</strong> video lectures on <a
+  href="https://www.math.uci.edu/~rvershyn/teaching/hdp/hdp.html"
+  
+  target="_blank" rel="noreferrer noopener"
+>High-Dimensional Probability</a> by the great, Roman Vershynin.</span>
+</div>
+
+<p>En este minicurso los asistentes tendrán la oportunidad de profundizar en el estudio de desigualdades de concentración clásicas y contemporáneas. A lo largo de tres sesiones, exploraremos desigualdades reconocidas, como las de Markov y Hoeffding, así como desigualdades más generales aplicables a variables aleatorias subgaussianas y subexponenciales. Además, se abordarán las versiones matriciales equivalentes de algunas de estas desigualdades. La teoría del curso será ilustrada con aplicaciones modernas, tales como el modelo de bloques estocásticos y reducción de dimensión, permitiendo así a los participantes adquirir habilidades aplicables en campos tan variados como la ciencia de datos, la teoría de redes y más. A través de una mezcla equilibrada de teoría y práctica, los estudiantes estarán preparados para utilizar estas poderosas herramientas en su trabajo e investigación futura, desarrollando un entendimiento sólido y aplicable de las desigualdades de concentración.</p>
+<p>El curso está basado en el maravilloso libro de Roman Vershynin, &ldquo;High-dimensional probability&rdquo;. Pueden encontrar una copia gratuita <a
+  href="https://www.math.uci.edu/~rvershyn/papers/HDP-book/HDP-book.pdf"
+  
+  target="_blank" rel="noreferrer noopener"
+>aquí</a>. Otras referencias muy buenas incluyen:</p>
+<ul>
+<li>Boucheron, Stéphane, Gábor Lugosi, and Olivier Bousquet. <a
+  href="https://www.amazon.com/Concentration-Inequalities-Nonasymptotic-Theory-Independence/dp/019876765X"
+  
+  target="_blank" rel="noreferrer noopener"
+>Concentration Inequalities</a> (2013).</li>
+<li>Tropp, Joel A. <a
+  href="https://tropp.caltech.edu/notes/Tro21-Probability-High-LN-corr.pdf"
+  
+  target="_blank" rel="noreferrer noopener"
+>Probability in High Dimensions</a>. Lecture notes (Caltech) (Winter 2023).</li>
+<li>Van Handel, Ramon. <a
+  href="https://web.math.princeton.edu/~rvan/APC550.pdf"
+  
+  target="_blank" rel="noreferrer noopener"
+>Probability in High Dimension</a>. Lecture Notes (Princeton University) (2014).</li>
+</ul>
+<h2 id="notas" class="relative group">Notas <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#notas" aria-label="Anchor">#</a></span></h2>
+<ul>
+<li>Día 1: Motivación y desigualdades clásicas</li>
+<li>Día 2: Matrices aleatorias</li>
+<li>Día 3: Concentración sin independencia</li>
+</ul>
+<h2 id="ejercicios" class="relative group">Ejercicios <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#ejercicios" aria-label="Anchor">#</a></span></h2>
+<p>Estos ejercicios están pensados para complementar los conceptos que cubrimos en clase. No se calificarán o corregirán, por favor no me manden las soluciones!</p>
+<h3 id="día-1" class="relative group">Día 1 <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#d%c3%ada-1" aria-label="Anchor">#</a></span></h3>
+
+
+<h4 id="problema-1" class="relative group">Problema 1 <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#problema-1" aria-label="Anchor">#</a></span></h4>
+<p>Demuestre que para todo \(x \in \mathbb{R}\) tenemos que \(\cosh(x) \leq e^{x^2}\).</p>
+<h4 id="problema-2" class="relative group">Problema 2 <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#problema-2" aria-label="Anchor">#</a></span></h4>
+<p>Demuestre que la norma sub-gaussiana de una variable aleatoria \(X\) acotada por \(1\) está acotada por
+\[
+\|X\|_{\psi_2} \leq \frac{1}{\log(2)}.
+\]</p>
+<h4 id="problema-3" class="relative group">Problema 3 <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#problema-3" aria-label="Anchor">#</a></span></h4>
+<p>Considere la siguiente versión de la desigualdad de Hoeffding.
+<strong>Teorema.</strong> <em>Sea \(X_1, \ldots, X_n\) variables aleatorias independientes. Suponga que \(X_i \in [m_i, M_i]\) para cada \(i\). Entonces, para cualquier \(t &gt; 0\), tenemos</em>
+\[
+\mathbb{P}\left(\sum_{i=1}^{n} (X_i - \mathbb{E} X_i) \geq t\right) \leq \exp\left(-\frac{2t^2}{\sum_{i=1}^{N} (M_i - m_i)^2}\right).
+\]</p>
+<p>Pruebe este resultado, posiblemente con alguna otra constante absoluta en lugar de 2 en la cola.</p>
+<h4 id="problema-4" class="relative group">Problema 4 <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#problema-4" aria-label="Anchor">#</a></span></h4>
+<h2 id="experimentos-numericos" class="relative group">Experimentos numericos <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#experimentos-numericos" aria-label="Anchor">#</a></span></h2>
+<h4 id="deteccion-de-comunidades" class="relative group">Deteccion de comunidades <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#deteccion-de-comunidades" aria-label="Anchor">#</a></span></h4>
+<p>Primero generamos un grafo aleatorio y dibujamos las etiquetas reales.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
 </span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 </span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">matplotlib.backends.backend_agg</span> <span class="kn">import</span> <span class="n">FigureCanvasAgg</span> <span class="k">as</span> <span class="n">FigureCanvas</span>
 </span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -255,8 +455,8 @@
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="c1"># Generate a random Stochastic Block Model graph</span>
 </span></span><span class="line"><span class="cl"><span class="n">n</span> <span class="o">=</span> <span class="mi">100</span>
-</span></span><span class="line"><span class="cl"><span class="n">p</span> <span class="o">=</span> <span class="mf">0.3</span>
-</span></span><span class="line"><span class="cl"><span class="n">q</span> <span class="o">=</span> <span class="mf">0.1</span>
+</span></span><span class="line"><span class="cl"><span class="n">p</span> <span class="o">=</span> <span class="mf">0.7</span>
+</span></span><span class="line"><span class="cl"><span class="n">q</span> <span class="o">=</span> <span class="mf">0.01</span>
 </span></span><span class="line"><span class="cl"><span class="n">sizes</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="n">n</span> <span class="o">//</span> <span class="mi">2</span><span class="p">]</span>
 </span></span><span class="line"><span class="cl"><span class="n">probs</span> <span class="o">=</span> <span class="p">[[</span><span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">],</span> <span class="p">[</span><span class="n">q</span><span class="p">,</span> <span class="n">p</span><span class="p">]]</span>
 </span></span><span class="line"><span class="cl"><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">stochastic_block_model</span><span class="p">(</span><span class="n">sizes</span><span class="p">,</span> <span class="n">probs</span><span class="p">)</span>
@@ -267,12 +467,11 @@
 </span></span><span class="line"><span class="cl"><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">v</span><span class="p">][</span><span class="s1">&#39;block&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">()]</span>
 </span></span><span class="line"><span class="cl"><span class="n">nx</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">node_color</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">Paired</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="n">canvas</span> <span class="o">=</span> <span class="n">FigureCanvas</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="n">filename</span> <span class="o">=</span> <span class="s2">&#34;plot1.png&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="n">filename</span> <span class="o">=</span> <span class="s2">&#34;true_labels.png&#34;</span>
 </span></span><span class="line"><span class="cl"><span class="n">canvas</span><span class="o">.</span><span class="n">print_figure</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="n">filename</span>
-</span></span></code></pre></div><p><a id="figure--fig:original-labels"></a></p>
-
+</span></span></code></pre></div>
   
   
   
@@ -290,15 +489,16 @@
         
         
         
-          src="/ox-hugo/plot1.png"
+          src="/ox-hugo/true_labels.png"
         
       
     />
     
-    <figcaption class="text-center"><span class="figure-number">Figure 1: </span>Original Labels</figcaption>
+    
   </figure>
 
 
+<p>Ahora corremos el metodo espectral para estimar las etiquetas.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># Compute the second eigenvector of the adjacency matrix</span>
 </span></span><span class="line"><span class="cl"><span class="n">A</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">adjacency_matrix</span><span class="p">(</span><span class="n">G</span><span class="p">)</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
 </span></span><span class="line"><span class="cl"><span class="n">w</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">eigh</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
@@ -311,17 +511,211 @@
 </span></span><span class="line"><span class="cl"><span class="n">fig2</span><span class="p">,</span> <span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
 </span></span><span class="line"><span class="cl"><span class="n">nx</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">node_color</span><span class="o">=</span><span class="n">estimated_labels</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">Paired</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax2</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="n">canvas2</span> <span class="o">=</span> <span class="n">FigureCanvas</span><span class="p">(</span><span class="n">fig2</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="n">filename2</span> <span class="o">=</span> <span class="s2">&#34;plot2.png&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="n">filename2</span> <span class="o">=</span> <span class="s2">&#34;estimated_labels.png&#34;</span>
 </span></span><span class="line"><span class="cl"><span class="n">canvas2</span><span class="o">.</span><span class="n">print_figure</span><span class="p">(</span><span class="n">filename2</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig2</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="n">filename2</span>
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># Compute the misclassification error (up to sign)</span>
-</span></span><span class="line"><span class="cl"><span class="n">true_labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span> <span class="k">if</span> <span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">v</span><span class="p">][</span><span class="s1">&#39;block&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">()])</span>
-</span></span><span class="line"><span class="cl"><span class="n">error</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">true_labels</span> <span class="o">!=</span> <span class="n">estimated_labels</span><span class="p">),</span>
-</span></span><span class="line"><span class="cl">            <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">true_labels</span> <span class="o">!=</span> <span class="o">-</span><span class="n">estimated_labels</span><span class="p">))</span> <span class="o">/</span> <span class="n">n</span>
-</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Misclassification error (up to sign):&#34;</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="n">error</span>
 </span></span></code></pre></div>
+  
+  
+  
+  
+  
+  <figure>
+    
+    <img
+      class="mx-auto my-0 rounded-md"
+      alt=""
+      
+        loading="lazy"
+      
+      
+        
+        
+        
+          src="/ox-hugo/estimated_labels.png"
+        
+      
+    />
+    
+    
+  </figure>
+
+
+<p>Finalmente, midamos el error.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="n">true_labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span> <span class="k">if</span> <span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">v</span><span class="p">][</span><span class="s1">&#39;block&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">()])</span>
+</span></span><span class="line"><span class="cl"><span class="n">error</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">true_labels</span> <span class="o">!=</span> <span class="n">estimated_labels</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">            <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">true_labels</span> <span class="o">!=</span> <span class="o">-</span><span class="n">estimated_labels</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Misclassification error (up to sign):&#34;</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="sa">f</span><span class="s1">&#39;El error de misclasificacion es </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s1">&#39;</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">El error de misclasificacion es 0
+</span></span></code></pre></div><h3 id="johnson-lindenstrauss" class="relative group">Johnson-Lindenstrauss <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#johnson-lindenstrauss" aria-label="Anchor">#</a></span></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Function to perform the random projection</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">random_projection</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># Create a random Gaussian matrix</span>
+</span></span><span class="line"><span class="cl">    <span class="n">projection_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># Project the data</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">X</span> <span class="o">@</span> <span class="n">projection_matrix</span><span class="o">.</span><span class="n">T</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Function to calculate the distortion of the norm</span>
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">norm_distortion</span><span class="p">(</span><span class="n">original</span><span class="p">,</span> <span class="n">projected</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">original_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">original</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">projected_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">projected</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">distortion</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">original_norm</span> <span class="o">-</span> <span class="n">projected_norm</span><span class="p">)</span> <span class="o">/</span> <span class="n">original_norm</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">distortion</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">run_experiment</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="c1"># number of points</span>
+</span></span><span class="line"><span class="cl">                   <span class="n">d</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="c1"># smaller dimension</span>
+</span></span><span class="line"><span class="cl">                   <span class="n">D</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="c1"># larger dimension</span>
+</span></span><span class="line"><span class="cl">                   <span class="n">eps</span><span class="o">=</span><span class="mf">0.25</span><span class="p">):</span> <span class="c1"># target accuracy</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">k_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">/</span><span class="n">eps</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="mi">10</span><span class="p">)</span>  <span class="c1"># range of lower dimensions to test</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1"># Generate random points in high-dimensional space</span>
+</span></span><span class="line"><span class="cl">    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1"># Apply the random projections and calculate distortions</span>
+</span></span><span class="line"><span class="cl">    <span class="n">distortions</span> <span class="o">=</span> <span class="p">[]</span>
+</span></span><span class="line"><span class="cl">    <span class="n">distortions2</span> <span class="o">=</span> <span class="p">[]</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">k_values</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">X_projected</span> <span class="o">=</span> <span class="n">random_projection</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">distortion</span> <span class="o">=</span> <span class="n">norm_distortion</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">X_projected</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">distortions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">distortion</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">k_values</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">X_projected</span> <span class="o">=</span> <span class="n">random_projection</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">distortion</span> <span class="o">=</span> <span class="n">norm_distortion</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">X_projected</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">distortions2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">distortion</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">distortions</span><span class="p">,</span> <span class="n">distortions2</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">n</span> <span class="o">=</span> <span class="mi">100</span>
+</span></span><span class="line"><span class="cl"><span class="n">distortions</span><span class="p">,</span> <span class="n">distortions2</span> <span class="o">=</span> <span class="n">run_experiment</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Theoretical number of dimensions for the embedding</span>
+</span></span><span class="line"><span class="cl"><span class="n">theoretical_k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">/</span> <span class="n">eps</span><span class="o">**</span><span class="mi">2</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Plot the distortion as a function of the lower dimension</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># plt.figure(figsize=(10, 6))</span>
+</span></span><span class="line"><span class="cl"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">k_values</span><span class="p">,</span> <span class="n">distortions</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&#34;Original dimension </span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">k_values</span><span class="p">,</span> <span class="n">distortions2</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&#34;Original dimension </span><span class="si">{</span><span class="n">D</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">eps</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;epsilon = </span><span class="si">{</span><span class="n">eps</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">theoretical_k</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;log(n)/epsilon^2 ≈ </span><span class="si">{</span><span class="n">theoretical_k</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Distortion of the Norm vs Dimension of the Embedding&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Dimension of the Embedding (k)&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Average Distortion of the Norm&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</span></span></code></pre></div><p><a id="code-snippet--JL-lemma-plot"></a></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">random_orthogonal_projection</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">G</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">Q</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">qr</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">Q</span><span class="p">[:,</span> <span class="p">:</span><span class="n">m</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">random_projection</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">d</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="n">P</span> <span class="o">=</span> <span class="n">random_orthogonal_projection</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d</span> <span class="o">/</span> <span class="n">m</span><span class="p">)</span> <span class="o">*</span> <span class="n">X</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">norm_distortion</span><span class="p">(</span><span class="n">original</span><span class="p">,</span> <span class="n">projected</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">original_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">original</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">projected_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">projected</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">distortion</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">original_norm</span> <span class="o">-</span> <span class="n">projected_norm</span><span class="p">)</span> <span class="o">/</span> <span class="n">original_norm</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">distortion</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">run_experiment</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">eps</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">d</span><span class="p">,</span> <span class="n">D</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">10000</span>
+</span></span><span class="line"><span class="cl">    <span class="n">k_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">/</span><span class="n">eps</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="mi">10</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">X_d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">X_D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">distortions_d</span> <span class="o">=</span> <span class="p">[</span><span class="n">norm_distortion</span><span class="p">(</span><span class="n">X_d</span><span class="p">,</span> <span class="n">random_projection</span><span class="p">(</span><span class="n">X_d</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">k_values</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">    <span class="n">distortions_D</span> <span class="o">=</span> <span class="p">[</span><span class="n">norm_distortion</span><span class="p">(</span><span class="n">X_D</span><span class="p">,</span> <span class="n">random_projection</span><span class="p">(</span><span class="n">X_D</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">k_values</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">theoretical_k</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">/</span> <span class="n">eps</span><span class="o">**</span><span class="mi">2</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">k_values</span><span class="p">,</span> <span class="n">distortions_d</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&#34;Original dimension </span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">k_values</span><span class="p">,</span> <span class="n">distortions_D</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&#34;Original dimension </span><span class="si">{</span><span class="n">D</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">eps</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;epsilon = </span><span class="si">{</span><span class="n">eps</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">theoretical_k</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;2 log(n)/epsilon^2 ≈ </span><span class="si">{</span><span class="n">theoretical_k</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Distortion of the Norm vs Dimension of the Embedding (n=</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Dimension of the Embedding (k)&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Worst Distortion of the Norm&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">image_file</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;jl-lemma-plot-n-</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">.png&#39;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">image_file</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">image_file</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Plot for n = 100</span>
+</span></span><span class="line"><span class="cl"><span class="n">image_file_100</span> <span class="o">=</span> <span class="n">run_experiment</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">image_file_100</span>
+</span></span></code></pre></div>
+  
+  
+  
+  
+  
+  <figure>
+    
+    <img
+      class="mx-auto my-0 rounded-md"
+      alt=""
+      
+        loading="lazy"
+      
+      
+        
+        
+        
+          src="/ox-hugo/jl-lemma-plot-n-100.png"
+        
+      
+    />
+    
+    
+  </figure>
+
+
+<p>Ahora con mas puntos.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="n">image_file_2000</span> <span class="o">=</span> <span class="n">run_experiment</span><span class="p">(</span><span class="mi">2000</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">image_file_2000</span>
+</span></span></code></pre></div>
+  
+  
+  
+  
+  
+  <figure>
+    
+    <img
+      class="mx-auto my-0 rounded-md"
+      alt=""
+      
+        loading="lazy"
+      
+      
+        
+        
+        
+          src="/ox-hugo/jl-lemma-plot-n-2000.png"
+        
+      
+    />
+    
+    
+  </figure>
+
+
+
     </section>
     <footer class="pt-8">
       
@@ -329,6 +723,17 @@
     </footer>
   </article>
 
+        
+          <div class="pointer-events-none absolute bottom-0 end-0 top-[100vh] w-12">
+            <a
+              href="#the-top"
+              class="pointer-events-auto sticky top-[calc(100vh-5.5rem)] flex h-12 w-12 items-center justify-center rounded-full bg-neutral/50 text-xl text-neutral-700 backdrop-blur hover:text-primary-600 dark:bg-neutral-800/50 dark:text-neutral dark:hover:text-primary-400"
+              aria-label="Scroll to top"
+              title="Scroll to top"
+            >
+              &uarr;
+            </a>
+          </div>
         
       </main><footer class="py-10 print:hidden">
   
