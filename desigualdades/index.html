@@ -100,7 +100,7 @@
     
     
     "mainEntityOfPage": "true",
-    "wordCount": "877"
+    "wordCount": "1414"
   }]
   </script>
 
@@ -383,16 +383,43 @@
       </h1>
     </header>
     <section class="max-w-full mt-6 prose dark:prose-invert">
-      <div class="flex px-4 py-3 rounded-md bg-primary-100 dark:bg-primary-900">
+      
+  
+  
+  
+  
+  
+  <figure>
+    
+    <img
+      class="mx-auto my-0 rounded-md"
+      alt=""
+      
+        loading="lazy"
+      
+      
+        
+        
+        
+          src="/orange_band.jpeg"
+        
+      
+    />
+    
+    
+  </figure>
+
+
+<div class="flex px-4 py-3 rounded-md bg-primary-100 dark:bg-primary-900">
   <span class="pe-3 text-primary-400">
     <span class="relative inline-block align-text-bottom px-1 icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256s256-114.6 256-256S397.4 0 256 0zM256 128c17.67 0 32 14.33 32 32c0 17.67-14.33 32-32 32S224 177.7 224 160C224 142.3 238.3 128 256 128zM296 384h-80C202.8 384 192 373.3 192 360s10.75-24 24-24h16v-64H224c-13.25 0-24-10.75-24-24S210.8 224 224 224h32c13.25 0 24 10.75 24 24v88h16c13.25 0 24 10.75 24 24S309.3 384 296 384z"/></svg>
 </span>
   </span>
-  <span class="dark:text-neutral-300">This website hosts the materials for a minicourse on concentration inequalities that I taught at the National University of Colombia in November of 2023. Thus, the course was delivered in Spanish. If you are interested in learning more about this subject, I strongly recommend the <strong>free</strong> video lectures on <a
+  <span class="dark:text-neutral-300">This website hosts the materials for a minicourse on concentration inequalities that I taught at the National University of Colombia in November of 2023. The course was delivered in Spanish. If you are interested in this subject, I strongly recommend the <strong>free</strong> video lectures on <a
   href="https://www.math.uci.edu/~rvershyn/teaching/hdp/hdp.html"
   
   target="_blank" rel="noreferrer noopener"
->High-Dimensional Probability</a> by the great, Roman Vershynin.</span>
+>High-Dimensional Probability</a> by, the great, Roman Vershynin.</span>
 </div>
 
 <p>En este minicurso los asistentes tendrán la oportunidad de profundizar en el estudio de desigualdades de concentración clásicas y contemporáneas. A lo largo de tres sesiones, exploraremos desigualdades reconocidas, como las de Markov y Hoeffding, así como desigualdades más generales aplicables a variables aleatorias subgaussianas y subexponenciales. Además, se abordarán las versiones matriciales equivalentes de algunas de estas desigualdades. La teoría del curso será ilustrada con aplicaciones modernas, tales como el modelo de bloques estocásticos y reducción de dimensión, permitiendo así a los participantes adquirir habilidades aplicables en campos tan variados como la ciencia de datos, la teoría de redes y más. A través de una mezcla equilibrada de teoría y práctica, los estudiantes estarán preparados para utilizar estas poderosas herramientas en su trabajo e investigación futura, desarrollando un entendimiento sólido y aplicable de las desigualdades de concentración.</p>
@@ -420,21 +447,32 @@
 </ul>
 <h2 id="notas" class="relative group">Notas <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#notas" aria-label="Anchor">#</a></span></h2>
 <ul>
-<li>Día 1: Motivación y desigualdades clásicas</li>
-<li>Día 2: Matrices aleatorias</li>
-<li>Día 3: Concentración sin independencia</li>
+<li><a
+  href="/pdfs/desigualdades/dia1.pdf"
+  
+  
+>Día 1: Desigualdades clásicas y distribuciones sub-gaussianas</a>.</li>
+<li><a
+  href="/pdfs/desigualdades/dia2.pdf"
+  
+  
+>Día 2: Matrices aleatorias</a></li>
+<li><a
+  href="/pdfs/desigualdades/dia3.pdf"
+  
+  
+>Día 3: Concentración sin independencia</a>.</li>
 </ul>
 <h2 id="ejercicios" class="relative group">Ejercicios <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#ejercicios" aria-label="Anchor">#</a></span></h2>
 <p>Estos ejercicios están pensados para complementar los conceptos que cubrimos en clase. No se calificarán o corregirán, por favor no me manden las soluciones!</p>
-<h3 id="día-1" class="relative group">Día 1 <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#d%c3%ada-1" aria-label="Anchor">#</a></span></h3>
 
 
 <h4 id="problema-1" class="relative group">Problema 1 <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#problema-1" aria-label="Anchor">#</a></span></h4>
-<p>Demuestre que para todo \(x \in \mathbb{R}\) tenemos que \(\cosh(x) \leq e^{x^2}\).</p>
+<p>Demuestre que para todo \(x \in \mathbb{R}\) tenemos que \(\cosh(x) \leq \exp{x^2}\).</p>
 <h4 id="problema-2" class="relative group">Problema 2 <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#problema-2" aria-label="Anchor">#</a></span></h4>
 <p>Demuestre que la norma sub-gaussiana de una variable aleatoria \(X\) acotada por \(1\) está acotada por
 \[
-\|X\|_{\psi_2} \leq \frac{1}{\log(2)}.
+\|X\|_{\psi_2} \leq \frac{1}{\sqrt{\log(2)}}.
 \]</p>
 <h4 id="problema-3" class="relative group">Problema 3 <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#problema-3" aria-label="Anchor">#</a></span></h4>
 <p>Considere la siguiente versión de la desigualdad de Hoeffding.
@@ -444,17 +482,73 @@
 \]</p>
 <p>Pruebe este resultado, posiblemente con alguna otra constante absoluta en lugar de 2 en la cola.</p>
 <h4 id="problema-4" class="relative group">Problema 4 <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#problema-4" aria-label="Anchor">#</a></span></h4>
-<h3 id="dia-3" class="relative group">Dia 3 <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#dia-3" aria-label="Anchor">#</a></span></h3>
-<h4 id="problema-1" class="relative group">Problema 1 <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#problema-1" aria-label="Anchor">#</a></span></h4>
-<p>Sea \(X \sim \text{Unif}(\mathbb{S}^{d-1})\). Demuestre que \(\|X_1\|_{\psi_2} \leq C\) para alguna constante \(C &gt; 0\) independiente de la dimension.</p>
-<h4 id="problema-2" class="relative group">Problema 2 <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#problema-2" aria-label="Anchor">#</a></span></h4>
-<p>Sea \(X \sim \text{Unif}(\mathbb{S}^{d-1})\) y \(f \colon \mathbb{S}^{d-1} \rightarrow \RR\) sea una funcion \(L\)-Lipschitz. Demuestre que
+<p>Sea \(X\) una variable aleatoria con esperanza cero. Demuestre que \(X\) es sub-gaussiana si y solo si exists una constant \(K &gt; 0\) tal que para todo \(\lambda \in \mathbb{R}\),
 \[
-\|f(X) - \EE f(X)\|_{\psi_2} \leq C\frac{L}{\sqrt{d}}
+\mathbb{E}\exp(\lambda X) \leq \exp(K^2 \lambda^2).
+\]</p>
+<h4 id="problema-5" class="relative group">Problema 5 <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#problema-5" aria-label="Anchor">#</a></span></h4>
+<p>Sea \(X\) una variable aleatoria sub-gaussiana. Defina
+\[
+\|X\|_{\psi_2} = \inf\{K&gt;0 \colon \mathbb{E}\exp(X^2/K^2) \leq 2\}.
+\]
+Demuestre que \(\|\cdot\|_{\psi_2}\) es una norma en el espacio de variables aleatorias sub-gaussianas.</p>
+<h4 id="problema-6" class="relative group">Problema 6 <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#problema-6" aria-label="Anchor">#</a></span></h4>
+<p>Sea \((\mathcal{T}, d)\) un espacio metrico y \(K \subseteq \mathcal{T}\) un subconjunto. Fije un \(\epsilon &gt; 0\), demuestre la siquiente desigualdad
+\[
+\mathcal{P}(K, d, 2\epsilon) \leq \mathcal{N}(K, d, \epsilon)
+\]
+donde \(\mathcal{P}(K, d, \epsilon)\) y \(\mathcal{N}(K, d, \epsilon)\) son el numero de empaquetamiento y de recubrimiento, respectivamente.</p>
+<h4 id="problema-7" class="relative group">Problema 7 <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#problema-7" aria-label="Anchor">#</a></span></h4>
+<p>En nuestra definición de los números de cobertura de \(K\), requerimos que los centros \( x_i \) de las bolas \( B(x_i, \varepsilon) \) que forman una cobertura estén en \(K\). Relajando esta condición, defina el número de cobertura exterior \( N_{\text{ext}}(K, d, \varepsilon) \) de manera similar pero sin requerir que \( x_i \in K \). Demuestre que
+\[
+N_{\text{ext}}(K, d, \varepsilon) \leq N(K, d, \varepsilon) \leq N_{\text{ext}}(K, d, \varepsilon/2).
+\]</p>
+<h4 id="problema-8" class="relative group">Problema 8 <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#problema-8" aria-label="Anchor">#</a></span></h4>
+<p>Dé un contraejemplo a la siguiente propiedad de monotonicidad:
+\[
+L \subset K \quad \text{implica} \quad N(L, d, \varepsilon) \leq N(K, d, \varepsilon).
+\]
+Demuestre una versión aproximada de monotonicidad:
+\[
+L \subset K \quad \text{implica} \quad N(L, d, \varepsilon) \leq N(K, d, \varepsilon/2).
+\]</p>
+<h4 id="problema-9" class="relative group">Problema 9 <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#problema-9" aria-label="Anchor">#</a></span></h4>
+<p>Sea $A ∈ \mathbb{R}<sup>n × m</sup> y $ ε ∈ (0, 1/2)$. Entonces para cualquier par de \(\epsilon\)-mallas \(\mathcal{N} \subseteq \mathbb{S}^{m-1}\) y  \(\mathcal{M} \subseteq \mathbb{S}^{n-1}\) tenemos que
+\[
+\sup_{x \in \mathcal{N}, y \in \mathcal{M}} \langle y, Ax \rangle \leq \|A\| \leq \frac{1}{1-2\epsilon} \sup_{x \in \mathcal{N}, y \in \mathcal{M}} \langle y, Ax \rangle.
+\]</p>
+<h4 id="problema-10" class="relative group">Problema 10 <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#problema-10" aria-label="Anchor">#</a></span></h4>
+<p>Recuerde el teorema de Davis-Kahan que vimos en clase:</p>
+<p><strong>Teorema.</strong> <em>Sean \(S\) y \(T\) matrices simetricas \(n \times n\). Fije un indice \(i \in [n]\) tal que</em>
+\[
+\min_{j \colon j \neq i} |\lambda_i(S) - \lambda_j(S)| = \delta &gt; 0.
+\]
+<em>Entonces,</em>
+\[
+\sin \angle (v_i(S), v_i(T)) \leq \frac{2\|S - T\|}{\delta},
+\]
+<em>donde \(v_i(X)\) es el $i$-esimo vector propio de \(X\) y \(\angle(u,v)\) denota el angulo entre \(u\) y \(v\) con valores entre \([0, \pi/2]\).</em></p>
+<p>Demuestre que la conclusion del Teorema de Davis-Kahan que probamos en clase implica que existe \(\theta \in \{-1, 1\}\) tal que
+\[
+\|v_i(S) - \theta v_i(T)\|_2 \leq 2^{3/2}\frac{\|S - T\|}{\delta}.
+\]</p>
+<h4 id="problema-11" class="relative group">Problema 11 <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#problema-11" aria-label="Anchor">#</a></span></h4>
+<p>Sea \(A\) la matriz de adyacencia de un grafo aleatorio dado por el modelo de bloques estocastico \(G(n, p, q)\) con \(n\) par y \(p &gt; q\). Suponga que ordenamos los nodos del grafo de forma que \[D:= \mathbb{E}(A) = \begin{pmatrix} p \mathbf{J} &amp; q \mathbf{J} \\ q \mathbf{J} &amp; p\mathbf{J} \end{pmatrix}\]
+donde \(\mathbf{J} \in \{1\}^{n/2 \times n/2}\) es la matriz de solo unos. Demuestre que esta matriz tiene rango dos y que sus valores propios y vectors propios son
+\[
+\lambda_1 = \left(\frac{p+q}{2}\right) n ,\quad v_1 = \begin{pmatrix} 1 \\ \vdots \\ 1 \\ 1 \\ \vdots \\1 \end{pmatrix},  \quad \lambda_2 = \left(\frac{p-q}{2}\right) n, \quad \text{and} \quad  v_2 = \begin{pmatrix} 1 \\ \vdots \\ 1 \\ -1 \\ \vdots \\ -1 \end{pmatrix}.
+\]</p>
+<h4 id="problema-12" class="relative group">Problema 12 <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#problema-12" aria-label="Anchor">#</a></span></h4>
+<p>Sea \(X \sim \text{Unif}(\mathbb{S}^{d-1})\). Demuestre que \(\|X_1\|_{\psi_2} \leq C\) para alguna constante \(C &gt; 0\) independiente de la dimension.</p>
+<h4 id="problema-13" class="relative group">Problema 13 <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#problema-13" aria-label="Anchor">#</a></span></h4>
+<p>Sea \(X \sim \text{Unif}(\mathbb{S}^{d-1})\) y \(f \colon \mathbb{S}^{d-1} \rightarrow \mathbb{R}\) sea una funcion \(L\)-Lipschitz. Demuestre que
+\[
+\|f(X) - \mathbb{E }f(X)\|_{\psi_2} \leq C\frac{L}{\sqrt{d}}
 \]
 para alguna constante \(C &gt; 0\) independiente de la dimension.</p>
 <h2 id="experimentos-numericos" class="relative group">Experimentos numericos <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#experimentos-numericos" aria-label="Anchor">#</a></span></h2>
-<h4 id="deteccion-de-comunidades" class="relative group">Deteccion de comunidades <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#deteccion-de-comunidades" aria-label="Anchor">#</a></span></h4>
+<p>Estos son los experimentos que vimos en clase como motivacion.</p>
+<h4 id="modelo-de-bloques-estocasticos-deteccion-de-comunidades" class="relative group">Modelo de bloques estocasticos: Deteccion de comunidades <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#modelo-de-bloques-estocasticos-deteccion-de-comunidades" aria-label="Anchor">#</a></span></h4>
 <p>Primero generamos un grafo aleatorio y dibujamos las etiquetas reales.</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
 </span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -558,7 +652,7 @@ para alguna constante \(C &gt; 0\) independiente de la dimension.</p>
 </span></span><span class="line"><span class="cl"><span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Misclassification error (up to sign):&#34;</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="sa">f</span><span class="s1">&#39;El error de misclasificacion es </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s1">&#39;</span>
 </span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">El error de misclasificacion es 0
-</span></span></code></pre></div><h3 id="reduccion-de-la-dimension-con-johnson-lindenstrauss" class="relative group">Reduccion de la dimension con Johnson-Lindenstrauss <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#reduccion-de-la-dimension-con-johnson-lindenstrauss" aria-label="Anchor">#</a></span></h3>
+</span></span></code></pre></div><h3 id="johnson-lindenstrauss-reduccion-de-dimension" class="relative group">Johnson-Lindenstrauss: Reduccion de dimension <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#johnson-lindenstrauss-reduccion-de-dimension" aria-label="Anchor">#</a></span></h3>
 <p><a id="code-snippet--JL-lemma-plot"></a></p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 </span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
