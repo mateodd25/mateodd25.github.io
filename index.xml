@@ -2,86 +2,86 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Mateo Díaz</title>
-    <link>//localhost:1313/</link>
+    <link>/</link>
     <description>Recent content on Mateo Díaz</description>
     <generator>Hugo</generator>
     <language>en</language>
-    <atom:link href="//localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title></title>
-      <link>//localhost:1313/all-contents/</link>
+      <link>/all-contents/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>//localhost:1313/all-contents/</guid>
+      <guid>/all-contents/</guid>
       <description>Mateo Díaz # Postdoctoral Scholar Computing and Mathematical Sciences Caltech About # I am Postdoctoral Scholar at Caltech hosted by Venkat Chandrasekaran and Joel Tropp.</description>
     </item>
     <item>
       <title></title>
-      <link>//localhost:1313/posts/all-contents/</link>
+      <link>/posts/all-contents/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>//localhost:1313/posts/all-contents/</guid>
+      <guid>/posts/all-contents/</guid>
       <description>Mateo Díaz\\(^2\) # I will join the Department of Applied Mathematics and Statistics at Johns Hopkins University in the Fall of 2023 as an Assistant Professor.</description>
     </item>
     <item>
       <title>Contact</title>
-      <link>//localhost:1313/contact/</link>
+      <link>/contact/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>//localhost:1313/contact/</guid>
+      <guid>/contact/</guid>
       <description>&amp;lt;first_name&amp;gt; dd caltech edu</description>
     </item>
     <item>
       <title>Desigualdades de concentración</title>
-      <link>//localhost:1313/desigualdades/</link>
+      <link>/desigualdades/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>//localhost:1313/desigualdades/</guid>
+      <guid>/desigualdades/</guid>
       <description>This website hosts the materials for a minicourse on concentration inequalities that I taught at the National University of Colombia in November of 2023.</description>
     </item>
     <item>
       <title>Nonlinear Optimization I - 553.761</title>
-      <link>//localhost:1313/nonlinear/</link>
+      <link>/nonlinear/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>//localhost:1313/nonlinear/</guid>
+      <guid>/nonlinear/</guid>
       <description>This course considers algorithms for solving various important nonlinear optimization problems and, in parallel, develops the supporting theory.</description>
     </item>
     <item>
       <title>Optimization Workshop</title>
-      <link>//localhost:1313/optiworkshop/</link>
+      <link>/optiworkshop/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>//localhost:1313/optiworkshop/</guid>
+      <guid>/optiworkshop/</guid>
       <description>About # When?</description>
     </item>
     <item>
       <title>Probability Theory II</title>
-      <link>//localhost:1313/prob2/</link>
+      <link>/prob2/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>//localhost:1313/prob2/</guid>
+      <guid>/prob2/</guid>
       <description>This course is an advanced graduate-level course designed to deepen students&amp;rsquo; understanding of the theoretical underpinnings of probability.</description>
     </item>
     <item>
       <title>Publications</title>
-      <link>//localhost:1313/publications/</link>
+      <link>/publications/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>//localhost:1313/publications/</guid>
+      <guid>/publications/</guid>
       <description>Ph.D. Thesis # Complexity, conditioning, and saddle avoidance in nonsmooth optimization PhD Thesis, Cornell University, 2021.</description>
     </item>
     <item>
       <title>Random photos</title>
-      <link>//localhost:1313/other/</link>
+      <link>/other/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>//localhost:1313/other/</guid>
+      <guid>/other/</guid>
       <description>Here are some pictures of places where I have lived (or visited).</description>
     </item>
     <item>
       <title>Random photos</title>
-      <link>//localhost:1313/random/</link>
+      <link>/random/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>//localhost:1313/random/</guid>
+      <guid>/random/</guid>
       <description>Here are some pictures of places where I have lived.</description>
     </item>
     <item>
       <title>Teaching</title>
-      <link>//localhost:1313/teaching/</link>
+      <link>/teaching/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>//localhost:1313/teaching/</guid>
+      <guid>/teaching/</guid>
       <description>Johns Hopkins # AMS 721: Probability Theory 2 Spring 2024 (Instructor).</description>
     </item>
   </channel>
