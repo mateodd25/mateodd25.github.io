@@ -2,100 +2,100 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Mateo Díaz</title>
-    <link>/</link>
+    <link>//localhost:1313/</link>
     <description>Recent content on Mateo Díaz</description>
     <generator>Hugo</generator>
     <language>en</language>
-    <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="//localhost:1313/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title></title>
-      <link>/all-contents/</link>
+      <link>//localhost:1313/all-contents/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>/all-contents/</guid>
+      <guid>//localhost:1313/all-contents/</guid>
       <description></description>
     </item>
     <item>
       <title></title>
-      <link>/posts/all-contents/</link>
+      <link>//localhost:1313/posts/all-contents/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>/posts/all-contents/</guid>
+      <guid>//localhost:1313/posts/all-contents/</guid>
       <description></description>
     </item>
     <item>
       <title>Contact</title>
-      <link>/contact/</link>
+      <link>//localhost:1313/contact/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>/contact/</guid>
+      <guid>//localhost:1313/contact/</guid>
       <description></description>
     </item>
     <item>
       <title>Desigualdades de concentración</title>
-      <link>/desigualdades/</link>
+      <link>//localhost:1313/desigualdades/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>/desigualdades/</guid>
+      <guid>//localhost:1313/desigualdades/</guid>
       <description></description>
     </item>
     <item>
       <title>Mathematics of Origami (Fall 2024)</title>
-      <link>/origami/</link>
+      <link>//localhost:1313/origami/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>/origami/</guid>
+      <guid>//localhost:1313/origami/</guid>
       <description></description>
     </item>
     <item>
       <title>Nonlinear Optimization I - 553.761 (Fall 2023)</title>
-      <link>/nonlinear-fa23/</link>
+      <link>//localhost:1313/nonlinear-fa23/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>/nonlinear-fa23/</guid>
+      <guid>//localhost:1313/nonlinear-fa23/</guid>
       <description></description>
     </item>
     <item>
       <title>Nonlinear Optimization I - 553.761 (Fall 2024)</title>
-      <link>/nonlinear/</link>
+      <link>//localhost:1313/nonlinear/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>/nonlinear/</guid>
+      <guid>//localhost:1313/nonlinear/</guid>
       <description></description>
     </item>
     <item>
       <title>Optimization Workshop</title>
-      <link>/optiworkshop/</link>
+      <link>//localhost:1313/optiworkshop/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>/optiworkshop/</guid>
+      <guid>//localhost:1313/optiworkshop/</guid>
       <description></description>
     </item>
     <item>
       <title>Probability Theory II</title>
-      <link>/prob2/</link>
+      <link>//localhost:1313/prob2/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>/prob2/</guid>
+      <guid>//localhost:1313/prob2/</guid>
       <description></description>
     </item>
     <item>
       <title>Publications</title>
-      <link>/publications/</link>
+      <link>//localhost:1313/publications/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>/publications/</guid>
+      <guid>//localhost:1313/publications/</guid>
       <description></description>
     </item>
     <item>
       <title>Random photos</title>
-      <link>/other/</link>
+      <link>//localhost:1313/other/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>/other/</guid>
+      <guid>//localhost:1313/other/</guid>
       <description></description>
     </item>
     <item>
       <title>Random photos</title>
-      <link>/random/</link>
+      <link>//localhost:1313/random/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>/random/</guid>
+      <guid>//localhost:1313/random/</guid>
       <description></description>
     </item>
     <item>
       <title>Teaching</title>
-      <link>/teaching/</link>
+      <link>//localhost:1313/teaching/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>/teaching/</guid>
+      <guid>//localhost:1313/teaching/</guid>
       <description></description>
     </item>
   </channel>
