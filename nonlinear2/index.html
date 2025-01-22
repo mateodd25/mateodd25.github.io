@@ -1,0 +1,551 @@
+
+
+
+
+
+<!DOCTYPE html>
+<html
+  lang="en"
+  dir="ltr"
+  class="scroll-smooth"
+  data-default-appearance="dark"
+  data-auto-appearance="true"
+><head>
+  <meta charset="utf-8" />
+  
+    <meta http-equiv="content-language" content="en" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="rgb(255,255,255)" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  
+  <title>Nonlinear Optimization II - 553.763 (Spring 2025) &middot; Mateo Díaz</title>
+    <meta name="title" content="Nonlinear Optimization II - 553.763 (Spring 2025) &middot; Mateo Díaz" />
+  
+  <meta name="description" content="" />
+  
+  
+  
+  <link rel="canonical" href="/nonlinear2/" />
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <link
+    type="text/css"
+    rel="stylesheet"
+    href="/css/main.bundle.min.1a7666af2aa7bb721f090a00fedb57d1943a8f913d5f91d91b6936bb4a638ceb.css"
+    integrity="sha256-GnZmryqnu3IfCQoA/ttX0ZQ6j5E9X5HZG2k2u0pjjOs="
+  />
+  
+  
+  <script type="text/javascript" src="/js/appearance.min.022d0ebc3b46a335eb1c7ef79b7f2de143d7cd5156d433638592ef1ce5f8554e.js" integrity="sha256-Ai0OvDtGozXrHH73m38t4UPXzVFW1DNjhZLvHOX4VU4="></script>
+  
+  
+  
+  
+  
+  
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+  
+  
+  
+  
+  
+  
+  
+  <meta property="og:url" content="/nonlinear2/">
+  <meta property="og:site_name" content="Mateo Díaz">
+  <meta property="og:title" content="Nonlinear Optimization II - 553.763 (Spring 2025)">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+
+  
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Nonlinear Optimization II - 553.763 (Spring 2025)">
+
+  
+  <script type="application/ld+json">
+  [{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "articleSection": "Mateo Díaz",
+    "name": "Nonlinear Optimization II - 553.763 (Spring 2025)",
+    "headline": "Nonlinear Optimization II - 553.763 (Spring 2025)",
+    
+    
+    "inLanguage": "en",
+    "url" : "\/nonlinear2\/",
+    "author" : {
+      "@type": "Person",
+      "name": "Mateo Díaz"
+    },
+    
+    
+    
+    
+    
+    
+    
+    
+    "mainEntityOfPage": "true",
+    "wordCount": "727"
+  }]
+  </script>
+
+
+  
+  <meta name="author" content="Mateo Díaz" />
+  
+    
+      <link href="mailto:mateodd@jhu.edu" rel="me" />
+    
+      <link href="https://github.com/mateodd25" rel="me" />
+    
+      <link href="https://linkedin.com/in/mateo-diaz" rel="me" />
+    
+      <link href="https://scholar.google.com/citations?user=F3cPGhsAAAAJ&amp;hl=en" rel="me" />
+    
+  
+  
+  
+
+
+
+
+
+  
+  
+  <link
+    type="text/css" rel="stylesheet"
+    href="/lib/katex/katex.min.ee74dae429f16f37d082342b3661d707b6f11935153bf0dc617eaba60b74e8c933334ad55cfdc4602bff3a3c60e47d1d29b63b9656db61aaa07d98e718e01618.css"
+    integrity="sha512-7nTa5CnxbzfQgjQrNmHXB7bxGTUVO/DcYX6rpgt06MkzM0rVXP3EYCv/Ojxg5H0dKbY7llbbYaqgfZjnGOAWGA=="
+  />
+  
+  
+  <script defer src="/lib/katex/katex.min.6a864286ffbc8a663f5353bb2881d7bcef3b10ecc2b8a3b41a116da43e86d82ca3a3fc4f79381d7f7fdb721075d2207e0288cc4c390c1c33cb28dc4f255a8373.js" integrity="sha512-aoZChv&#43;8imY/U1O7KIHXvO87EOzCuKO0GhFtpD6G2Cyjo/xPeTgdf3/bchB10iB&#43;AojMTDkMHDPLKNxPJVqDcw=="></script>
+  
+  
+  <script defer src="/lib/katex/auto-render.min.8968ae052e67b7aafad1f0b3dba35dd19a9ed276e4d594c841b9772afee462c5fec8a314147ce3687dbe02733abe9d97b3e80d99a0405562634a6b8fc3be847e.js" integrity="sha512-iWiuBS5nt6r60fCz26Nd0Zqe0nbk1ZTIQbl3Kv7kYsX&#43;yKMUFHzjaH2&#43;AnM6vp2Xs&#43;gNmaBAVWJjSmuPw76Efg==" onload="renderMathInElement(document.body);"></script>
+  
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+
+
+  
+  
+  
+  
+  
+
+  
+  
+</head>
+<body
+    class="flex flex-col h-screen px-6 m-auto text-lg leading-7 max-w-7xl bg-neutral text-neutral-900 dark:bg-neutral-800 dark:text-neutral sm:px-14 md:px-24 lg:px-32"
+  >
+    <div id="the-top" class="absolute flex self-center">
+      <a
+        class="px-3 py-1 text-sm -translate-y-8 rounded-b-lg bg-primary-200 focus:translate-y-0 dark:bg-neutral-600"
+        href="#main-content"
+        ><span class="font-bold pe-2 text-primary-600 dark:text-primary-400">&darr;</span
+        >Skip to main content</a
+      >
+    </div>
+    
+    
+      <header class="py-6 font-semibold text-neutral-900 dark:text-neutral print:hidden sm:py-10">
+  <nav class="flex items-start justify-between sm:items-center">
+    
+    <div class="flex flex-row items-center">
+      
+  <a
+    class="decoration-primary-500 hover:underline hover:decoration-2 hover:underline-offset-2"
+    rel="me"
+    href="/"
+    >Mateo Díaz</a
+  >
+
+      
+
+    </div>
+    
+    
+      <ul class="flex list-none flex-col ltr:text-right rtl:text-left sm:flex-row">
+        
+          
+            <li class="group mb-1 sm:mb-0 sm:me-7 sm:last:me-0.5">
+              
+                <a
+                  href="/publications/"
+                  title=""
+                  
+                  ><span
+                      class="decoration-primary-500 group-hover:underline group-hover:decoration-2 group-hover:underline-offset-2"
+                      >publications</span
+                    >
+                  </a
+                >
+              
+            </li>
+          
+            <li class="group mb-1 sm:mb-0 sm:me-7 sm:last:me-0.5">
+              
+                <a
+                  href="/teaching/"
+                  title=""
+                  
+                  ><span
+                      class="decoration-primary-500 group-hover:underline group-hover:decoration-2 group-hover:underline-offset-2"
+                      >teaching</span
+                    >
+                  </a
+                >
+              
+            </li>
+          
+            <li class="group mb-1 sm:mb-0 sm:me-7 sm:last:me-0.5">
+              
+                <a
+                  href="/pdfs/cv.pdf"
+                  title=""
+                  
+                  ><span
+                      class="decoration-primary-500 group-hover:underline group-hover:decoration-2 group-hover:underline-offset-2"
+                      >curriculum vitae</span
+                    >
+                  </a
+                >
+              
+            </li>
+          
+            <li class="group mb-1 sm:mb-0 sm:me-7 sm:last:me-0.5">
+              
+                <a
+                  href="/random/"
+                  title=""
+                  
+                  ><span
+                      class="decoration-primary-500 group-hover:underline group-hover:decoration-2 group-hover:underline-offset-2"
+                      >random</span
+                    >
+                  </a
+                >
+              
+            </li>
+          
+          
+        
+      </ul>
+    
+  </nav>
+</header>
+
+    
+    <div class="relative flex flex-col grow">
+      <main id="main-content" class="grow">
+        
+  <article class="max-w-full">
+    <header>
+      
+      <h1 class="mt-0 text-4xl font-extrabold text-neutral-900 dark:text-neutral">
+        Nonlinear Optimization II - 553.763 (Spring 2025)
+      </h1>
+    </header>
+    <section class="max-w-full mt-6 prose dark:prose-invert">
+      
+  
+  
+  
+  
+  
+  <figure>
+    
+    <img
+      class="mx-auto my-0 rounded-md"
+      alt=""
+      
+        loading="lazy"
+      
+      
+        
+        
+        
+          src="/nonlinear_band.jpeg"
+        
+      
+    />
+    
+    
+  </figure>
+
+
+<p>This course builds upon Nonlinear Optimization I to explore advanced topics in optimization theory and algorithms. Our primary focus will be on constrained optimization and duality theory. Topics include: convex analysis fundamentals and optimality conditions for constrained problems; Fenchel and Lagrangian duality theory; classical algorithmic solutions, such as, the simplex method and interior point methods, and modern splitting methods, e.g., ADMM and PDHG; and elements of variational analysis for handling nonsmooth and nonconvex problems.</p>
+<h2 id="coordinates" class="relative group">Coordinates <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#coordinates" aria-label="Anchor">#</a></span></h2>
+<p><strong>Time</strong>: MW 12:00M - 1:15PM <br />
+<strong>Location</strong>: Bloomberg 278</p>
+<h2 id="personnel" class="relative group">Personnel <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#personnel" aria-label="Anchor">#</a></span></h2>
+<p><strong>Instructor:</strong><br />
+Mateo Díaz (mateodd <code>at</code> jhu <del>dot</del> edu) <br />
+OH M 4:00PM - 5:30PM Wyman S429</p>
+<p><strong>Teaching Assistants:</strong><br />
+Pedro Izquierdo Lehmann (pizquie1 <code>at</code> jhu <del>dot</del> edu) <br />
+OH TBD Wyman S425</p>
+<p>Thabo Samakhoana (tsamakh1 <code>at</code> jhu <del>dot</del> edu)<br />
+OH F TBD Wyman S425</p>
+<h2 id="syllabus" class="relative group">Syllabus <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#syllabus" aria-label="Anchor">#</a></span></h2>
+<p>The syllabus can be found <a
+  href="/pdfs/syllabus-nonlinear2-25.pdf"
+  
+  
+>here</a>.</p>
+<h2 id="lecture-notes" class="relative group">Lecture notes <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#lecture-notes" aria-label="Anchor">#</a></span></h2>
+<p>The lecture notes will be posted here.</p>
+<ul>
+<li><a
+  href="/pdfs/nonlinear2-25/lecture1.pdf"
+  
+  
+>Lecture 1: Intro and motivation</a></li>
+</ul>
+<h2 id="homework" class="relative group">Homework <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#homework" aria-label="Anchor">#</a></span></h2>
+<p>Homework assignments (approximately five) will be posted here and on the course Canvas. Most homework assignments include at least one question that involves the writing and testing of code. Python is preferred, and I will use it in my demos.</p>
+<h2 id="textbook" class="relative group">Textbook <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#textbook" aria-label="Anchor">#</a></span></h2>
+<p><strong>We will not be following any particular textbook. Notes will be posted on this website.</strong> Other potentially useful textbooks as references (but not required):</p>
+<ul>
+<li>J. Borwein and A. S. Lewis, Convex Analysis and Nonlinear Optimization, Springer, (2006),</li>
+<li>J. Nocedal and S. Wright, Numerical Optimization, Second Edition, Springer, (2006),</li>
+<li>R. T. Rockafellar, Convex Analysis, Princeton University Press (1970)</li>
+<li>J.-F. Bonnans and A. Shapiro, Perturbation Analysis of Optimization Problems, Springer (2000)</li>
+<li>R. T. Rockafellar and R. J-B. Wets, Variational Analysis, Springer (1998)</li>
+<li>H. H. Bauschke and P. L. Combettes, Convex Analysis and Monotone Operator Theory in Hilbert Spaces, Springer (2011)</li>
+<li>D. Drusvyatskiy, Convex Analysis and Nonsmooth Optimization, Lecture notes, (2020) <a
+  href="https://sites.math.washington.edu/~ddrusv/crs/Math_516_2021/bookwithindex.pdf"
+  
+  target="_blank" rel="noreferrer noopener"
+>PDF</a>.</li>
+</ul>
+<h2 id="grading-system" class="relative group">Grading system <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#grading-system" aria-label="Anchor">#</a></span></h2>
+<p>We will use an ingenious grading scheme invented by Ben Grimmer for one of the previous iterations of this class. Course grades will be based on four components: Homework, Midterm, Final, Participation. These are described individually below. I will maximize the course score that I give each of you. To optimize each student&rsquo;s course score, I will solve the following optimization problem.</p>
+<p>Denote the student’s performance in each of these four components as</p>
+<p>
+
+\[ \begin{array}{rl}
+C_H &amp;= \text{Homework score},\\
+C_M &amp;= \text{Midterm score},\\
+C_F &amp;= \text{Final score, and}\\
+C_P &amp;= \text{Participation score}.
+\end{array}\]
+All of the above are scores out of \(100\). The optimization problem will be solved individually for each student to give them the best rubric and highest course score I can justify. Then, a rubric for grading this student is given by selecting weights for these four components as
+\[ \begin{array}{rl}
+H &amp;= \text{Homework weight},  \\
+M &amp;= \text{Midterm exam weight}, \\
+F &amp;= \text{Final exam weight}, \\
+P &amp;= 100 - H - M - F.
+\end{array}\]
+Notice the participation weight is determined by the other three since they must sum to 100. Each student’s score is given by maximizing over the set of all reasonable rubrics \((H, M, F)\) by solving
+\[\begin{array}{rl}  \text{max} &amp; C_H H + C_M  M + C_F F + C_P (100 - H - M - F)&amp;&amp;\\
+\text{subject to} &amp; \\
+&amp;  \begin{array}{rllll}
+&amp;&amp; (H, M, F)     &amp;\in \mathbb{R}^3&amp;\\
+&amp;&amp; H + M + F     &amp;\leq 100  &amp;\text{(Percentages are at most 100)}\\
+15 &amp;\leq&amp; H, M   &amp; &amp;\text{(Homework and Midterm matter)}\\
+M &amp;\leq&amp; F  &amp;&amp;\text{(Final is more important than Midterm)}\\
+50 &amp; \leq&amp; M + F &amp; \leq 80 &amp; \text{(Exams are most, but not all of the score)}\\
+90 &amp; \leq&amp;  H  + M + F &amp;&amp; \text{(H, M, and F are the majority of the score)}.
+\end{array}
+\end{array}\]</p>
+<h2 id="midterm-and-final" class="relative group">Midterm and Final <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#midterm-and-final" aria-label="Anchor">#</a></span></h2>
+<p>Additional assessment will be based on one midterm exam and the final exam, both will be take home. The dates of the midterm and final exams will be posted on the course Canvas as they become available, although the date of the final exam is determined by the official JHU final exam schedule.</p>
+<h2 id="participation" class="relative group">Participation <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#participation" aria-label="Anchor">#</a></span></h2>
+<p>The grading program described above will assign between 0 and 10 percent of the course to be a participation grade. As a result, you can get full marks in the course without any participation. Students will receive full points in participation for engaging during lectures, engaging in office hours, and/or asking insightful questions.</p>
+
+    </section>
+    <footer class="pt-8">
+      
+
+    </footer>
+  </article>
+
+        
+          <div class="pointer-events-none absolute bottom-0 end-0 top-[100vh] w-12">
+            <a
+              href="#the-top"
+              class="pointer-events-auto sticky top-[calc(100vh-5.5rem)] flex h-12 w-12 items-center justify-center rounded-full bg-neutral/50 text-xl text-neutral-700 backdrop-blur hover:text-primary-600 dark:bg-neutral-800/50 dark:text-neutral dark:hover:text-primary-400"
+              aria-label="Scroll to top"
+              title="Scroll to top"
+            >
+              &uarr;
+            </a>
+          </div>
+        
+      </main><footer class="py-10 print:hidden">
+  
+  
+  <div class="flex items-center justify-between">
+    <div>
+      
+      
+      
+      
+    </div>
+    
+    
+      <div
+        class="me-14 cursor-pointer text-sm text-neutral-700 hover:text-primary-600 dark:text-neutral dark:hover:text-primary-400"
+      >
+        <button id="appearance-switcher-0" type="button" aria-label="appearance switcher">
+          <div
+            class="flex h-12 w-12 items-center justify-center dark:hidden"
+            title="Switch to dark appearance"
+          >
+            <span class="relative inline-block align-text-bottom px-1 icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M32 256c0-123.8 100.3-224 223.8-224c11.36 0 29.7 1.668 40.9 3.746c9.616 1.777 11.75 14.63 3.279 19.44C245 86.5 211.2 144.6 211.2 207.8c0 109.7 99.71 193 208.3 172.3c9.561-1.805 16.28 9.324 10.11 16.95C387.9 448.6 324.8 480 255.8 480C132.1 480 32 379.6 32 256z"/></svg>
+</span>
+          </div>
+          <div
+            class="hidden h-12 w-12 items-center justify-center dark:flex"
+            title="Switch to light appearance"
+          >
+            <span class="relative inline-block align-text-bottom px-1 icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 159.1c-53.02 0-95.1 42.98-95.1 95.1S202.1 351.1 256 351.1s95.1-42.98 95.1-95.1S309 159.1 256 159.1zM509.3 347L446.1 255.1l63.15-91.01c6.332-9.125 1.104-21.74-9.826-23.72l-109-19.7l-19.7-109c-1.975-10.93-14.59-16.16-23.72-9.824L256 65.89L164.1 2.736c-9.125-6.332-21.74-1.107-23.72 9.824L121.6 121.6L12.56 141.3C1.633 143.2-3.596 155.9 2.736 164.1L65.89 256l-63.15 91.01c-6.332 9.125-1.105 21.74 9.824 23.72l109 19.7l19.7 109c1.975 10.93 14.59 16.16 23.72 9.824L256 446.1l91.01 63.15c9.127 6.334 21.75 1.107 23.72-9.822l19.7-109l109-19.7C510.4 368.8 515.6 356.1 509.3 347zM256 383.1c-70.69 0-127.1-57.31-127.1-127.1c0-70.69 57.31-127.1 127.1-127.1s127.1 57.3 127.1 127.1C383.1 326.7 326.7 383.1 256 383.1z"/></svg>
+</span>
+          </div>
+        </button>
+      </div>
+    
+  </div>
+  
+  
+</footer>
+
+    </div>
+  </body>
+</html>
