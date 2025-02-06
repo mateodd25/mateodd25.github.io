@@ -1,4 +1,4 @@
-% Created 2025-02-06 Thu 15:09
+% Created 2025-02-06 Thu 15:20
 % Intended LaTeX compiler: pdflatex
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
@@ -27,6 +27,7 @@
 \newcommand{\SSS}{\mathbf{S}^n}
 \newcommand{\bR}{\overline{\mathbf{R}}}
 \newcommand{\prox}{\operatorname{prox}}
+\newcommand{\epi}{\operatorname{epi}}
 \newcommand{\sign}{\operatorname{sign}}
 \newcommand{\dom}{\operatorname{dom}}
 \newcommand{\Tr}{\operatorname{tr}}
@@ -46,13 +47,13 @@
 \begin{document}
 
 \section*{\textbf{Nonlinear Optimization 2, Spring 2025 - Homework 1} \\ Due at 11:49PM on Friday 2/14 (Gradescope)}
-\label{sec:orgd05b6e6}
+\label{sec:org2921ad4}
 \textbf{Your submitted solutions to assignments should be your own work. While discussing homework problems with peers is permitted, the final work and implementation of any discussed ideas must be executed solely by you. Acknowledge any source you consult.}
 \textbf{\textcolor{red}{Do not use any type of Large Language Model, e.g., ChatGPT, to blindly answer this assignment. If you do, your submission will be voided and you will get zero as a grade.}} \vspace{.5cm}
 
 \noindent Throughout let \(\E\) be a Euclidean space and use the symbol \(\bR\) to denote \(\RR \cup \{\pm \infty\}\).
 \subsection*{Problem 1 - Continuity of convex functions}
-\label{sec:org04827ac}
+\label{sec:orga4b7fcc}
 \begin{itemize}
 \item[(a)] We say that a function $f \colon \E \rightarrow \bR$ is lower semicontinuous (lsc) if its epigraph $\epi f = \{(x, t) \mid f(x) \leq t\}$ is closed. Show that this property is equivalent to having that for all $x^{\star} \in \E$, $\liminf_{x \rightarrow x^{\star}} f(x) \geq f(x^{\star}).$
 \item[(b)] Consider the function $f\colon \RR^{2} \rightarrow \bR$ defined by
@@ -65,7 +66,7 @@ Show that $f$ is convex and lsc, but it is not continuous relative to its domain
 \item[(c)] Suppose that a convex function $f\colon \E \rightarrow \bR$ takes the value $-\infty$ at some point. Prove that it must take the value $-\infty$ at every point in the interior of $\{x \in \E \mid f(x) < +\infty\}$.
 \end{itemize}
 \subsection*{Problem 2 - Fun with the normies}
-\label{sec:org4deb351}
+\label{sec:org0f7249e}
 Let \(Q \subseteq \E\) be a closed, convex set and let \(\iota_{Q}\) be its indicator function, i.e., it takes values \(\iota_{Q}(x) = 0\) for \(x \in Q\) and infinity everywhere else. Define the normal set to \(Q\) at \(x\) by
 $$
 N_{Q}(x) = \left\{g \in \E \mid \langle g, y - x\rangle \leq 0, \text{ for all } y \in Q\right\}.
@@ -77,7 +78,7 @@ $$
 \item[(d)] Prove that the projection $\textrm{proj}_{Q}(\cdot)$ is $1$-Lipschitz.
 \end{enumerate}
 \subsection*{Problem 3 - Positive semidefinite cone}
-\label{sec:org3352437}
+\label{sec:org2c1bf41}
 
 Let \(\Sp\) be the cone of \(n \times n\) positive semidefinite matrices.
 
@@ -86,6 +87,6 @@ Let \(\Sp\) be the cone of \(n \times n\) positive semidefinite matrices.
 \item[(b)] Given a symmetric matrix $Z \in \SSS$, use its spectral decomposition to find a formula for $\text{proj}_{\Sp}(Z)$ and justify why is it correct.
 \end{enumerate}
 \subsection*{Problem 4 - Computing gradients}
-\label{sec:org868428c}
+\label{sec:org8ebf988}
 Let \(\Spp\) be the set of \(n\times n\) positive definite matrices. Consider the function \(f \colon \Spp \rightarrow \bR\) defined by \(f(X) = \Tr(X^{-1})\) for \(X \in \Spp\). Calculate the gradient \(\nabla f(X)\) and second derivative \(\nabla^2 f(X)[Y, Y]\) (for a matrix \(Y \in \SSS\)), and conclude that \(f\) is strictly convex on \(\Spp\).
 \end{document}
