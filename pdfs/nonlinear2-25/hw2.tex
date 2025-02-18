@@ -1,4 +1,4 @@
-% Created 2025-02-16 Sun 23:13
+% Created 2025-02-18 Tue 17:46
 % Intended LaTeX compiler: pdflatex
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
@@ -49,21 +49,22 @@
 \begin{document}
 
 \section*{\textbf{Nonlinear Optimization 2, Spring 2025 - Homework 2} \\ Due at 11:49PM on Friday 2/28 (Gradescope)}
-\label{sec:org414c513}
+\label{sec:orgecd51a6}
 \textbf{Your submitted solutions to assignments should be your own work. You are allowed to discuss homework problems with other students, but should carry out the execution of any thoughts/directions discussed independently, on your own. Acknowledge any source you consult.}
 \textbf{\textcolor{red}{Do not use any type of Large Language Model, e.g., ChatGPT, to blindly answer this assignment. If you do, your submission will be voided and you will get zero as a grade.}} \vspace{.5cm}
 \subsection*{Problem 1 - Directional derivative formulae}
-\label{sec:org7243844}
+\label{sec:org6fd4b70}
 \begin{itemize}
 \item[(a)] Let $f \colon \EEE \rightarrow \RR$ be continuous and directionally differentiable at zero such that there exists $g\in \EEE$ satisfying  $f'(x; v) = \langle g, v \rangle$ for all $v \in \EEE$. Find a counterexample to show that this does not necessarily imply that $f$ is differentiable at zero.
 \item[(b)] Let $f \colon \EEE \rightarrow \RR \cup \{+ \infty\}$ be a proper, closed, convex function. Let $x \in \dom f$, show that for any $v$, the directional derivative $f'(x, v)$ exists and, moreover, it is equal to $$ f'(x; v) = \sup_{g \in \partial f(x)} \langle g, v\rangle \quad \text{for all }x, v \in \EEE.$$
 \item[(c)] Let $f_{1}, \dots, f_{k} \colon \EEE \rightarrow \RR$ be differentiable functions and define $h(x) = \max_{j \in [k]} f_{j}(x)$. Prove that $h$ is directionally differentiable for any $v \in \EEE.$ Further, prove that
 $$
-h'(x; v) = \max_{j \in [k]} \langle \nabla f_{j}(x), v\rangle \quad \text{for all }x, v \in \EEE.
+h'(x; v) = \max_{j \in M(x)} \langle \nabla f_{j}(x), v\rangle \quad \text{for all }x, v \in \EEE,
 $$
+where $M(x) = \{i \in [k] \mid f_{i}(x) = h(x)\}$.
 \end{itemize}
 \subsection*{Problem 2 - Arguments that we missed}
-\label{sec:org5104dd5}
+\label{sec:orgea9e154}
 Show the following two things we did not prove in class.
 \begin{enumerate}
 \item[(a)] Let $f\colon \EEE \rightarrow \RR \cup \{+\infty\}$ and $g\colon \EEE \rightarrow \RR \cup \{+\infty\}$ be convex functions, and $A \colon \EEE \rightarrow \YY$ be a linear map. Define the value function $\nu \colon \YY \rightarrow \RR \cup \{\pm \infty\}$ given by $
@@ -82,7 +83,7 @@ $
 In class we proved that $(1)$ implies $(2).$ Show that $(2)$ implies $(3)$ and $(3)$ implies $(1)$.
 \end{enumerate}
 \subsection*{Problem 3 - Duality with cones}
-\label{sec:orgcb654f4}
+\label{sec:org7842d5a}
 \begin{enumerate}
 \item[(a)] (\textbf{Krein-Rutman Theorem}) Consider a linear map $A \colon \EEE \rightarrow \YY$, and the indicator functions of convex cones $K \subseteq \EEE$ and $H\subseteq \YY$. Compute $\partial \iota_{K}(0)$ and use subdifferential calculus to find conditions guaranteeing $\left(K\cap A^{{-1}} H \right)^{+} = K^{ +} + A^{*} H^{ +}$ where $A^{-1} H = \{x \in \EEE \mid Ax \in H\}.$
 \item[(b)] Given a nonempty set $K \subseteq \EEE$, by considering $\iota_{K}^{**}$, prove $K = K^{ + +}$ if, and only if, $K$ is a closed convex cone.
@@ -94,7 +95,7 @@ $$
 is not closed. \textbf{Hint:} consider the point $-(1,1,1)$.
 \end{enumerate}
 \subsection*{Problem 4 - Von Neumann Minimax Theorem}
-\label{sec:org6269813}
+\label{sec:org52f61fa}
 Suppose the sets \(C\subseteq \EEE\) and \(D \subseteq \YY\) are nonempty and convex, with \(D\) closed.
 \begin{enumerate}
     \item[(a)] By considering the Fenchel problem
