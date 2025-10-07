@@ -127,7 +127,7 @@
     
     
     "mainEntityOfPage": "true",
-    "wordCount": "779"
+    "wordCount": "826"
   }
   </script>
     <script type="application/ld+json">
@@ -467,8 +467,11 @@ OH F 9:00AM - 10:30AM Wyman S425</p>
 <li><a href="/pdfs/mds/lecture6.pdf">Lecture 6: Orlicz norms and McDiarmid&rsquo;s inequality</a></li>
 <li><a href="/pdfs/mds/lecture7.pdf">Lecture 7: Lipschitz functions of Gaussian random variables</a></li>
 <li><a href="/pdfs/mds/lecture8.pdf">Lecture 8: Concentration of the norm of sub-Gaussian vectors</a></li>
-<li><a href="/pdfs/mds/lecture9.pdf">Lecture 9: Matrix norms and singular value decomposition</a></li>
+<li><a href="/pdfs/mds/lecture9.pdf">Lecture 9: Matrix norms and the singular value decomposition</a></li>
 <li><a href="/pdfs/mds/lecture10.pdf">Lecture 10: Introduction to perturbation theory</a></li>
+<li><a href="/pdfs/mds/lecture11.pdf">Lecture 11: Davis-Kahan sin theorem</a></li>
+<li><a href="/pdfs/mds/lecture12.pdf">Lecture 12: Proof of Davis-Kahan, Wedin&rsquo;s theorem, and community detection</a></li>
+<li><a href="/pdfs/mds/lecture13.pdf">Lecture 13: Nets, coverings, and packings</a></li>
 </ul>
 <h2 id="textbook" class="relative group">Textbook <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#textbook" aria-label="Anchor">#</a></span></h2><p>We will use the following references:</p>
 <ul>
@@ -478,6 +481,7 @@ OH F 9:00AM - 10:30AM Wyman S425</p>
 <li>Shai Shalev-Shwartz, Shai Ben-David, <a href="https://www.cs.huji.ac.il/~shais/UnderstandingMachineLearning/understanding-machine-learning-theory-algorithms.pdf" target="_blank" rel="noreferrer">Understanding Machine Learning: From Theory to Algorithms</a>, 1st Edition. Cambridge University Press (2014).</li>
 <li>Trevor Hastie, Robert Tibshirani, Jerome Friedman, <a href="https://hastie.su.domains/ElemStatLearn/download.html" target="_blank" rel="noreferrer">The Elements of Statistical Learning: Data Mining, Inference, and Prediction</a>, 2nd Edition. Springer (2009).</li>
 <li>Terence Tao, <a href="https://bookstore.ams.org/gsm-132/" target="_blank" rel="noreferrer">Topics in Random Matrix Theory</a>, 1st Edition. American Mathematical Society (2012).</li>
+<li>Yuxin Chen, Yuejie Chi, Jianqing Fan, Cong Ma, <a href="https://arxiv.org/abs/2012.08496" target="_blank" rel="noreferrer">Spectral Methods for Data Science: A Statistical Perspective</a>, 1st Edition. Now Foundations and Trends (2021).</li>
 </ul>
 <h2 id="grading-system" class="relative group">Grading system <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#grading-system" aria-label="Anchor">#</a></span></h2><p>Your grade will take into account four components: <strong>Homework (50%)</strong>, <strong>Take-home exam (20%)</strong>, <strong>Final project (20%)</strong>, and <strong>Participation (10%)</strong>. In what follows we ellaborate on each of these components.</p>
 <h2 id="homework" class="relative group">Homework <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#homework" aria-label="Anchor">#</a></span></h2><p>Problem sets (approximately five) will be posted here and on the course Canvas. Some homework assignments include at least one question that involves the writing and testing of code; Python is prefered. Please submit homework assignments on Gradescope.</p>
@@ -486,6 +490,7 @@ OH F 9:00AM - 10:30AM Wyman S425</p>
 <ul>
 <li><a href="/pdfs/mds/hw1.pdf">Homework 1</a></li>
 <li><a href="/pdfs/mds/hw2.pdf">Homework 2</a></li>
+<li><a href="/pdfs/mds/hw3.pdf">Homework 3</a></li>
 </ul>
 <h2 id="midterm" class="relative group">Midterm <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#midterm" aria-label="Anchor">#</a></span></h2><p>There will be one take-home exam with a date TBA. The exam will be posted on Canvas, and you will have two days to turn in your solutions through Gradescope. You may not discuss the exam with anyone or seek external help.</p>
 <h2 id="final-project" class="relative group">Final project <span class="absolute top-0 w-6 transition-opacity opacity-0 -start-6 not-prose group-hover:opacity-100"><a class="group-hover:text-primary-300 dark:group-hover:text-neutral-700" style="text-decoration-line: none !important;" href="#final-project" aria-label="Anchor">#</a></span></h2><p>There will be a final project, which gives students the opportunity to explore topics related to the course that were not covered in class. Students may work individually or in groups of up to four, and the sole deliverable is a written report. Suggested topics will be released two weeks before the end of class, though students are welcome to propose their own with instructor approval. Reports should be written in the style of lecture notes if the topic is well established, or as a short research paper if the topic concerns current work. In either case, the report should state one main result or idea, explain why it is interesting and what implications it has (including potential new research directions), and present its proof—or a sketch thereof if the full argument is too long.</p>
