@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An interactive comparison of gradient descent on well-conditioned and ill-conditioned two-dimensional quadratics.">
+  <title>Gradient descent and conditioning · Optimization for Data Science</title>
+  <style>
+    :root { color-scheme: light dark; --bg:#f7f6f2; --surface:#ffffff; --text:#23262b; --muted:#616771; --line:#deded8; --grid:#eaeae5; --axis:#a5a8a9; --left:#14796e; --right:#9c3455; --soft:#f0efe9; --focus:#146eaa; --upper:#426db3; --lower:#9b6b16; }
+    @media (prefers-color-scheme:dark) { :root { --bg:#181b20; --surface:#20242a; --text:#eeeef0; --muted:#b2b7c0; --line:#3f444b; --grid:#30353d; --axis:#717985; --left:#69cbb9; --right:#f494af; --soft:#2b3037; --focus:#82c9fa; --upper:#91b8ff; --lower:#eac17a; } }
+    * { box-sizing:border-box; }
+    [hidden] { display:none !important; }
+    body { margin:0; background:var(--bg); color:var(--text); font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    main { max-width:1180px; margin:0 auto; padding:34px 28px 40px; }
+    .eyebrow { margin:0 0 9px; font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); font-weight:650; }
+    h1 { margin:0; font-size:clamp(25px,3.4vw,38px); line-height:1.2; font-weight:650; letter-spacing:-.035em; }
+    .intro { margin:11px 0 18px; max-width:850px; color:var(--muted); }
+    .setup { display:flex; flex-wrap:wrap; gap:8px 22px; margin-bottom:24px; font-size:14px; }
+    .setup span { white-space:nowrap; }
+    .math { font-family:Georgia,"Times New Roman",serif; }
+    .controls { display:grid; grid-template-columns:minmax(240px,1fr) minmax(290px,1fr); gap:22px 40px; align-items:center; padding:19px 22px; border:1px solid var(--line); background:var(--surface); border-radius:12px; }
+    .control-label { display:flex; justify-content:space-between; align-items:center; gap:12px; font-size:14px; font-weight:600; }
+    .kappa-entry { display:flex; align-items:center; gap:7px; flex-shrink:0; white-space:nowrap; }
+    input,select,button { font:inherit; color:inherit; }
+    input[type=number],select { border:1px solid var(--line); background:var(--surface); border-radius:6px; padding:5px 8px; min-height:36px; }
+    input[type=number] { width:84px; font-variant-numeric:tabular-nums; }
+    input[type=range] { width:100%; margin:11px 0 0; accent-color:var(--right); cursor:pointer; min-height:20px; }
+    .range-ticks { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-top:-1px; }
+    .transport { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    button { border:1px solid var(--line); background:var(--surface); border-radius:7px; padding:8px 13px; cursor:pointer; font-size:14px; font-weight:550; min-height:40px; }
+    button.primary { background:var(--text); color:var(--surface); border-color:var(--text); min-width:98px; }
+    button:hover { filter:brightness(.94); }
+    button:disabled { opacity:.45; cursor:default; }
+    :focus-visible { outline:3px solid var(--focus); outline-offset:3px; }
+    .speed-label { display:flex; align-items:center; gap:6px; margin-left:auto; font-size:12px; color:var(--muted); }
+    .speed-label select { font-size:13px; }
+    .timeline-label { margin-top:10px; display:flex; justify-content:space-between; align-items:baseline; font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; }
+    #iteration-value { color:var(--text); font-size:14px; font-weight:600; }
+    #iteration { accent-color:var(--text); margin-top:2px; }
+    .hint { color:var(--muted); font-size:12px; margin:11px 2px 16px; }
+    .panels { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    .panel { min-width:0; background:var(--surface); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+    .panel-head { padding:16px 20px 0; }
+    .panel-title { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    h2 { margin:0; font-size:18px; font-weight:600; letter-spacing:-.02em; }
+    .tag { border:1px solid var(--line); border-radius:20px; padding:2px 10px; font-size:12px; white-space:nowrap; font-variant-numeric:tabular-nums; }
+    .panel-parameters { margin:4px 0 0; color:var(--muted); font-size:13px; }
+    .plot-wrap { padding:2px 8px 0; }
+    .landscape { width:100%; aspect-ratio:1.25; display:block; touch-action:manipulation; cursor:crosshair; }
+    svg text { font-family:inherit; fill:var(--muted); font-size:11px; }
+    svg .axis-title { fill:var(--text); font-size:13px; font-family:Georgia,"Times New Roman",serif; font-style:italic; }
+    .grid-line { stroke:var(--grid); stroke-width:1; }
+    .axis-line { stroke:var(--axis); stroke-width:1; }
+    .contour { stroke:var(--axis); fill:none; stroke-width:1.05; opacity:.64; }
+    .path-left { stroke:var(--left); }
+    .path-right { stroke:var(--right); }
+    .panel-bottom { margin:0 20px; padding:11px 0 15px; border-top:1px solid var(--line); display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px 12px; font-size:12px; color:var(--muted); }
+    .panel-bottom strong { display:block; font-size:17px; font-weight:600; color:var(--text); font-variant-numeric:tabular-nums; }
+    .position { text-align:right; }
+    .caption { font-size:12px; color:var(--muted); margin:10px 2px 21px; }
+    .chart-section { border:1px solid var(--line); border-radius:12px; background:var(--surface); padding:18px 20px 12px; }
+    .chart-head { display:flex; flex-wrap:wrap; gap:10px 24px; justify-content:space-between; align-items:center; }
+    .legend { display:flex; flex-wrap:wrap; gap:8px 19px; font-size:12px; color:var(--muted); }
+    .legend span,.legend label { display:inline-flex; align-items:center; gap:7px; }
+    .legend label { cursor:pointer; }
+    .legend input { margin:0; accent-color:var(--text); width:15px; height:15px; }
+    .swatch { display:inline-block; width:22px; height:0; border-top:2px solid; }
+    .swatch.left { border-color:var(--left); }
+    .swatch.right { border-color:var(--right); }
+    .swatch.bound { border-color:var(--right); border-top-style:dashed; }
+    #convergence { display:block; width:100%; height:260px; }
+    .chart-note { font-size:12px; color:var(--muted); margin:0; }
+    .models-section { margin-top:20px; }
+    .model-intro { margin:8px 0 14px; color:var(--muted); font-size:14px; }
+    .model-controls { display:flex; flex-wrap:wrap; align-items:center; gap:14px 30px; margin:0 0 12px; }
+    .model-selection { display:flex; gap:9px; align-items:center; font-size:13px; }
+    .direction-control { flex:1 1 250px; max-width:440px; }
+    .direction-control .control-label { font-size:13px; font-weight:400; }
+    #slice-angle { accent-color:var(--text); margin-top:3px; }
+    #slice-angle-value { font-weight:600; font-variant-numeric:tabular-nums; }
+    #quadratic-models { display:block; width:100%; height:340px; }
+    .swatch.function { border-color:var(--left); border-top-width:3px; }
+    .swatch.upper { border-color:var(--upper); border-top-style:dashed; }
+    .swatch.lower { border-color:var(--lower); border-top-style:dotted; }
+    .model-status { font-size:12px; color:var(--muted); margin:4px 0; font-variant-numeric:tabular-nums; }
+    .model-equality { font-size:13px; margin:8px 0 0; min-height:20px; }
+    .model-formulas { border-top:1px solid var(--line); padding-top:10px; margin-top:12px; display:flex; flex-wrap:wrap; gap:6px 26px; }
+    .model-formulas p { margin:0; font-size:15px; overflow-wrap:anywhere; }
+    .model-formulas b { font-family:system-ui,-apple-system,sans-serif; font-size:12px; font-weight:550; }
+    .camera-controls { display:flex; flex-wrap:wrap; align-items:center; gap:10px 24px; margin:8px 0; }
+    .camera-controls label { display:flex; align-items:center; gap:9px; font-size:12px; }
+    .camera-controls input[type=range] { width:135px; accent-color:var(--text); margin:0; }
+    #surface-canvas { width:100%; height:480px; display:block; touch-action:none; cursor:grab; }
+    #surface-canvas:active { cursor:grabbing; }
+    details { margin-top:20px; border-top:1px solid var(--line); padding-top:14px; }
+    summary { cursor:pointer; font-size:14px; font-weight:600; }
+    .explanation { display:grid; grid-template-columns:1fr 1fr; gap:12px 36px; font-size:14px; }
+    .explanation p { margin:14px 0 0; }
+    .equation { font-family:Georgia,"Times New Roman",serif; font-size:19px; line-height:1.8; }
+    .start-fields { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:14px; }
+    .start-fields label { display:flex; align-items:center; gap:7px; font-size:13px; }
+    .start-fields input { width:85px; }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    noscript { display:block; padding:20px; color:var(--right); }
+    @media(max-width:760px) { main { padding:24px 16px; } .controls { grid-template-columns:1fr; gap:16px; padding:16px; } .panels { gap:12px; } .panel-head { padding:14px 12px 0; } h2 { font-size:16px; } .tag { padding:2px 7px; } .panel-bottom { margin:0 12px; } .chart-section { padding:16px 12px 12px; } .explanation { grid-template-columns:1fr; gap:0; } }
+    @media(max-width:580px) { .panels { grid-template-columns:1fr; } .landscape { aspect-ratio:1.2; } .position { text-align:left; } .chart-head { align-items:flex-start; } .legend { gap:7px 12px; } .setup { gap:5px 14px; font-size:13px; } .speed-label { margin-left:0; } input[type=number] { font-size:16px; } button,select { min-height:44px; } }
+    @media(max-width:580px) { #surface-canvas { height:360px; } .camera-controls { gap:8px 16px; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Optimization for Data Science · Interactive demo</p>
+    <h1>Gradient descent and conditioning</h1>
+    <p class="intro">The same starting point, the same algorithm, and the same step size. Change the curvature to see why the condition number controls convergence.</p>
+    <div class="setup"><span>Fixed smoothness <b class="math">L = 1</b></span><span>Step size <b class="math">η = 1/L = 1</b></span><span>Minimizer <b class="math">x⋆ = (0, 0)</b></span></div>
+  </header>
+
+  <section class="controls" aria-label="Simulation controls">
+    <div>
+      <div class="control-label"><label for="kappa">Right-hand condition number</label><span class="kappa-entry"><span class="math">κ =</span><input id="kappa-number" type="number" min="1" max="1000" step="1" value="50" aria-label="Right-hand condition number, exact value"></span></div>
+      <input id="kappa" type="range" min="0" max="3000" step="1" value="1699" aria-valuetext="Condition number 50" aria-describedby="kappa-help">
+      <div class="range-ticks" aria-hidden="true"><span>1</span><span>10</span><span>100</span><span>1,000</span></div>
+    </div>
+    <div>
+      <div class="transport"><button id="play" class="primary" type="button">Run both</button><button id="step" type="button">Step +1</button><button id="reset" type="button">Restart</button><label class="speed-label" for="speed">Speed <select id="speed"><option value="0.25">¼×</option><option value="1" selected>1×</option><option value="4">4×</option></select></label></div>
+      <div class="timeline-label"><label for="iteration">Iteration <output id="iteration-value" aria-live="off">0</output></label><span id="iteration-limit">of 456</span></div>
+      <input id="iteration" type="range" min="0" max="456" step="1" value="0" aria-label="Iteration in both runs">
+    </div>
+  </section>
+  <p class="hint" id="kappa-help">Changing κ restarts both runs. Click either contour plot to move the shared starting point.</p>
+
+  <section class="panels" aria-label="Side-by-side gradient descent trajectories">
+    <article class="panel">
+      <div class="panel-head"><div class="panel-title"><h2>Perfectly conditioned</h2><span class="tag">κ = 1</span></div><p class="panel-parameters">μ = 1 &nbsp;·&nbsp; L = 1 &nbsp;·&nbsp; circular level sets</p></div>
+      <div class="plot-wrap"><svg id="left-plot" class="landscape" role="img" aria-labelledby="left-title left-description"><title id="left-title">Gradient descent on the perfectly conditioned quadratic</title><desc id="left-description">Circular contours with the shared initial point and the gradient descent path. With step size one, this quadratic reaches the origin in one step.</desc></svg></div>
+      <div class="panel-bottom"><div>Relative objective <strong id="left-error">1.000</strong></div><div class="position">Current point <strong id="left-position">(3.000, −2.000)</strong></div></div>
+    </article>
+    <article class="panel">
+      <div class="panel-head"><div class="panel-title"><h2 id="right-heading">Ill-conditioned</h2><span class="tag" id="right-tag">κ = 50</span></div><p class="panel-parameters" id="right-parameters">μ = 0.0200 &nbsp;·&nbsp; L = 1 &nbsp;·&nbsp; elliptical level sets</p></div>
+      <div class="plot-wrap"><svg id="right-plot" class="landscape" role="img" aria-labelledby="right-title right-description"><title id="right-title">Gradient descent on the adjustable quadratic</title><desc id="right-description">Elliptical contours with the same starting point and step size. Progress slows along the direction with smaller curvature.</desc></svg></div>
+      <div class="panel-bottom"><div>Relative objective <strong id="right-error">1.000</strong></div><div class="position">Current point <strong id="right-position">(3.000, −2.000)</strong></div></div>
+    </article>
+  </section>
+  <p class="caption">Open circle: start &nbsp;·&nbsp; filled dot: current iterate &nbsp;·&nbsp; cross: minimizer. In slice view, a dashed line shows the selected slice. Both plots use the same spatial scale; contour levels are chosen separately for visibility.</p>
+
+  <section class="chart-section" aria-labelledby="convergence-heading">
+    <div class="chart-head"><h2 id="convergence-heading">Objective convergence</h2><div class="legend"><span><i class="swatch left" aria-hidden="true"></i>κ = 1: actual = bound</span><span><i class="swatch right" aria-hidden="true"></i>Right: actual</span><span><i class="swatch bound" aria-hidden="true"></i>Right: theorem bound</span></div></div>
+    <svg id="convergence" role="img" aria-labelledby="convergence-title convergence-description"><title id="convergence-title">Normalized objective and the strongly convex gradient descent bound</title><desc id="convergence-description">The logarithmic plot compares f(x_t) divided by f(x_0) with the upper bound (1 minus 1 over kappa) to the power t. Exact zeros use a separate row.</desc></svg>
+    <p class="chart-note">Vertical scale: f(x<sub>t</sub>) / f(x<sub>0</sub>). Values below 10⁻⁸ sit at the axis floor; exact zeros use a separate row. The dashed curve shows the full theoretical bound.</p>
+  </section>
+
+  <section class="chart-section models-section" aria-labelledby="models-heading">
+    <div class="chart-head"><h2 id="models-heading">Quadratic upper and lower bounds</h2><div class="legend" aria-label="Visible surfaces"><label><input id="show-actual" type="checkbox" checked><i class="swatch function" aria-hidden="true"></i>Quadratic f</label><label><input id="show-upper" type="checkbox" checked><i class="swatch upper" aria-hidden="true"></i>Smoothness upper bound</label><label><input id="show-lower" type="checkbox" checked><i class="swatch lower" aria-hidden="true"></i>Strong-convexity lower bound</label></div></div>
+    <p class="model-intro" id="model-intro">Three surfaces over (y₁, y₂), tangent at the current iterate. Drag to rotate; use the checkboxes to inspect each surface.</p>
+    <div class="model-controls">
+      <label class="model-selection" for="slice-side">Quadratic <select id="slice-side"><option value="right" selected>Right: adjustable κ</option><option value="left">Left: κ = 1</option></select></label>
+      <label class="model-selection" for="model-view">View <select id="model-view"><option value="surface" selected>3D surfaces</option><option value="slice">1D slice</option></select></label>
+      <div class="direction-control" id="slice-controls" hidden><div class="control-label"><label for="slice-angle">Angle from the μ-eigendirection</label><output id="slice-angle-value" aria-live="off">45°</output></div><input id="slice-angle" type="range" min="0" max="90" step="1" value="45" aria-valuetext="45 degrees from the small-curvature direction"><div class="range-ticks" aria-hidden="true"><span>0°: μ direction</span><span>90°: L direction</span></div></div>
+    </div>
+    <div class="camera-controls" id="surface-controls"><label for="camera-azimuth">Rotation <input id="camera-azimuth" type="range" min="0" max="360" step="1" value="315" aria-label="3D camera rotation"></label><label for="camera-elevation">Elevation <input id="camera-elevation" type="range" min="10" max="80" step="1" value="26" aria-label="3D camera elevation"></label><button id="reset-camera" type="button">Reset view</button></div>
+    <p class="model-status" id="model-status"></p>
+    <div id="surface-view"><canvas id="surface-canvas" role="img" aria-label="Rotatable three-dimensional graph of the quadratic, its smoothness upper bound, and its strong-convexity lower bound. All three surfaces share a tangent plane at the marked current iterate. Use the rotation and elevation sliders or drag to change the camera.">Three-dimensional quadratic surfaces. The function lies between the lower and upper models shown in the formulas below.</canvas><p class="chart-note">Horizontal axes: y₁ and y₂. Vertical axis: objective / model value. All surfaces share the same axes, held fixed while GD runs. The marked point is (x<sub>t</sub>, f(x<sub>t</sub>)).</p></div>
+    <svg id="quadratic-models" hidden role="img" aria-labelledby="models-title models-description"><title id="models-title">The quadratic between its strong-convexity lower model and smoothness upper model</title><desc id="models-description">A slice through the current iterate compares the actual objective with two tangent quadratic models. The lower model uses curvature mu, the upper model uses curvature L, and the actual directional curvature lies between them.</desc></svg>
+    <p class="model-equality" id="model-equality"></p>
+    <div class="model-formulas math"><p><b>Lower:</b> q<sub>μ</sub>(y) = f(x<sub>t</sub>) + ∇f(x<sub>t</sub>)ᵀ(y − x<sub>t</sub>) + ½μ‖y − x<sub>t</sub>‖²</p><p><b>Upper:</b> q<sub>L</sub>(y) = f(x<sub>t</sub>) + ∇f(x<sub>t</sub>)ᵀ(y − x<sub>t</sub>) + ½L‖y − x<sub>t</sub>‖²</p></div>
+    <p class="chart-note" style="margin-top:10px">q<sub>μ</sub>(y) ≤ f(y) ≤ q<sub>L</sub>(y) for every y. The bounds follow the selected run’s current iterate; a lower bound can be negative even though f ≥ 0.</p>
+  </section>
+
+  <details>
+    <summary>The quadratic, the guarantee, and the starting point</summary>
+    <div class="explanation">
+      <div><p>In coordinates rotated by 30°, the right-hand objective is</p><p class="equation">f<sub>κ</sub>(x) = ½(u²/κ + v²), &nbsp; (u, v) = Rᵀx.</p><p>Its Hessian has eigenvalues μ = 1/κ and L = 1. The left-hand objective is ½‖x‖². Increasing κ lowers the curvature in one direction while preserving the same smoothness constant and step size.</p></div>
+      <div><p>For smooth, strongly convex functions, gradient descent with η = 1/L guarantees</p><p class="equation">f(x<sub>t</sub>) / f(x<sub>0</sub>) ≤ (1 − 1/κ)<sup>t</sup>.</p><p>Here f⋆ = 0. These particular quadratics can converge faster than the bound: one step eliminates the L-eigendirection, and the remaining objective contracts by (1 − 1/κ)² each step. At κ = 1, the entire error disappears in one step.</p></div>
+    </div>
+    <div class="start-fields"><span>Shared start:</span><label for="start-x">x₁ <input id="start-x" type="number" min="-4" max="4" step="0.1" value="3"></label><label for="start-y">x₂ <input id="start-y" type="number" min="-4" max="4" step="0.1" value="-2"></label><button id="default-start" type="button">Restore start</button></div>
+    <p class="hint">Coordinates are limited to [−4, 4]. At the minimizer, both runs stay at zero and the relative-objective ratio is undefined. The timeline ends when the general bound reaches 10⁻⁴; playback speed changes only the animation.</p>
+  </details>
+  <p id="announcement" class="sr-only" role="status" aria-live="polite"></p>
+  <noscript>This interactive demo needs JavaScript enabled.</noscript>
+</main>
+<script>
+(() => {
+  'use strict';
+  // Single-file, offline demo. All calculations use the Hessian's eigenbasis.
+  // Q = R diag(1/kappa, 1) R^T, L = eta = 1, and R is a 30-degree rotation.
+  const NS = 'http://www.w3.org/2000/svg';
+  const c = Math.cos(Math.PI / 6), s = Math.sin(Math.PI / 6);
+  const span = 4.5, logFloor = -8;
+  const byId = id => document.getElementById(id);
+  const state = { kappa:50, t:0, start:[3,-2], running:false, speed:1, lastTime:0, carry:0, frame:0, sliceSide:'right', sliceAngle:45, modelView:'surface', azimuth:315, elevation:26, visible:{actual:true,upper:true,lower:true} };
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const views = [];
+  let chart, modelChart;
+
+  function element(tag, attrs = {}, text = null) {
+    const node = document.createElementNS(NS, tag);
+    for (const [key,value] of Object.entries(attrs)) node.setAttribute(key, value);
+    if (text !== null) node.textContent = text;
+    return node;
+  }
+  function add(parent, tag, attrs, text) { const node=element(tag, attrs, text); parent.appendChild(node); return node; }
+  function clearDrawing(svg) { for (const child of [...svg.children]) if (!['title','desc'].includes(child.tagName.toLowerCase())) child.remove(); }
+  function clamp(value, low, high) { return Math.min(high, Math.max(low,value)); }
+  function horizon() { return state.kappa===1 ? 8 : Math.ceil(Math.log(1e-4)/Math.log1p(-1/state.kappa)); }
+  function eigenStart() { const [x,y]=state.start; return [c*x+s*y,-s*x+c*y]; }
+  function iterate(kappa,t) {
+    if (t===0) return [...state.start];
+    if (kappa===1) return [0,0];
+    const [u]=eigenStart();
+    const ut=u*Math.exp(t*Math.log1p(-1/kappa));
+    return [c*ut,s*ut];
+  }
+  function logRatio(kappa,t) {
+    // null means 0/0 at an initial minimizer; -Infinity means an exact zero.
+    const [u,v]=eigenStart();
+    if (state.start[0]===0 && state.start[1]===0) return null;
+    if (t===0) return 0;
+    if (kappa===1 || u===0) return -Infinity;
+    const a=u*u/kappa, b=v*v;
+    return (Math.log(a/(a+b))+2*t*Math.log1p(-1/kappa))/Math.LN10;
+  }
+  function boundLog(kappa,t) { return t===0 ? 0 : kappa===1 ? -Infinity : t*Math.log1p(-1/kappa)/Math.LN10; }
+  function number(value,digits=3) { return (Object.is(value,-0) ? 0 : value).toFixed(digits).replace('-', '−'); }
+  function coordinate(value) { return value!==0 && Math.abs(value)<.001 ? value.toExponential(2).replace(/-/g,'−') : number(value); }
+  function formatRatio(value) {
+    if (value===null) return '— (already optimal)';
+    if (value===-Infinity) return '0 · exact';
+    if (value>=-3) return Math.pow(10,value).toFixed(3);
+    return Math.pow(10,value).toExponential(2).replace('e-', 'e−');
+  }
+  function announce(message) { byId('announcement').textContent=message; }
+
+  function quadraticModel(kappa,point) {
+    const mu=1/kappa,u=c*point[0]+s*point[1],v=-s*point[0]+c*point[1];
+    return {kappa,mu,L:1,point,base:.5*(mu*u*u+v*v),gradient:[c*mu*u-s*v,s*mu*u+c*v]};
+  }
+  function sliceModel() {
+    const kappa=state.sliceSide==='right'?state.kappa:1;
+    const model=quadraticModel(kappa,iterate(kappa,state.t));
+    const angle=state.sliceAngle*Math.PI/180;
+    // Exact endpoint directions make equality with the bounds explicit.
+    const du=state.sliceAngle===90?0:Math.cos(angle), dv=state.sliceAngle===0?0:Math.sin(angle);
+    const direction=[c*du-s*dv,s*du+c*dv];
+    return {...model,slope:model.gradient[0]*direction[0]+model.gradient[1]*direction[1],
+      curvature:kappa===1?1:model.mu*du*du+dv*dv,direction};
+  }
+  function modelValue(model, displacement, curvature) { return model.base+model.slope*displacement+.5*curvature*displacement*displacement; }
+  function surfaceValue(model,x,y,kind) {
+    if(kind==='actual') { const u=c*x+s*y,v=-s*x+c*y; return .5*(model.mu*u*u+v*v); }
+    const dx=x-model.point[0],dy=y-model.point[1],h=kind==='upper'?1:model.mu;
+    return model.base+model.gradient[0]*dx+model.gradient[1]*dy+.5*h*(dx*dx+dy*dy);
+  }
+
+  function surfaceLimits(kappa) {
+    // The post-first-step trajectory lies on the segment from x_1 to zero.
+    // Upper models are convex in the anchor, lower models concave. Endpoints
+    // thus bound all models in time; include x_0 for the initial model too.
+    let low=0,high=0;
+    for(const point of [iterate(kappa,0),iterate(kappa,1),[0,0]]) {
+      const model=quadraticModel(kappa,point);
+      for(const kind of ['actual','upper','lower']) {
+        for(const x of [-4,4]) for(const y of [-4,4]) {
+          const value=surfaceValue(model,x,y,kind); low=Math.min(low,value);high=Math.max(high,value);
+        }
+        const h=kind==='upper'?1:model.mu;
+        const minimum=kind==='actual'?[0,0]:[clamp(point[0]-model.gradient[0]/h,-4,4),clamp(point[1]-model.gradient[1]/h,-4,4)];
+        low=Math.min(low,surfaceValue(model,...minimum,kind));
+      }
+    }
+    const padding=.025*(high-low),raw=(high-low+2*padding)/4,magnitude=10**Math.floor(Math.log10(raw));
+    const step=[1,2,2.5,5,10].find(value=>value*magnitude>=raw)*magnitude;
+    return {low:Math.floor((low-padding)/step)*step,high:Math.ceil((high+padding)/step)*step,step};
+  }
+
+  let surfaceCache={key:'',geometry:null},surfaceRangeCache={key:'',limits:null};
+  function surfaceGeometry(model) {
+    const key=[model.kappa,...state.start,state.t].join('|');
+    if(surfaceCache.key===key) return surfaceCache.geometry;
+    const rangeKey=[model.kappa,...state.start].join('|');
+    if(surfaceRangeCache.key!==rangeKey) surfaceRangeCache={key:rangeKey,limits:surfaceLimits(model.kappa)};
+    const limits=surfaceRangeCache.limits,N=24,meshes={};
+    for(const kind of ['actual','upper','lower']) {
+      const vertices=[],faces=[],lines=[];
+      for(let i=0;i<=N;i++) for(let j=0;j<=N;j++) {
+        const x=-4+8*i/N,y=-4+8*j/N,value=surfaceValue(model,x,y,kind);
+        vertices.push([x/4,y/4,1.7*(value-limits.low)/(limits.high-limits.low)]);
+      }
+      const face=(indices)=>{
+        const [a,b,d]=indices.map(i=>vertices[i]),u=b.map((v,i)=>v-a[i]),v=d.map((v,i)=>v-a[i]);
+        const normal=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]];
+        const length=Math.hypot(...normal),illumination=Math.abs((-.3*normal[0]-.4*normal[1]+normal[2])/length/Math.sqrt(1.25));
+        faces.push({indices,shade:.68+.32*illumination});
+      };
+      for(let i=0;i<N;i++) for(let j=0;j<N;j++) {
+        const a=i*(N+1)+j,b=(i+1)*(N+1)+j,d=a+1,e=b+1;face([a,b,e]);face([a,e,d]);
+      }
+      for(let i=0;i<=N;i+=2) for(let j=0;j<N;j++) {lines.push([i*(N+1)+j,i*(N+1)+j+1]);lines.push([j*(N+1)+i,(j+1)*(N+1)+i]);}
+      meshes[kind]={vertices,faces,lines};
+    }
+    const geometry={limits,meshes};surfaceCache={key,geometry};return geometry;
+  }
+
+  function makeLandscape(id, side) {
+    const svg=byId(id), width=Math.max(240,svg.getBoundingClientRect().width), height=svg.getBoundingClientRect().height || width/1.25;
+    svg.setAttribute('viewBox',`0 0 ${width} ${height}`); clearDrawing(svg);
+    const size=Math.min(width-64,height-47), left=(width-size)/2+8, top=9;
+    const unit=size/(2*span), px=x=>left+size/2+x*unit, py=y=>top+size/2-y*unit;
+    const clipId=`${side}-clip`, defs=add(svg,'defs');
+    add(add(defs,'clipPath',{id:clipId}),'rect',{x:left,y:top,width:size,height:size});
+    const grid=add(svg,'g');
+    for (let i=-4;i<=4;i+=2) {
+      add(grid,'line',{x1:px(i),x2:px(i),y1:top,y2:top+size,class:i===0?'axis-line':'grid-line'});
+      add(grid,'line',{x1:left,x2:left+size,y1:py(i),y2:py(i),class:i===0?'axis-line':'grid-line'});
+      add(grid,'text',{x:px(i),y:top+size+17,'text-anchor':'middle'},String(i).replace('-','−'));
+      if (i!==0) add(grid,'text',{x:left-9,y:py(i)+4,'text-anchor':'end'},String(i).replace('-','−'));
+    }
+    add(svg,'rect',{x:left,y:top,width:size,height:size,fill:'none',stroke:'var(--line)'});
+    add(svg,'text',{x:left+size+12,y:top+size+18,class:'axis-title'},'x₁');
+    add(svg,'text',{x:left-15,y:top+3,class:'axis-title','text-anchor':'end'},'x₂');
+    const contours=add(svg,'g',{'clip-path':`url(#${clipId})`});
+    const contourNodes=[];
+    for (const radius of [.55,1.05,1.65,2.35,3.15,4.15,5.45,7.1,9.3,12.5]) {
+      contourNodes.push({radius,node:add(contours,'ellipse',{cx:px(0),cy:py(0),rx:radius*unit,ry:radius*unit,transform:`rotate(-30 ${px(0)} ${py(0)})`,class:'contour'})});
+    }
+    const trajectory=add(svg,'g',{'clip-path':`url(#${clipId})`});
+    const slice=add(trajectory,'line',{stroke:'var(--muted)','stroke-width':1.4,'stroke-dasharray':'6 5',opacity:.8});
+    const color=side==='left'?'var(--left)':'var(--right)';
+    const path=add(trajectory,'path',{fill:'none',stroke:color,'stroke-width':2.5,'stroke-linejoin':'round'});
+    const dots=add(trajectory,'g',{fill:color});
+    add(trajectory,'path',{d:`M${px(0)-5},${py(0)}H${px(0)+5}M${px(0)},${py(0)-5}V${py(0)+5}`,stroke:'var(--text)','stroke-width':1.5,fill:'none'});
+    const start=add(trajectory,'circle',{r:5.5,fill:'var(--surface)',stroke:color,'stroke-width':2});
+    const dot=add(trajectory,'circle',{r:6,fill:color,stroke:'var(--surface)','stroke-width':2});
+    return {svg,side,px,py,left,top,size,unit,contourNodes,path,dots,start,dot,slice};
+  }
+
+  function drawLandscape(view,kappa) {
+    for (const {radius,node} of view.contourNodes) node.setAttribute('ry',radius*view.unit/Math.sqrt(kappa));
+    const point=iterate(kappa,state.t), first=iterate(kappa,Math.min(1,state.t));
+    view.slice.style.display=state.modelView==='slice'&&view.side===state.sliceSide?'':'none';
+    if(view.side===state.sliceSide) {
+      const {direction}=sliceModel(), reach=3*span;
+      view.slice.setAttribute('x1',view.px(point[0]-reach*direction[0])); view.slice.setAttribute('y1',view.py(point[1]-reach*direction[1]));
+      view.slice.setAttribute('x2',view.px(point[0]+reach*direction[0])); view.slice.setAttribute('y2',view.py(point[1]+reach*direction[1]));
+    }
+    const pts=state.t===0?[state.start]:[state.start,first,point];
+    view.path.setAttribute('d',pts.map((p,i)=>`${i?'L':'M'}${view.px(p[0])},${view.py(p[1])}`).join(' '));
+    view.start.setAttribute('cx',view.px(state.start[0])); view.start.setAttribute('cy',view.py(state.start[1]));
+    view.dot.setAttribute('cx',view.px(point[0])); view.dot.setAttribute('cy',view.py(point[1]));
+    view.dots.replaceChildren();
+    // Selected integer iterates avoid thousands of indistinguishable marks.
+    const indices=new Set();
+    for(let t=1;t<Math.min(state.t,9);t++) indices.add(t);
+    for(let j=1;j<24;j++) { const t=Math.floor(j*state.t/24); if(t>0&&t<state.t) indices.add(t); }
+    for(const t of indices) { const p=iterate(kappa,t); add(view.dots,'circle',{cx:view.px(p[0]),cy:view.py(p[1]),r:2,opacity:.65}); }
+    byId(`${view.side}-error`).textContent=formatRatio(logRatio(kappa,state.t));
+    byId(`${view.side}-position`).textContent=`(${coordinate(point[0])}, ${coordinate(point[1])})`;
+  }
+
+  function makeChart() {
+    const svg=byId('convergence'), width=Math.max(250,svg.getBoundingClientRect().width), height=260;
+    svg.setAttribute('viewBox',`0 0 ${width} ${height}`); clearDrawing(svg);
+    const left=51,right=width-18,top=27,bottom=188,zero=217;
+    const x=t=>left+(right-left)*t/horizon();
+    const y=log=>log===-Infinity?zero:top+(bottom-top)*(-Math.max(logFloor,Math.min(0,log)))/(-logFloor);
+    const supers=['0','−2','−4','−6','−8'];
+    for(let j=0;j<5;j++) {
+      const yy=y(-2*j);
+      add(svg,'line',{x1:left,x2:right,y1:yy,y2:yy,class:'grid-line'});
+      add(svg,'text',{x:left-9,y:yy+4,'text-anchor':'end'},j===0?'1':`10${supers[j].replace(/−/g,'⁻').replace(/2/g,'²').replace(/4/g,'⁴').replace(/6/g,'⁶').replace(/8/g,'⁸')}`);
+    }
+    const ticks=width<500?3:5;
+    for(let j=0;j<ticks;j++) {
+      const t=Math.round(horizon()*j/(ticks-1));
+      add(svg,'line',{x1:x(t),x2:x(t),y1:top,y2:bottom,class:'grid-line'});
+      add(svg,'text',{x:x(t),y:height-10,'text-anchor':j===0?'start':j===ticks-1?'end':'middle'},String(t));
+    }
+    add(svg,'line',{x1:left,x2:right,y1:zero,y2:zero,stroke:'var(--line)'});
+    add(svg,'text',{x:left-9,y:zero+4,'text-anchor':'end'},'0');
+    add(svg,'text',{x:left,y:14},'Relative objective (log scale)');
+    add(svg,'text',{x:(left+right)/2,y:height-10,'text-anchor':'middle',class:'axis-title'},'iteration t');
+    // Put the x-axis title above the bottom labels so it never overlaps a tick.
+    svg.lastChild.setAttribute('y',height-26);
+    const guide=add(svg,'line',{y1:top,y2:zero,stroke:'var(--axis)','stroke-width':1,'stroke-dasharray':'3 4'});
+    const bound=add(svg,'path',{fill:'none',stroke:'var(--right)','stroke-width':1.8,'stroke-dasharray':'6 5',opacity:.7});
+    const actualRight=add(svg,'path',{fill:'none',stroke:'var(--right)','stroke-width':2.5,'stroke-linejoin':'round'});
+    const actualLeft=add(svg,'path',{fill:'none',stroke:'var(--left)','stroke-width':2.5,'stroke-linejoin':'round'});
+    const pointRight=add(svg,'circle',{r:4,fill:'var(--right)',stroke:'var(--surface)','stroke-width':1});
+    const pointLeft=add(svg,'circle',{r:4,fill:'var(--left)',stroke:'var(--surface)','stroke-width':1});
+    const empty=add(svg,'text',{x:(left+right)/2,y:top+65,'text-anchor':'middle',fill:'var(--text)'},'Already at the minimizer; f(x₀) = 0.');
+    return {svg,x,y,guide,bound,actualRight,actualLeft,pointRight,pointLeft,empty};
+  }
+
+  function chartPath(kappa,t,isBound) {
+    const value=isBound?boundLog:logRatio;
+    const indices=t===0?[0]:t===1?[0,1]:[0,1,t];
+    // Insert the exact crossing of the display floor; clamping just endpoints
+    // would distort the visible log-linear slope when t goes beyond the floor.
+    if(kappa!==1 && t>1) {
+      const one=value(kappa,1), end=value(kappa,t);
+      if(Number.isFinite(one) && end<logFloor && one>logFloor) indices.splice(2,0,1+(logFloor-one)*(t-1)/(end-one));
+    }
+    return indices.map((i,j)=>`${j?'L':'M'}${chart.x(i)},${chart.y(value(kappa,i))}`).join(' ');
+  }
+
+  function drawChart() {
+    const empty=logRatio(1,0)===null;
+    chart.empty.style.display=empty?'':'none';
+    for(const node of [chart.bound,chart.actualRight,chart.actualLeft,chart.pointRight,chart.pointLeft]) node.style.display=empty?'none':'';
+    chart.guide.setAttribute('x1',chart.x(state.t)); chart.guide.setAttribute('x2',chart.x(state.t));
+    if(empty) return;
+    chart.bound.setAttribute('d',chartPath(state.kappa,horizon(),true));
+    chart.actualRight.setAttribute('d',chartPath(state.kappa,state.t,false));
+    chart.actualLeft.setAttribute('d',chartPath(1,state.t,false));
+    for(const [node,kappa] of [[chart.pointRight,state.kappa],[chart.pointLeft,1]]) { node.setAttribute('cx',chart.x(state.t)); node.setAttribute('cy',chart.y(logRatio(kappa,state.t))); }
+  }
+
+  function makeModelChart() {
+    const svg=byId('quadratic-models'), width=Math.max(250,svg.getBoundingClientRect().width), height=340;
+    svg.setAttribute('viewBox',`0 0 ${width} ${height}`); clearDrawing(svg);
+    const left=52,right=width-20,top=27,bottom=height-51;
+    const defs=add(svg,'defs');
+    add(add(defs,'clipPath',{id:'models-clip'}),'rect',{x:left,y:top,width:right-left,height:bottom-top});
+    const axes=add(svg,'g');
+    const curves=add(svg,'g',{'clip-path':'url(#models-clip)'});
+    const band=add(curves,'path',{fill:'var(--upper)',opacity:.07});
+    const lower=add(curves,'path',{id:'lower-model-curve',fill:'none',stroke:'var(--lower)','stroke-width':2.3,'stroke-dasharray':'3 4'});
+    const upper=add(curves,'path',{id:'upper-model-curve',fill:'none',stroke:'var(--upper)','stroke-width':2.3,'stroke-dasharray':'8 5'});
+    const actual=add(curves,'path',{id:'actual-model-curve',fill:'none',stroke:'var(--left)','stroke-width':2.7});
+    const anchor=add(curves,'circle',{id:'model-anchor',r:5,fill:'var(--text)',stroke:'var(--surface)','stroke-width':1.5});
+    const label=add(svg,'text',{'text-anchor':'start',fill:'var(--text)'},'current iterate');
+    return {svg,width,height,left,right,top,bottom,axes,band,lower,upper,actual,anchor,label};
+  }
+  function drawSliceModels() {
+    const model=sliceModel(), view=modelChart, radius=4;
+    const curvatures=[model.mu,model.curvature,model.L];
+    const extrema=[];
+    for(const h of curvatures) {
+      for(const displacement of [-radius,radius,clamp(-model.slope/h,-radius,radius)]) extrema.push(modelValue(model,displacement,h));
+    }
+    const minimum=Math.min(...extrema), maximum=Math.max(...extrema), pad=.07*(maximum-minimum);
+    const rawStep=(maximum-minimum+2*pad)/5, magnitude=10**Math.floor(Math.log10(rawStep));
+    const step=[1,2,2.5,5,10].find(value=>value*magnitude>=rawStep)*magnitude;
+    const low=Math.floor((minimum-pad)/step)*step, high=Math.ceil((maximum+pad)/step)*step;
+    const x=value=>view.left+(value+radius)*(view.right-view.left)/(2*radius);
+    const y=value=>view.bottom-(value-low)*(view.bottom-view.top)/(high-low);
+    const tick=value=>Math.abs(value)<1e-10?'0':String(Number(value.toPrecision(5))).replace('-','−');
+    view.axes.replaceChildren();
+    for(let value=low;value<=high+step/2;value+=step) {
+      add(view.axes,'line',{x1:view.left,x2:view.right,y1:y(value),y2:y(value),class:Math.abs(value)<1e-10?'axis-line':'grid-line'});
+      add(view.axes,'text',{x:view.left-9,y:y(value)+4,'text-anchor':'end'},tick(value));
+    }
+    const ticks=view.width<500?[-4,0,4]:[-4,-2,0,2,4];
+    for(const value of ticks) {
+      add(view.axes,'line',{x1:x(value),x2:x(value),y1:view.top,y2:view.bottom,class:value===0?'axis-line':'grid-line'});
+      add(view.axes,'text',{x:x(value),y:view.bottom+19,'text-anchor':value===-4?'start':value===4?'end':'middle'},tick(value));
+    }
+    add(view.axes,'rect',{x:view.left,y:view.top,width:view.right-view.left,height:view.bottom-view.top,fill:'none',stroke:'var(--line)'});
+    add(view.axes,'text',{x:view.left,y:14},'Objective / model value');
+    add(view.axes,'text',{x:(view.left+view.right)/2,y:view.height-7,'text-anchor':'middle',class:'axis-title'},'displacement s along the slice');
+    const samples=Array.from({length:161},(_,i)=>-radius+2*radius*i/160);
+    const path=h=>samples.map((value,i)=>`${i?'L':'M'}${x(value)},${y(modelValue(model,value,h))}`).join(' ');
+    view.lower.setAttribute('d',path(model.mu)); view.upper.setAttribute('d',path(model.L)); view.actual.setAttribute('d',path(model.curvature));
+    for(const kind of ['actual','upper','lower']) view[kind].style.display=state.visible[kind]?'':'none';
+    view.band.style.display=state.visible.lower&&state.visible.upper?'':'none';
+    const backward=samples.slice().reverse().map(value=>`L${x(value)},${y(modelValue(model,value,model.mu))}`).join(' ');
+    view.band.setAttribute('d',path(model.L)+' '+backward+' Z');
+    for(const [node,h] of [[view.lower,model.mu],[view.upper,model.L],[view.actual,model.curvature]]) node.setAttribute('data-curvature',h);
+    view.anchor.setAttribute('cx',x(0)); view.anchor.setAttribute('cy',y(model.base));
+    view.anchor.setAttribute('data-objective',model.base);
+    view.label.setAttribute('x',x(0)+9); view.label.setAttribute('y',Math.max(view.top+14,y(model.base)-11));
+    byId('model-status').textContent=`${state.sliceSide==='right'?'Right':'Left'} quadratic · κ = ${model.kappa.toLocaleString()} · t = ${state.t} · μ = ${model.mu.toPrecision(3)} ≤ dᵀQd = ${model.curvature.toPrecision(3)} ≤ L = 1`;
+    byId('model-equality').textContent=model.kappa===1?'κ = 1: the objective and both bounds coincide in every direction.':state.sliceAngle===0?'Along the μ-eigenvector, the lower bound equals the objective.':state.sliceAngle===90?'Along the L-eigenvector, the upper bound equals the objective.':'The objective lies between the two tangent quadratic bounds.';
+  }
+
+  function drawSurface() {
+    const canvas=byId('surface-canvas'),width=canvas.clientWidth,height=canvas.clientHeight;
+    if(!width||!height) return;
+    const ratio=Math.min(window.devicePixelRatio||1,2);
+    if(canvas.width!==Math.round(width*ratio)||canvas.height!==Math.round(height*ratio)) {canvas.width=Math.round(width*ratio);canvas.height=Math.round(height*ratio);}
+    const ctx=canvas.getContext('2d');ctx.setTransform(ratio,0,0,ratio,0,0);ctx.clearRect(0,0,width,height);
+    const model=sliceModel(),{limits,meshes}=surfaceGeometry(model),style=getComputedStyle(document.documentElement);
+    const color=name=>style.getPropertyValue(name).trim();
+    const palette={actual:color('--left'),upper:color('--upper'),lower:color('--lower')};
+    const shaded=(hex,light)=>{const v=parseInt(hex.replace('#',''),16);return `rgb(${Math.round(((v>>16)&255)*light)},${Math.round(((v>>8)&255)*light)},${Math.round((v&255)*light)})`;};
+    const angle=state.azimuth*Math.PI/180,elevation=state.elevation*Math.PI/180,ca=Math.cos(angle),sa=Math.sin(angle),ce=Math.cos(elevation),se=Math.sin(elevation);
+    const raw=([x,y,z])=>[ca*x-sa*y,se*(sa*x+ca*y)-ce*z,ce*(sa*x+ca*y)+se*z];
+    const corners=[];for(const x of [-1,1])for(const y of [-1,1])for(const z of [0,1.7])corners.push(raw([x,y,z]));
+    const minX=Math.min(...corners.map(p=>p[0])),maxX=Math.max(...corners.map(p=>p[0])),minY=Math.min(...corners.map(p=>p[1])),maxY=Math.max(...corners.map(p=>p[1]));
+    const padding=width<500?37:54,scale=.8*Math.min((width-2*padding)/(maxX-minX),(height-90)/(maxY-minY));
+    const offsetX=width/2-scale*(minX+maxX)/2,offsetY=height/2-scale*(minY+maxY)/2;
+    const project=point=>{const p=raw(point);return [offsetX+scale*p[0],offsetY+scale*p[1],p[2]];};
+    const projectValue=(x,y,value)=>project([x/4,y/4,1.7*(value-limits.low)/(limits.high-limits.low)]);
+    function line(a,b,stroke,lineWidth=1,alpha=1) {ctx.globalAlpha=alpha;ctx.strokeStyle=stroke;ctx.lineWidth=lineWidth;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();}
+    function label(text,x,y,align='center',fill=color('--muted'),font='11px system-ui') {ctx.globalAlpha=1;ctx.font=font;ctx.textAlign=align;ctx.textBaseline='middle';ctx.fillStyle=fill;const half=ctx.measureText(text).width/2;if(align==='center')x=clamp(x,half+4,width-half-4);ctx.fillText(text,x,clamp(y,9,height-9));}
+    for(const value of [-4,-2,0,2,4]) {
+      line(projectValue(value,-4,limits.low),projectValue(value,4,limits.low),color('--grid'));
+      line(projectValue(-4,value,limits.low),projectValue(4,value,limits.low),color('--grid'));
+    }
+    const floorCorners=[[-4,-4],[4,-4],[4,4],[-4,4]];
+    for(let i=0;i<4;i++) {const a=floorCorners[i],b=floorCorners[(i+1)%4];line(projectValue(...a,limits.low),projectValue(...b,limits.low),color('--axis'));}
+    const visible=['lower','upper','actual'].filter(kind=>state.visible[kind]);
+    // Identical meshes would only darken each other. Draw coincident surfaces once.
+    const kinds=model.kappa===1?(state.visible.actual?['actual']:visible.slice(-1)):visible;
+    const primitives=[];
+    for(const kind of kinds) {
+      const mesh=meshes[kind],points=mesh.vertices.map(project);
+      for(const face of mesh.faces) {
+        const p=face.indices.map(i=>points[i]);
+        primitives.push({p,depth:(p[0][2]+p[1][2]+p[2][2])/3,kind,shade:face.shade});
+      }
+      for(const pair of mesh.lines) {const p=pair.map(i=>points[i]);primitives.push({p,depth:(p[0][2]+p[1][2])/2+1e-5,kind,line:true});}
+    }
+    // Orthographic projection with back-to-front transparent mesh rendering.
+    primitives.sort((a,b)=>a.depth-b.depth);
+    for(const item of primitives) {
+      if(item.line) {line(item.p[0],item.p[1],palette[item.kind],item.kind==='actual'?.65:.8,item.kind==='actual'?.45:.60);continue;}
+      ctx.globalAlpha=item.kind==='actual'?.64:.10;ctx.fillStyle=shaded(palette[item.kind],item.shade);
+      ctx.beginPath();ctx.moveTo(item.p[0][0],item.p[0][1]);ctx.lineTo(item.p[1][0],item.p[1][1]);ctx.lineTo(item.p[2][0],item.p[2][1]);ctx.closePath();ctx.fill();
+    }
+    ctx.globalAlpha=1;
+    const center=projectValue(0,0,limits.low),frontX=sa>=0?4:-4,frontY=ca>=0?4:-4;
+    for(const axis of [0,1]) {
+      const edge=value=>axis===0?projectValue(value,frontY,limits.low):projectValue(frontX,value,limits.low);
+      const mid=edge(0),out=[mid[0]-center[0],mid[1]-center[1]],length=Math.hypot(...out)||1;
+      const outward=out.map(v=>v/length);
+      for(const value of (width<500?[-4,4]:[-4,0,4])) {const p=edge(value);label(String(value).replace('-','−'),p[0]+outward[0]*13,p[1]+outward[1]*13);}
+      label(axis===0?'y₁':'y₂',mid[0]+outward[0]*30,mid[1]+outward[1]*30,'center',color('--text'),'italic 14px Georgia');
+    }
+    const zCorner=floorCorners.slice().sort((a,b)=>projectValue(...a,limits.low)[0]-projectValue(...b,limits.low)[0])[0];
+    line(projectValue(...zCorner,limits.low),projectValue(...zCorner,limits.high),color('--axis'));
+    for(let value=limits.low;value<=limits.high+limits.step/2;value+=limits.step) {
+      const p=projectValue(...zCorner,value);line([p[0]-3,p[1]],[p[0]+3,p[1]],color('--axis'));
+      label(String(Number(value.toPrecision(4))).replace('-','−'),p[0]-7,p[1],'right');
+    }
+    label('Objective / model value',12,16,'left',color('--muted'),'12px system-ui');
+    const anchor=projectValue(...model.point,model.base);
+    const floorPoint=projectValue(...model.point,limits.low);
+    ctx.setLineDash([3,4]);line(anchor,floorPoint,color('--text'),1,.55);ctx.setLineDash([]);
+    ctx.globalAlpha=1;ctx.beginPath();ctx.arc(anchor[0],anchor[1],5.5,0,2*Math.PI);ctx.fillStyle=color('--text');ctx.fill();ctx.strokeStyle=color('--surface');ctx.lineWidth=2;ctx.stroke();
+    const text='current iterate',tx=clamp(anchor[0]+12,8,width-104),ty=clamp(anchor[1]-14,34,height-22);
+    ctx.font='12px system-ui';ctx.globalAlpha=.88;ctx.fillStyle=color('--surface');ctx.fillRect(tx-4,ty-10,ctx.measureText(text).width+8,20);
+    label(text,tx,ty,'left',color('--text'),'12px system-ui');
+    canvas.setAttribute('data-z-min',limits.low);canvas.setAttribute('data-z-max',limits.high);canvas.setAttribute('data-anchor-value',model.base);canvas.setAttribute('data-rendered-surfaces',kinds.join(','));canvas.setAttribute('data-camera',`${state.azimuth},${state.elevation}`);
+    byId('model-status').textContent=`${state.sliceSide==='right'?'Right':'Left'} quadratic · κ = ${model.kappa.toLocaleString()} · t = ${state.t} · μ = ${model.mu.toPrecision(3)}, L = 1 · y₁, y₂ ∈ [−4, 4]`;
+    byId('model-equality').textContent=visible.length===0?'Select a surface above to show it.':model.kappa===1?'κ = 1: all three surfaces coincide everywhere (drawn once).':'The objective lies between the bounds. All three share the same value and gradient at the marked point.';
+  }
+
+  function syncModelView() {
+    const surface=state.modelView==='surface';
+    byId('surface-view').hidden=!surface;byId('surface-controls').hidden=!surface;
+    byId('quadratic-models').hidden=surface;byId('slice-controls').hidden=surface;
+    byId('model-intro').textContent=surface?'Three surfaces over (y₁, y₂), tangent at the current iterate. Drag to rotate; use the checkboxes to inspect each surface.':'A one-dimensional slice y = xₜ + s d, with ‖d‖ = 1. All three curves have the same value and slope at the current iterate (s = 0).';
+  }
+  function drawModels() { if(state.modelView==='surface') drawSurface(); else drawSliceModels(); }
+
+  function draw() {
+    drawLandscape(views[0],1); drawLandscape(views[1],state.kappa); drawChart(); drawModels();
+    byId('iteration').value=state.t; byId('iteration-value').textContent=state.t;
+    byId('step').disabled=state.t>=horizon();
+    byId('play').textContent=state.running?'Pause':state.t>=horizon()?'Replay':state.t===0?'Run both':'Resume';
+  }
+  function rebuild() {
+    views.splice(0,views.length,makeLandscape('left-plot','left'),makeLandscape('right-plot','right'));
+    chart=makeChart(); modelChart=makeModelChart(); draw();
+  }
+  function stop() { state.running=false; cancelAnimationFrame(state.frame); state.lastTime=0; state.carry=0; }
+  function restart(message) { stop(); state.t=0; draw(); if(message) announce(message); }
+  function updateKappa(raw) {
+    if(!Number.isFinite(raw)) { byId('kappa-number').value=state.kappa; return; }
+    state.kappa=clamp(Math.round(raw),1,1000); stop(); state.t=0;
+    byId('kappa').value=Math.round(Math.log10(state.kappa)*1000);
+    byId('kappa').setAttribute('aria-valuetext',`Condition number ${state.kappa}`);
+    byId('kappa-number').value=state.kappa;
+    byId('right-tag').textContent=`κ = ${state.kappa.toLocaleString()}`;
+    byId('right-heading').textContent=state.kappa===1?'Perfectly conditioned':'Ill-conditioned';
+    byId('right-parameters').textContent=`μ = ${(1/state.kappa).toPrecision(3)} · L = 1 · ${state.kappa===1?'circular':'elliptical'} level sets`;
+    byId('iteration').max=horizon(); byId('iteration-limit').textContent=`of ${horizon().toLocaleString()}`;
+    chart=makeChart(); draw(); announce(`Condition number ${state.kappa}. Both runs restarted.`);
+  }
+  function setStart(x,y) {
+    if(!Number.isFinite(x)||!Number.isFinite(y)) { byId('start-x').value=state.start[0]; byId('start-y').value=state.start[1]; return; }
+    state.start=[clamp(x,-4,4),clamp(y,-4,4)];
+    byId('start-x').value=state.start[0]; byId('start-y').value=state.start[1];
+    restart(`Starting point (${number(state.start[0],2)}, ${number(state.start[1],2)}). Both runs restarted.`);
+  }
+  function animate(time) {
+    if(!state.running) return;
+    if(state.lastTime===0) state.lastTime=time;
+    const elapsed=Math.min(time-state.lastTime,250); state.lastTime=time;
+    // A run takes about 20 seconds at 1x, with a slower first step for teaching.
+    const rate=state.t===0?1.4:Math.max(3,horizon()/19);
+    state.carry+=elapsed/1000*rate*state.speed;
+    const steps=Math.floor(state.carry);
+    if(steps>0) { state.carry-=steps; state.t=Math.min(horizon(),state.t+steps); if(state.t>=horizon()) { stop(); announce(`Run complete at iteration ${state.t}.`); } draw(); }
+    if(state.running) state.frame=requestAnimationFrame(animate);
+  }
+  byId('play').addEventListener('click',()=>{
+    if(state.running) { stop(); draw(); announce(`Paused at iteration ${state.t}.`); return; }
+    if(state.t>=horizon()) state.t=0;
+    state.running=true; state.lastTime=0; state.carry=0; draw(); state.frame=requestAnimationFrame(animate);
+    announce('Both gradient descent runs are playing.');
+  });
+  byId('step').addEventListener('click',()=>{ stop(); state.t=Math.min(horizon(),state.t+1); draw(); announce(`Iteration ${state.t}. Right relative objective ${formatRatio(logRatio(state.kappa,state.t))}.`); });
+  byId('reset').addEventListener('click',()=>restart('Both runs restarted.'));
+  byId('iteration').addEventListener('input',event=>{ stop(); state.t=Number(event.target.value); draw(); });
+  byId('iteration').addEventListener('change',()=>announce(`Iteration ${state.t}.`));
+  byId('kappa').addEventListener('input',event=>updateKappa(Math.pow(10,Number(event.target.value)/1000)));
+  byId('kappa-number').addEventListener('input',event=>{
+    const raw=event.target.value.trim();
+    if(raw!=='' && Number.isFinite(Number(raw))) updateKappa(Number(raw));
+  });
+  byId('kappa-number').addEventListener('change',event=>{
+    const raw=event.target.value.trim()===''?NaN:Number(event.target.value);
+    if(raw!==state.kappa) updateKappa(raw);
+  });
+  byId('speed').addEventListener('change',event=>{ state.speed=Number(event.target.value); });
+  byId('slice-side').addEventListener('change',event=>{ state.sliceSide=event.target.value; draw(); announce(`Showing quadratic bounds for the ${state.sliceSide} run.`); });
+  byId('model-view').addEventListener('change',event=>{state.modelView=event.target.value;syncModelView();rebuild();announce(state.modelView==='surface'?'Showing three-dimensional surfaces.':'Showing a one-dimensional slice.');});
+  for(const kind of ['actual','upper','lower']) byId(`show-${kind}`).addEventListener('change',event=>{state.visible[kind]=event.target.checked;drawModels();});
+  function updateCamera(azimuth,elevation) {
+    state.azimuth=(azimuth%360+360)%360;state.elevation=clamp(elevation,10,80);
+    byId('camera-azimuth').value=Math.round(state.azimuth);byId('camera-elevation').value=Math.round(state.elevation);drawSurface();
+  }
+  byId('camera-azimuth').addEventListener('input',event=>updateCamera(Number(event.target.value),state.elevation));
+  byId('camera-elevation').addEventListener('input',event=>updateCamera(state.azimuth,Number(event.target.value)));
+  byId('reset-camera').addEventListener('click',()=>updateCamera(315,26));
+  let surfaceDrag=null,cameraFrame=0;
+  byId('surface-canvas').addEventListener('pointerdown',event=>{
+    if(event.button!==0) return;surfaceDrag={id:event.pointerId,x:event.clientX,y:event.clientY,azimuth:state.azimuth,elevation:state.elevation};event.currentTarget.setPointerCapture(event.pointerId);
+  });
+  byId('surface-canvas').addEventListener('pointermove',event=>{
+    if(!surfaceDrag||event.pointerId!==surfaceDrag.id) return;
+    const azimuth=surfaceDrag.azimuth+(event.clientX-surfaceDrag.x)*.5,elevation=surfaceDrag.elevation-(event.clientY-surfaceDrag.y)*.35;
+    cancelAnimationFrame(cameraFrame);cameraFrame=requestAnimationFrame(()=>updateCamera(azimuth,elevation));
+  });
+  for(const event of ['pointerup','pointercancel','lostpointercapture']) byId('surface-canvas').addEventListener(event,()=>{surfaceDrag=null;});
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>drawModels());
+  byId('slice-angle').addEventListener('input',event=>{
+    state.sliceAngle=Number(event.target.value);
+    byId('slice-angle-value').textContent=`${state.sliceAngle}°`;
+    byId('slice-angle').setAttribute('aria-valuetext',`${state.sliceAngle} degrees from the small-curvature direction`);
+    draw();
+  });
+  byId('slice-angle').addEventListener('change',()=>announce(`Slice direction ${state.sliceAngle} degrees from the small-curvature direction.`));
+  function updateStartInputs(commit) {
+    const x=byId('start-x').value.trim(), y=byId('start-y').value.trim();
+    if(!commit && (x===''||y==='')) return;
+    const xx=x===''?NaN:Number(x), yy=y===''?NaN:Number(y);
+    if(xx!==state.start[0]||yy!==state.start[1]) setStart(xx,yy);
+  }
+  for(const id of ['start-x','start-y']) {
+    byId(id).addEventListener('input',()=>updateStartInputs(false));
+    byId(id).addEventListener('change',()=>updateStartInputs(true));
+  }
+  byId('default-start').addEventListener('click',()=>setStart(3,-2));
+  for(const [index,id] of ['left-plot','right-plot'].entries()) byId(id).addEventListener('click',event=>{
+    const view=views[index], rect=view.svg.getBoundingClientRect(), px=(event.clientX-rect.left)*view.svg.viewBox.baseVal.width/rect.width, py=(event.clientY-rect.top)*view.svg.viewBox.baseVal.height/rect.height;
+    if(px<view.left||px>view.left+view.size||py<view.top||py>view.top+view.size) return;
+    setStart(Math.round(((px-view.left-view.size/2)/view.unit)*100)/100,Math.round(((view.top+view.size/2-py)/view.unit)*100)/100);
+  });
+  // Never autoplay; users requesting reduced motion start at the slower speed.
+  if(reducedMotion.matches) { state.speed=.25; byId('speed').value='0.25'; }
+  document.addEventListener('visibilitychange',()=>{ if(document.hidden&&state.running) { stop(); draw(); } });
+  let resizeFrame=0;
+  const observer=new ResizeObserver(()=>{ cancelAnimationFrame(resizeFrame); resizeFrame=requestAnimationFrame(rebuild); });
+  observer.observe(byId('left-plot')); observer.observe(byId('right-plot')); observer.observe(byId('convergence')); observer.observe(byId('quadratic-models'));observer.observe(byId('surface-canvas'));
+  rebuild(); updateKappa(state.kappa);
+})();
+</script>
+</body>
+</html>

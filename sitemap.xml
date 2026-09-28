@@ -4,105 +4,19 @@
   
     
       <url>
-            <loc>/posts/all-contents/</loc>
+            <loc>https://mateodd25.github.io/posts/all-contents/</loc>
           </url>
     
   
     
       <url>
-            <loc>/bio/</loc>
+            <loc>https://mateodd25.github.io/bio/</loc>
           </url>
     
   
     
       <url>
-            <loc>/biosketch/</loc>
-          </url>
-    
-  
-    
-  
-    
-      <url>
-            <loc>/contact/</loc>
-          </url>
-    
-  
-    
-      <url>
-            <loc>/desigualdades/</loc>
-          </url>
-    
-  
-    
-      <url>
-            <loc>/</loc>
-          </url>
-    
-  
-    
-      <url>
-            <loc>/mds/</loc>
-          </url>
-    
-  
-    
-      <url>
-            <loc>/origami/</loc>
-          </url>
-    
-  
-    
-      <url>
-            <loc>/nonlinear-fa23/</loc>
-          </url>
-    
-  
-    
-      <url>
-            <loc>/nonlinear/</loc>
-          </url>
-    
-  
-    
-      <url>
-            <loc>/nonlinear2/</loc>
-          </url>
-    
-  
-    
-      <url>
-            <loc>/optiworkshop/</loc>
-          </url>
-    
-  
-    
-      <url>
-            <loc>/posts/</loc>
-          </url>
-    
-  
-    
-      <url>
-            <loc>/prob2/</loc>
-          </url>
-    
-  
-    
-      <url>
-            <loc>/publications/</loc>
-          </url>
-    
-  
-    
-      <url>
-            <loc>/random/</loc>
-          </url>
-    
-  
-    
-      <url>
-            <loc>/other/</loc>
+            <loc>https://mateodd25.github.io/biosketch/</loc>
           </url>
     
   
@@ -110,7 +24,99 @@
   
     
       <url>
-            <loc>/teaching/</loc>
+            <loc>https://mateodd25.github.io/contact/</loc>
+          </url>
+    
+  
+    
+      <url>
+            <loc>https://mateodd25.github.io/desigualdades/</loc>
+          </url>
+    
+  
+    
+      <url>
+            <loc>https://mateodd25.github.io/</loc>
+          </url>
+    
+  
+    
+      <url>
+            <loc>https://mateodd25.github.io/mds/</loc>
+          </url>
+    
+  
+    
+      <url>
+            <loc>https://mateodd25.github.io/origami/</loc>
+          </url>
+    
+  
+    
+      <url>
+            <loc>https://mateodd25.github.io/nonlinear-fa23/</loc>
+          </url>
+    
+  
+    
+      <url>
+            <loc>https://mateodd25.github.io/nonlinear/</loc>
+          </url>
+    
+  
+    
+      <url>
+            <loc>https://mateodd25.github.io/nonlinear2/</loc>
+          </url>
+    
+  
+    
+      <url>
+            <loc>https://mateodd25.github.io/opti-ds/</loc>
+          </url>
+    
+  
+    
+      <url>
+            <loc>https://mateodd25.github.io/optiworkshop/</loc>
+          </url>
+    
+  
+    
+      <url>
+            <loc>https://mateodd25.github.io/posts/</loc>
+          </url>
+    
+  
+    
+      <url>
+            <loc>https://mateodd25.github.io/prob2/</loc>
+          </url>
+    
+  
+    
+      <url>
+            <loc>https://mateodd25.github.io/publications/</loc>
+          </url>
+    
+  
+    
+      <url>
+            <loc>https://mateodd25.github.io/random/</loc>
+          </url>
+    
+  
+    
+      <url>
+            <loc>https://mateodd25.github.io/other/</loc>
+          </url>
+    
+  
+    
+  
+    
+      <url>
+            <loc>https://mateodd25.github.io/teaching/</loc>
           </url>
     
   
