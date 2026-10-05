@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore linear convergence and the implicit bias of gradient descent for overparameterized least squares, with two observations and three parameters.">
+  <title>Least squares and implicit bias · Optimization for Data Science</title>
+  <style>
+    :root { color-scheme:light dark; --bg:#f7f6f2; --surface:#fff; --text:#23262b; --muted:#616771; --line:#deded8; --grid:#eaeae5; --axis:#989da4; --zero:#14796e; --shift:#9c3455; --gold:#ac751a; --soft:#f0efe9; --focus:#146eaa; }
+    @media(prefers-color-scheme:dark) { :root { --bg:#181b20; --surface:#20242a; --text:#eeeef0; --muted:#b2b7c0; --line:#3f444b; --grid:#30353d; --axis:#717985; --zero:#69cbb9; --shift:#f494af; --gold:#eac17a; --soft:#2b3037; --focus:#82c9fa; } }
+    * { box-sizing:border-box; } [hidden] { display:none !important; }
+    body { margin:0; background:var(--bg); color:var(--text); font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    main { max-width:1240px; margin:auto; padding:30px 26px 42px; }
+    .eyebrow { margin:0 0 8px; color:var(--muted); font-size:11px; letter-spacing:.15em; text-transform:uppercase; font-weight:650; }
+    h1 { margin:0; font-size:clamp(25px,3.3vw,38px); line-height:1.2; letter-spacing:-.035em; font-weight:650; }
+    h2 { margin:0; font-size:18px; letter-spacing:-.02em; font-weight:600; }
+    p { margin:8px 0; } .intro { max-width:920px; color:var(--muted); margin:11px 0 16px; }
+    .math { font-family:Georgia,"Times New Roman",serif; } .formula { font-family:Georgia,"Times New Roman",serif; font-size:19px; overflow-wrap:anywhere; }
+    .setup { display:flex; flex-wrap:wrap; gap:8px 24px; font-size:14px; margin-bottom:20px; }
+    .controls,.panel,.result { border:1px solid var(--line); border-radius:12px; background:var(--surface); }
+    .controls { padding:18px 21px 14px; }
+    .sliders { display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px 34px; }
+    .control-label { display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:13px; font-weight:600; }
+    .control-label output { font-variant-numeric:tabular-nums; }
+    input,select,button { font:inherit; color:inherit; }
+    input[type=range] { width:100%; accent-color:var(--text); margin:9px 0 0; min-height:22px; cursor:pointer; }
+    #null-start { accent-color:var(--shift); }
+    input[type=number],select { background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:5px 7px; min-height:34px; }
+    input[type=number] { width:70px; font-variant-numeric:tabular-nums; }
+    .ticks { display:flex; justify-content:space-between; color:var(--muted); font-size:11px; }
+    .transport { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+    .playback { border-top:1px solid var(--line); margin-top:16px; padding-top:14px; display:grid; grid-template-columns:auto 1fr; gap:14px 28px; align-items:center; }
+    button { background:var(--surface); border:1px solid var(--line); border-radius:7px; padding:8px 12px; min-height:40px; font-size:13px; font-weight:550; cursor:pointer; }
+    button.primary { background:var(--text); color:var(--surface); border-color:var(--text); min-width:93px; }
+    button:disabled { opacity:.45; cursor:default; } button:hover:not(:disabled) { filter:brightness(.94); }
+    :focus-visible { outline:3px solid var(--focus); outline-offset:3px; }
+    .speed { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); }
+    .timeline label { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); }
+    .timeline input { margin-top:2px; } #iteration-value { color:var(--text); font-weight:600; }
+    .advanced { margin-top:12px; font-size:13px; } summary { cursor:pointer; font-weight:600; }
+    .fields { display:flex; flex-wrap:wrap; align-items:center; gap:10px 15px; margin-top:10px; }
+    .fields label { display:flex; align-items:center; gap:7px; }
+    .hint { font-size:12px; color:var(--muted); } .controls .hint { margin-bottom:0; }
+    .observation { margin:15px 0; padding:11px 15px; border-left:3px solid var(--shift); background:var(--soft); font-size:14px; }
+    .panels { display:grid; grid-template-columns:1.08fr 1fr; gap:18px; }
+    .panel { min-width:0; padding:17px 17px 12px; }
+    .panel-head { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
+    .tag { border:1px solid var(--line); border-radius:20px; font-size:11px; padding:2px 9px; white-space:nowrap; }
+    .subtitle { font-size:13px; color:var(--muted); min-height:39px; }
+    .legend { display:flex; flex-wrap:wrap; align-items:center; gap:7px 16px; color:var(--muted); font-size:11px; }
+    .legend span { display:inline-flex; align-items:center; gap:6px; }
+    .swatch { display:inline-block; width:21px; border-top:3px solid; }
+    .swatch.zero { border-color:var(--zero); } .swatch.shift { border-color:var(--shift); border-top-style:dashed; }
+    .swatch.bound { border-color:var(--axis); border-top-width:2px; border-top-style:dashed; } .swatch.solution { border-color:var(--gold); }
+    #geometry { display:block; width:100%; height:365px; touch-action:none; cursor:grab; }
+    #geometry:active { cursor:grabbing; } #loss-chart { display:block; width:100%; height:365px; }
+    .camera { display:flex; flex-wrap:wrap; gap:8px 15px; align-items:center; }
+    .camera label { display:flex; gap:5px; align-items:center; color:var(--muted); font-size:11px; }
+    .camera input { width:74px; margin:0; min-height:20px; } .camera button { font-size:11px; padding:4px 8px; min-height:30px; }
+    .chart-equation { padding-top:5px; font-size:16px; min-height:35px; }
+    .results { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:18px; }
+    .result { padding:16px 19px; border-top:3px solid var(--zero); min-width:0; }
+    .result.shifted { border-top-color:var(--shift); }
+    .result h2 { font-size:16px; } .result .initial { font-size:13px; color:var(--muted); }
+    .metrics { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin:12px 0; font-size:11px; color:var(--muted); }
+    .metrics strong { display:block; color:var(--text); font-size:17px; font-weight:600; font-variant-numeric:tabular-nums; }
+    .endpoint { border-top:1px solid var(--line); padding-top:10px; font-size:14px; }
+    .endpoint small { display:block; color:var(--muted); margin-top:4px; }
+    .proof { margin-top:22px; border-top:1px solid var(--line); padding-top:15px; font-size:14px; }
+    .explanation { display:grid; grid-template-columns:1fr 1fr; gap:10px 36px; }
+    .explanation p { margin-top:14px; } .equation { font:18px/1.7 Georgia,"Times New Roman",serif; overflow-wrap:anywhere; }
+    .matrix { display:inline-grid; grid-template-columns:repeat(3,auto); gap:2px 14px; border-left:1px solid; border-right:1px solid; padding:0 9px; vertical-align:middle; text-align:center; }
+    .lesson { font-size:14px; color:var(--muted); margin:14px 1px 0; }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    noscript { display:block; padding:15px; color:var(--shift); }
+    @media(max-width:900px) { .playback { grid-template-columns:1fr; gap:10px; } .panels { grid-template-columns:1fr; } .subtitle { min-height:0; } #geometry,#loss-chart { height:390px; } }
+    @media(max-width:600px) { main { padding:23px 15px; } .sliders { grid-template-columns:1fr; gap:15px; } .results,.explanation { grid-template-columns:1fr; } .panel { padding:15px 12px 12px; } .controls { padding:16px; } .metrics { gap:8px; } .metrics strong { font-size:16px; } input[type=number] { font-size:16px; } button,select { min-height:44px; } #geometry,#loss-chart { height:330px; } .camera input { width:65px; } .camera { gap:8px; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Optimization for Data Science · Lecture 3</p>
+    <h1>Fast convergence. Which solution?</h1>
+    <p class="intro">Two observations, three parameters, infinitely many exact fits. Compare gradient descent from zero with a different initialization to see what the algorithm learns—and what it preserves.</p>
+    <div class="setup"><span class="math">f(w) = ¼ ‖Xw − y‖²</span><span><b>PL</b> with <span class="math">μ = 1/κ</span></span><span class="math">L = 1</span><span>Hessian eigenvalues: <span class="math">1, 1/κ, 0</span></span></div>
+  </header>
+
+  <section class="controls" aria-label="Simulation controls">
+    <div class="sliders">
+      <div><div class="control-label"><label for="kappa">Condition number κ = L/μ</label><input id="kappa-number" aria-label="Condition number, exact value" type="number" min="1" max="100" step="1" value="12"></div><input id="kappa" type="range" min="0" max="200" value="108" aria-describedby="model-help"><div class="ticks" aria-hidden="true"><span>1</span><span>10</span><span>100</span></div></div>
+      <div><div class="control-label"><label for="eta">Step size η</label><output id="eta-value">1.00 / L</output></div><input id="eta" type="range" min="0.1" max="1" step="0.05" value="1"><div class="ticks" aria-hidden="true"><span>0.1 / L</span><span>1 / L</span></div></div>
+      <div><div class="control-label"><label for="null-start">Initial null-space coordinate c₀</label><output id="null-value">2.00</output></div><input id="null-start" type="range" min="-3" max="3" step="0.1" value="2"><div class="ticks" aria-hidden="true"><span>−3</span><span>0</span><span>3</span></div></div>
+    </div>
+    <div class="playback">
+      <div class="transport"><button id="play" class="primary" type="button">Run both</button><button id="step" type="button">Step +1</button><button id="restart" type="button">Restart</button><label class="speed" for="speed">Speed <select id="speed"><option value="0.25">¼×</option><option value="1" selected>1×</option><option value="4">4×</option></select></label></div>
+      <div class="timeline"><label for="iteration"><span>Iteration <output id="iteration-value">0</output></span><span id="horizon-value"></span></label><input id="iteration" type="range" min="0" max="133" value="0" step="1"></div>
+    </div>
+    <details class="advanced"><summary>Change the row-space initialization</summary><p>The teal run always starts at zero. The other starts at <span class="math">w₀ = a₀u₁ + b₀u₂ + c₀v</span>. Change <span class="math">a₀, b₀</span> to change the transient behavior; only <span class="math">c₀</span> affects the limit.</p><div class="fields"><label for="a-start">a₀ <input id="a-start" type="number" min="-2" max="3" step="0.1" value="0"></label><label for="b-start">b₀ <input id="b-start" type="number" min="-2" max="3" step="0.1" value="0"></label><button id="null-preset" type="button">Null-space start</button><button id="fit-preset" type="button">Already interpolates</button><button id="defaults" type="button">Reset all</button></div></details>
+    <p class="hint" id="model-help">Changing the model or initialization restarts both runs. κ measures curvature on the row space; the full Hessian is singular.</p>
+  </section>
+
+  <p class="observation" id="observation" aria-live="polite"></p>
+  <section class="panels" aria-label="Parameter paths and loss convergence">
+    <article class="panel">
+      <div class="panel-head"><h2>Parameter space</h2><span class="tag">3D · drag to rotate</span></div>
+      <p class="subtitle">Orthonormal coordinates <span class="math">w = au₁ + bu₂ + cv</span>. The gold line contains every exact fit; its intersection with <span class="math">c = 0</span> is the minimum-norm solution.</p>
+      <div class="legend"><span><i class="swatch zero" aria-hidden="true"></i>Zero start</span><span><i class="swatch shift" aria-hidden="true"></i>Chosen start</span><span><i class="swatch solution" aria-hidden="true"></i>All interpolators</span></div>
+      <canvas id="geometry" role="img" aria-label="Rotatable parameter-space plot. Two gradient descent paths approach the line a = b = 1 while preserving their initial null-space coordinate c."></canvas>
+      <div class="camera"><label for="azimuth">Rotate <input id="azimuth" type="range" min="0" max="360" step="1" value="325"></label><label for="elevation">Tilt <input id="elevation" type="range" min="10" max="75" step="1" value="24"></label><label for="zoom">Zoom <input id="zoom" type="range" min="0.6" max="1.6" step="0.05" value="1"></label><button id="reset-view" type="button">Reset view</button></div>
+      <p class="hint">Open circles: starts · filled dots: current iterates · diamonds: limits. The gray plane is the row space, c = 0. No loss height is shown.</p>
+    </article>
+    <article class="panel">
+      <div class="panel-head"><h2>Objective convergence</h2><span class="tag">Logarithmic scale</span></div>
+      <p class="subtitle">PL gives geometric decay of the loss even though the objective is not strongly convex in all three parameters.</p>
+      <div class="legend"><span><i class="swatch zero" aria-hidden="true"></i>Zero start</span><span><i class="swatch shift" aria-hidden="true"></i>Chosen start</span><span><i class="swatch bound" aria-hidden="true"></i>PL bound</span></div>
+      <svg id="loss-chart" role="img" aria-labelledby="loss-title loss-desc"><title id="loss-title">Relative loss versus iteration</title><desc id="loss-desc">The relative objective is compared with the PL bound (1 minus eta divided by kappa) to the power t. Exact zeros appear on a separate row.</desc></svg>
+      <p class="chart-equation math">f(w<sub>t</sub>) / f(w₀) ≤ (1 − ημ)<sup>t</sup> = <span id="rate-value"></span><sup>t</sup></p>
+      <p class="hint" id="chart-note"></p>
+    </article>
+  </section>
+
+  <section class="results" aria-label="Current iterates and their limits">
+    <article class="result"><h2>Zero initialization</h2><p class="initial math">w₀ = 0</p><div class="metrics"><div>Training loss<strong id="zero-loss"></strong></div><div>Parameter norm<strong id="zero-norm"></strong></div><div>Null coordinate c<sub>t</sub><strong id="zero-null"></strong></div></div><div class="endpoint"><span class="math">w<sub>∞</sub> = w†</span> · minimum-norm interpolator<small id="zero-current"></small><small id="zero-limit"></small></div></article>
+    <article class="result shifted"><h2>Chosen initialization</h2><p class="initial math" id="chosen-initial"></p><div class="metrics"><div>Training loss<strong id="chosen-loss"></strong></div><div>Parameter norm<strong id="chosen-norm"></strong></div><div>Null coordinate c<sub>t</sub><strong id="chosen-null"></strong></div></div><div class="endpoint"><span class="math">w<sub>∞</sub> = w† + c₀v</span> · closest interpolator to this start<small id="chosen-current"></small><small id="chosen-limit"></small></div></article>
+  </section>
+  <p class="lesson" id="lesson"></p>
+
+  <details class="proof"><summary>The model and the two mathematical guarantees</summary><div class="explanation">
+    <div><p><b>A concrete least-squares problem.</b> Use the orthonormal basis</p><p class="equation">u₁ = (1, −1, 0) / √2,<br>u₂ = (1, 1, −2) / √6,<br>v = (1, 1, 1) / √3.</p><p>With two observations and three parameters, set</p><p class="equation">X = √2 [u₁ᵀ; u₂ᵀ / √κ], &nbsp; y = √2 (1, 1 / √κ).</p><p>Thus the plotted objective is exactly</p><p class="equation">f(w) = ¼ ‖Xw − y‖²<br>= ½ [(a − 1)² + (b − 1)² / κ].</p><p>The solution set is <span class="math">{u₁ + u₂ + cv : c ∈ ℝ}</span>. Its minimum-norm point is <span class="math">w† = u₁ + u₂</span>, with norm <span class="math">√2</span>. Changing κ changes X and y together, preserving this solution set.</p></div>
+    <div><p><b>Fast convergence without strong convexity.</b> The loss is flat along v, but</p><p class="equation">½ ‖∇f(w)‖² = ½ [(a − 1)² + (b − 1)² / κ²]<br>≥ (1 / κ) f(w).</p><p>Hence μ = 1/κ and L = 1. For 0 &lt; η ≤ 1/L, the usual PL theorem gives <span class="math">f(w<sub>t</sub>) ≤ (1 − ημ)<sup>t</sup>f(w₀)</span>. “Linear convergence” means geometric decay per iteration.</p><p><b>Implicit bias.</b> The GD recurrence separates into three coordinates:</p><p class="equation">a<sub>t</sub> = 1 + (1 − η)<sup>t</sup>(a₀ − 1),<br>b<sub>t</sub> = 1 + (1 − η/κ)<sup>t</sup>(b₀ − 1),<br>c<sub>t</sub> = c₀.</p><p>The first two coordinates converge to 1; the null-space coordinate never changes. Therefore <span class="math">w<sub>∞</sub> = X†y + Π<sub>ker X</sub>w₀</span>. Zero initialization selects the minimum Euclidean norm. A nonzero null component selects a different interpolator with identical training predictions.</p></div>
+  </div><p class="hint">The curves use the exact GD recurrence above. Thin, faint paths show the upcoming trajectory; solid paths show the iterations already taken. The PL bound is shown over the full horizon. Points below 10⁻⁸ are clipped to the plot floor, while exact zero has a separate row. A run that starts with zero loss has no normalized curve. Minimum norm is a statement among interpolators; it is not a general guarantee of better test error.</p></details>
+  <p class="sr-only" id="announcement" aria-live="polite"></p>
+  <noscript>Please enable JavaScript to run this interactive demo.</noscript>
+</main>
+
+<script id="least-squares-model">
+// Pure model functions shared by the visualization and the numerical checks.
+const LeastSquaresModel = (() => {
+  const u1=[1/Math.sqrt(2),-1/Math.sqrt(2),0];
+  const u2=[1/Math.sqrt(6),1/Math.sqrt(6),-2/Math.sqrt(6)];
+  const v=[1/Math.sqrt(3),1/Math.sqrt(3),1/Math.sqrt(3)];
+  const power=(q,t)=>t===0?1:Math.pow(q,t);
+  const errors=(start,t,kappa,eta)=>[(start[0]-1)*power(1-eta,t),(start[1]-1)*power(1-eta/kappa,t)];
+  const point=(start,t,kappa,eta)=>{const e=errors(start,t,kappa,eta);return [1+e[0],1+e[1],start[2]];};
+  const loss=(start,t,kappa,eta)=>{const [a,b]=errors(start,t,kappa,eta);return (a*a+b*b/kappa)/2;};
+  // Log-sum-exp keeps tiny positive losses distinct from mathematical zero.
+  const logLoss=(start,t,kappa,eta)=>{
+    const term=(delta,q,weight)=>delta===0||(t>0&&q===0)?-Infinity:2*Math.log(Math.abs(delta))+(t===0?0:2*t*Math.log(q))-Math.log(weight);
+    const a=term(start[0]-1,1-eta,1),b=term(start[1]-1,1-eta/kappa,kappa),m=Math.max(a,b);
+    return m===-Infinity?-Infinity:m+Math.log(Math.exp(a-m)+Math.exp(b-m))-Math.log(2);
+  };
+  const logBound=(t,kappa,eta)=>t===0?0:t*Math.log1p(-eta/kappa);
+  const weights=([a,b,c])=>u1.map((x,i)=>a*x+b*u2[i]+c*v[i]);
+  const horizon=(kappa,eta)=>Math.max(8,Math.ceil(Math.log(1e-5)/Math.log1p(-eta/kappa))||8);
+  const bound=(t,kappa,eta)=>power(1-eta/kappa,t);
+  return {u1,u2,v,point,loss,logLoss,logBound,weights,horizon,bound};
+})();
+</script>
+<script>
+(() => {
+  'use strict';
+  const M=LeastSquaresModel, $=id=>document.getElementById(id), NS='http://www.w3.org/2000/svg';
+  const state={kappa:12,eta:1,start:[0,0,2],t:0,running:false,speed:1,azimuth:325,elevation:24,zoom:1};
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const format=(x,d=3)=>(Math.abs(x)<0.5*Math.pow(10,-d)?0:x).toFixed(d).replace('-','−');
+  const smallLog=x=>{
+    if(x===-Infinity)return '0 · exact';
+    if(x>=Math.log(.001))return format(Math.exp(x));
+    let exponent=Math.floor(x/Math.LN10),mantissa=Math.exp(x-exponent*Math.LN10);
+    if(Number(mantissa.toFixed(2))>=10){mantissa/=10;exponent++;}
+    return mantissa.toFixed(2)+'e'+String(exponent).replace('-','−');
+  };
+  const tuple=p=>'('+p.map(x=>format(x,3)).join(', ')+')';
+  const initial=run=>run===0?[0,0,0]:state.start;
+  const at=(run,t)=>M.point(initial(run),t,state.kappa,state.eta);
+  const loss=(run,t)=>M.loss(initial(run),t,state.kappa,state.eta);
+  const logLoss=(run,t)=>M.logLoss(initial(run),t,state.kappa,state.eta);
+  const horizon=()=>M.horizon(state.kappa,state.eta);
+  const colors=()=>{const s=getComputedStyle(document.documentElement);return Object.fromEntries(['text','muted','surface','axis','grid','zero','shift','gold'].map(k=>[k,s.getPropertyValue('--'+k).trim()]));};
+  let frame=0,lastTime=0,carry=0;
+  const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
+  if(reducedMotion.matches) {state.speed=.25;$('speed').value='0.25';}
+  function announce(message) {$('announcement').textContent=message;}
+  function syncControls() {
+    $('kappa').value=Math.round(100*Math.log10(state.kappa));$('kappa-number').value=state.kappa;
+    $('kappa').setAttribute('aria-valuetext','Condition number '+state.kappa);
+    $('eta').value=state.eta;$('eta-value').textContent=format(state.eta,2)+' / L';
+    $('null-start').value=state.start[2];$('null-value').textContent=format(state.start[2],2);
+    $('a-start').value=state.start[0];$('b-start').value=state.start[1];
+    $('iteration').max=horizon();$('horizon-value').textContent='of '+horizon().toLocaleString();
+    $('azimuth').value=state.azimuth;$('elevation').value=state.elevation;$('zoom').value=state.zoom;
+  }
+  function stop() {state.running=false;cancelAnimationFrame(frame);lastTime=0;carry=0;$('play').textContent='Run both';}
+  function reset() {stop();state.t=0;syncControls();draw();}
+  function sampleTimes(end,limit=260) {
+    const times=new Set([0,Math.min(1,end),end]);
+    const count=Math.min(end,limit);for(let i=1;i<count;i++)times.add(Math.round(i*end/count));
+    return [...times].sort((a,b)=>a-b);
+  }
+  function drawGeometry() {
+    const canvas=$('geometry'),W=canvas.clientWidth,H=canvas.clientHeight;
+    if(!W||!H)return;
+    const dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);
+    const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);
+    const c=colors(),theta=state.azimuth*Math.PI/180,phi=state.elevation*Math.PI/180;
+    const ca=Math.cos(theta),sa=Math.sin(theta),ce=Math.cos(phi),se=Math.sin(phi);
+    const lo=Math.min(-.65,state.start[0]-.6,state.start[1]-.6),hi=Math.max(2,state.start[0]+.6,state.start[1]+.6);
+    const center=(lo+hi)/2,cz=Math.max(2.8,Math.abs(state.start[2])+.6);
+    const raw=([a,b,z])=>{a-=center;b-=center;return [ca*a-sa*b,se*(sa*a+ca*b)-ce*z,ce*(sa*a+ca*b)+se*z];};
+    const corners=[];for(const a of [lo,hi])for(const b of [lo,hi])for(const z of [-cz,cz])corners.push(raw([a,b,z]));
+    const minX=Math.min(...corners.map(p=>p[0])),maxX=Math.max(...corners.map(p=>p[0]));
+    const minY=Math.min(...corners.map(p=>p[1])),maxY=Math.max(...corners.map(p=>p[1]));
+    const scale=.86*state.zoom*Math.min((W-75)/(maxX-minX),(H-65)/(maxY-minY));
+    const project=p=>{const r=raw(p);return [W/2+scale*(r[0]-(minX+maxX)/2),H/2+scale*(r[1]-(minY+maxY)/2),r[2]];};
+    const line=(points,color,width=1,dash=[],alpha=1)=>{ctx.globalAlpha=alpha;ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;};
+    const label=(text,p,color=c.muted,dx=0,dy=0)=>{ctx.font='11px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';const x=clamp(p[0]+dx,ctx.measureText(text).width/2+4,W-ctx.measureText(text).width/2-4),y=clamp(p[1]+dy,12,H-12);ctx.fillStyle=c.surface;ctx.globalAlpha=.9;ctx.fillRect(x-ctx.measureText(text).width/2-3,y-8,ctx.measureText(text).width+6,16);ctx.globalAlpha=1;ctx.fillStyle=color;ctx.fillText(text,x,y);};
+    const plane=[[lo,lo,0],[hi,lo,0],[hi,hi,0],[lo,hi,0]].map(project);
+    ctx.fillStyle=c.axis;ctx.globalAlpha=.07;ctx.beginPath();plane.forEach((p,i)=>i?ctx.lineTo(...p.slice(0,2)):ctx.moveTo(...p.slice(0,2)));ctx.closePath();ctx.fill();ctx.globalAlpha=1;
+    for(let q=Math.ceil(lo);q<=hi;q++) {line([[q,lo,0],[q,hi,0]].map(project),c.grid);line([[lo,q,0],[hi,q,0]].map(project),c.grid);}
+    // Elliptical contours in the row plane show loss geometry, not a height surface.
+    for(const level of [.025,.10,.25]) {const pts=[];for(let i=0;i<=100;i++){const a=2*Math.PI*i/100,p=[1+Math.sqrt(2*level)*Math.cos(a),1+Math.sqrt(2*level*state.kappa)*Math.sin(a),0];if(p[0]>=lo&&p[0]<=hi&&p[1]>=lo&&p[1]<=hi)pts.push(project(p));else if(pts.length){line(pts,c.axis,1,[],.35);pts.length=0;}}if(pts.length)line(pts,c.axis,1,[],.35);}
+    line([[lo,0,0],[hi+.1,0,0]].map(project),c.axis,1.2);
+    line([[0,lo,0],[0,hi+.1,0]].map(project),c.axis,1.2);
+    line([[0,0,-cz],[0,0,cz]].map(project),c.axis,1,[3,4],.65);
+    label('a · row',project([hi+.1,0,0]),c.muted,17,12);label('b · row',project([0,hi+.1,0]),c.muted,-8,16);
+    label('c · null',project([0,0,cz]),c.muted,-6,-15);
+    line([[1,1,-cz],[1,1,cz]].map(project),c.gold,2.5);
+    label('Xw = y',project([1,1,-cz]),c.gold,4,18);
+    for(const z of [-2,0,2]) {const p=project([0,0,z]);line([[p[0]-3,p[1]],[p[0]+3,p[1]]],c.axis);label(String(z).replace('-','−'),p,c.muted,-13,0);}
+    const primitives=[];
+    for(const run of [0,1]) {
+      const color=run===0?c.zero:c.shift;
+      // A connector emphasizes that the selected limit is the orthogonal projection of its start.
+      if(run===1 && state.start[2]!==0)line([state.start,[1,1,state.start[2]]].map(project),c.shift,.8,[2,5],.25);
+      for(const future of [true,false]) {
+        const pts=sampleTimes(future?horizon():state.t).map(t=>project(at(run,t)));
+        for(let i=1;i<pts.length;i++)primitives.push({points:[pts[i-1],pts[i]],depth:(pts[i-1][2]+pts[i][2])/2,color,width:future?1.7:run===0?4:2.5,alpha:future?.18:1,dash:run===1?[5,3]:[]});
+      }
+      for(const kind of ['limit','start','current']) {const p=project(kind==='limit'?[1,1,initial(run)[2]]:at(run,kind==='start'?0:state.t));primitives.push({p,depth:p[2]+.001,color,kind,run});}
+    }
+    primitives.sort((a,b)=>a.depth-b.depth);
+    for(const item of primitives) {
+      if(item.points){line(item.points,item.color,item.width,item.dash,item.alpha);continue;}
+      const [x,y]=item.p,r=item.kind==='limit'?7:item.kind==='start'?5.5:item.run===0?5:3.8;
+      ctx.beginPath();if(item.kind==='limit'){ctx.moveTo(x,y-r);ctx.lineTo(x+r,y);ctx.lineTo(x,y+r);ctx.lineTo(x-r,y);ctx.closePath();}else ctx.arc(x,y,r,0,2*Math.PI);
+      ctx.fillStyle=item.kind==='current'?item.color:c.surface;ctx.fill();ctx.strokeStyle=item.color;ctx.lineWidth=item.kind==='limit'?2:1.8;ctx.stroke();
+    }
+    label('w†',project([1,1,0]),c.gold,17,10);
+    if(state.start[2]!==0)label('w† + c₀v',project([1,1,state.start[2]]),c.shift,39,-4);
+    canvas.setAttribute('aria-label',`Parameter paths at iteration ${state.t}. Zero start has coordinates ${tuple(at(0,state.t))}. Chosen start has coordinates ${tuple(at(1,state.t))}. Their limits are (1, 1, 0) and (1, 1, ${state.start[2]}).`);
+  }
+  function drawChart() {
+    const svg=$('loss-chart'),W=Math.max(310,svg.clientWidth),H=svg.clientHeight||365,c=colors();
+    svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+    for(const child of [...svg.children])if(!['title','desc'].includes(child.tagName))child.remove();
+    const add=(tag,attrs,text)=>{const el=document.createElementNS(NS,tag);for(const [k,v]of Object.entries(attrs))el.setAttribute(k,v);if(text!==undefined)el.textContent=text;svg.appendChild(el);return el;};
+    const left=52,right=W-16,top=30,bottom=H-73,zeroY=H-47,T=horizon();
+    const x=t=>left+(right-left)*t/T;
+    const y=logRatio=>logRatio===-Infinity?zeroY:top+clamp(-logRatio/Math.LN10,0,8)/8*(bottom-top);
+    const text=(str,px,py,anchor='middle',size=11)=>add('text',{x:px,y:py,fill:c.muted,'font-size':size,'font-family':'system-ui','text-anchor':anchor},str);
+    text('Relative loss  f(wₜ) / f(w₀)',left,14,'start');
+    for(let e=0;e<=8;e+=2){const py=top+e/8*(bottom-top);add('line',{x1:left,y1:py,x2:right,y2:py,stroke:c.grid});text(e===0?'1':'10'+['','⁻¹','⁻²','⁻³','⁻⁴','⁻⁵','⁻⁶','⁻⁷','⁻⁸'][e],left-9,py+4,'end');}
+    add('line',{x1:left,y1:zeroY,x2:right,y2:zeroY,stroke:c.grid,'stroke-dasharray':'2 4'});text('0 exact',left-8,zeroY+4,'end',10);
+    for(let i=0;i<=4;i++){const t=Math.round(i*T/4),px=x(t);add('line',{x1:px,y1:top,x2:px,y2:bottom,stroke:c.grid});text(t.toLocaleString(),px,H-23);}
+    text('Iteration t',(left+right)/2,H-4);
+    add('line',{x1:x(state.t),y1:top,x2:x(state.t),y2:zeroY,stroke:c.axis,'stroke-dasharray':'2 4'});
+    const path=(value,end,color,width,dash,alpha)=>{const d=sampleTimes(end,350).map((t,i)=>`${i?'L':'M'}${x(t)},${y(value(t))}`).join(' ');add('path',{d,fill:'none',stroke:color,'stroke-width':width,'stroke-dasharray':dash,opacity:alpha,'stroke-linejoin':'round'});};
+    path(t=>M.logBound(t,state.kappa,state.eta),T,c.axis,1.7,'6 5',1);
+    for(const run of [0,1]) {
+      const logF0=logLoss(run,0);if(logF0===-Infinity)continue;
+      const color=run===0?c.zero:c.shift,value=t=>logLoss(run,t)-logF0;
+      path(value,T,color,run===0?4:2.3,run===0?'':'5 4',.14);
+      path(value,state.t,color,run===0?4:2.3,run===0?'':'5 4',1);
+      add('circle',{cx:x(state.t),cy:y(value(state.t)),r:run===0?5:3,fill:color,stroke:c.surface,'stroke-width':1});
+    }
+  }
+  function draw() {
+    $('iteration').value=state.t;$('iteration-value').textContent=state.t.toLocaleString();
+    $('step').disabled=state.t>=horizon();$('play').textContent=state.running?'Pause':state.t>=horizon()?'Replay':'Run both';
+    const sameRow=state.start[0]===0&&state.start[1]===0,optimal=loss(1,0)===0;
+    $('observation').textContent=optimal?'The chosen start already fits the data: its gradient is zero, so GD leaves it exactly where it is.':sameRow?(state.start[2]===0?'Both starts are zero: the trajectories and losses coincide, and both approach the minimum-norm interpolator.':'Same predictions and loss at every step. Different parameter limits: the null-space shift survives forever.'):'Changing the row-space initialization can change the loss trajectory. The final row-space component is unchanged; the initial null-space component survives.';
+    $('rate-value').textContent=format(1-state.eta/state.kappa,4);
+    $('chart-note').textContent=(optimal?'Chosen start: f(w₀) = 0, so its normalized curve is undefined and omitted. ':sameRow?'The teal and dashed rose loss curves coincide. ':'Each curve is normalized by its own initial loss. ')+'Values below 10⁻⁸ sit on the plot floor; exact zero is shown separately.';
+    $('chosen-initial').textContent=`(a₀, b₀, c₀) = ${tuple(state.start)}`;
+    for(const run of [0,1]) {const prefix=run===0?'zero':'chosen',p=at(run,state.t),end=[1,1,initial(run)[2]];
+      $(prefix+'-loss').textContent=smallLog(logLoss(run,state.t));$(prefix+'-norm').textContent=format(Math.hypot(...p));$(prefix+'-null').textContent=format(p[2],2)+' · fixed';
+      $(prefix+'-current').textContent='Current w = '+tuple(M.weights(p));$(prefix+'-limit').textContent='Limit w = '+tuple(M.weights(end))+'; norm '+format(Math.hypot(...end));
+    }
+    $('lesson').textContent=`At convergence: ‖w∞‖² = ‖w†‖² + c₀² = 2 + ${format(state.start[2]**2,2)} for the chosen start. ${state.start[2]===0?'Both runs select the minimum-norm interpolator.':'Its extra norm is invisible to the training loss.'} A smaller norm before interpolation does not contradict minimum norm among exact fits.`;
+    drawGeometry();drawChart();
+  }
+  function animate(time) {
+    if(!state.running)return;
+    if(lastTime){carry+=(time-lastTime)*state.speed*Math.max(12,horizon()/18)/1000;const step=Math.floor(carry);if(step){state.t=Math.min(horizon(),state.t+step);carry-=step;if(state.t>=horizon())stop();draw();}}
+    lastTime=time;if(state.running)frame=requestAnimationFrame(animate);
+  }
+  $('play').addEventListener('click',()=>{if(state.running){stop();draw();return;}if(state.t>=horizon())state.t=0;state.running=true;lastTime=0;carry=0;draw();frame=requestAnimationFrame(animate);});
+  $('step').addEventListener('click',()=>{stop();state.t=Math.min(horizon(),state.t+1);draw();});
+  $('restart').addEventListener('click',()=>{reset();announce('Both runs restarted.');});
+  $('iteration').addEventListener('input',e=>{stop();state.t=Number(e.target.value);draw();});
+  $('speed').addEventListener('change',e=>{state.speed=Number(e.target.value);});
+  $('kappa').addEventListener('input',e=>{state.kappa=Math.round(10**(Number(e.target.value)/100));reset();});
+  $('kappa-number').addEventListener('change',e=>{const v=Number(e.target.value);if(Number.isFinite(v))state.kappa=clamp(Math.round(v),1,100);reset();});
+  $('eta').addEventListener('input',e=>{state.eta=Number(e.target.value);reset();});
+  $('null-start').addEventListener('input',e=>{state.start[2]=Number(e.target.value);reset();});
+  for(const [id,index]of [['a-start',0],['b-start',1]])$(id).addEventListener('change',e=>{const v=Number(e.target.value);if(Number.isFinite(v))state.start[index]=clamp(v,-2,3);reset();});
+  $('null-preset').addEventListener('click',()=>{state.start[0]=state.start[1]=0;reset();announce('Only the null-space initialization differs.');});
+  $('fit-preset').addEventListener('click',()=>{state.start[0]=state.start[1]=1;reset();announce('Chosen start already interpolates the observations.');});
+  const resetView=()=>{state.azimuth=325;state.elevation=24;state.zoom=1;syncControls();drawGeometry();};
+  $('reset-view').addEventListener('click',resetView);
+  $('defaults').addEventListener('click',()=>{Object.assign(state,{kappa:12,eta:1,start:[0,0,2]});resetView();reset();});
+  for(const id of ['azimuth','elevation','zoom'])$(id).addEventListener('input',e=>{state[id]=Number(e.target.value);drawGeometry();});
+  let drag=null;
+  $('geometry').addEventListener('pointerdown',e=>{if(e.button!==0)return;drag={x:e.clientX,y:e.clientY,az:state.azimuth,el:state.elevation};e.currentTarget.setPointerCapture(e.pointerId);});
+  $('geometry').addEventListener('pointermove',e=>{if(!drag)return;state.azimuth=(drag.az+(e.clientX-drag.x)*.45+720)%360;state.elevation=clamp(drag.el+(e.clientY-drag.y)*.25,10,75);$('azimuth').value=state.azimuth;$('elevation').value=state.elevation;drawGeometry();});
+  const endDrag=()=>{drag=null;};for(const type of ['pointerup','pointercancel','lostpointercapture'])$('geometry').addEventListener(type,endDrag);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){stop();draw();}});
+  let resizeFrame=0;new ResizeObserver(()=>{cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(()=>{drawGeometry();drawChart();});}).observe(document.querySelector('.panels'));
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw);
+  syncControls();draw();
+})();
+</script>
+</body>
+</html>
