@@ -1,0 +1,715 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Four foldable experiments: gradient descent zigzags, heavy-ball momentum helps on quadratics, momentum can fail, and restarted accelerated gradient descent.">
+  <title>Momentum, acceleration, and restarts · Optimization for Data Science</title>
+  <style>
+    :root { color-scheme: light dark; --bg:#f7f6f2; --surface:#ffffff; --text:#23262b; --muted:#616771; --line:#deded8; --grid:#eaeae5; --axis:#a5a8a9; --soft:#f0efe9; --focus:#146eaa;
+      --gd:#14796e; --hb:#9c3455; --agd:#426db3; --rst:#a36400; --band:rgba(156,52,85,.11); --region:rgba(66,109,179,.08); }
+    @media (prefers-color-scheme:dark) { :root { --bg:#181b20; --surface:#20242a; --text:#eeeef0; --muted:#b2b7c0; --line:#3f444b; --grid:#30353d; --axis:#717985; --soft:#2b3037; --focus:#82c9fa;
+      --gd:#69cbb9; --hb:#f494af; --agd:#91b8ff; --rst:#eac17a; --band:rgba(244,148,175,.13); --region:rgba(145,184,255,.10); } }
+    * { box-sizing:border-box; }
+    [hidden] { display:none !important; }
+    body { margin:0; background:var(--bg); color:var(--text); font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    main { max-width:1180px; margin:0 auto; padding:34px 28px 48px; }
+    .eyebrow { margin:0 0 9px; font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); font-weight:650; }
+    h1 { margin:0; font-size:clamp(25px,3.4vw,38px); line-height:1.2; font-weight:650; letter-spacing:-.035em; }
+    .intro { margin:11px 0 22px; max-width:860px; color:var(--muted); }
+    .math { font-family:Georgia,"Times New Roman",serif; }
+    details.stage { margin:0 0 16px; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+    details.stage > summary { list-style:none; cursor:pointer; padding:18px 22px; display:flex; align-items:center; gap:14px; font-size:19px; font-weight:620; letter-spacing:-.015em; }
+    details.stage > summary::-webkit-details-marker { display:none; }
+    details.stage > summary::after { content:"Show"; margin-left:auto; font-size:12px; font-weight:550; color:var(--muted); border:1px solid var(--line); border-radius:20px; padding:2px 11px; }
+    details.stage[open] > summary::after { content:"Hide"; }
+    .num { flex:0 0 auto; width:30px; height:30px; border-radius:50%; display:grid; place-items:center; background:var(--text); color:var(--surface); font-size:14px; font-weight:650; }
+    .stage-body { padding:0 22px 22px; }
+    .lede { margin:0 0 16px; max-width:900px; }
+    .controls { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:16px 34px; align-items:end; padding:16px 18px; border:1px solid var(--line); background:var(--soft); border-radius:12px; }
+    .control-label { display:flex; justify-content:space-between; align-items:baseline; gap:12px; font-size:14px; font-weight:600; }
+    .control-label output { font-weight:600; font-variant-numeric:tabular-nums; }
+    input,select,button { font:inherit; color:inherit; }
+    select { border:1px solid var(--line); background:var(--surface); border-radius:6px; padding:5px 8px; min-height:36px; }
+    input[type=range] { width:100%; margin:9px 0 0; accent-color:var(--text); cursor:pointer; min-height:20px; }
+    .range-ticks { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); }
+    .presets { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+    button { border:1px solid var(--line); background:var(--surface); border-radius:7px; padding:7px 12px; cursor:pointer; font-size:14px; font-weight:550; min-height:38px; }
+    button.primary { background:var(--text); color:var(--surface); border-color:var(--text); min-width:92px; }
+    button.small { font-size:12px; padding:4px 10px; min-height:30px; }
+    button[aria-pressed=true] { border-color:var(--text); box-shadow:inset 0 0 0 1px var(--text); }
+    button:hover { filter:brightness(.94); }
+    :focus-visible { outline:3px solid var(--focus); outline-offset:3px; }
+    .transport { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .speed-label { display:flex; align-items:center; gap:6px; margin-left:auto; font-size:12px; color:var(--muted); }
+    .timeline { grid-column:1/-1; }
+    .timeline-label { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; }
+    .timeline-label b { color:var(--text); font-size:14px; }
+    .panels { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:16px; }
+    .panel { min-width:0; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--surface); }
+    .panel h3 { margin:0; padding:13px 16px 0; font-size:15px; font-weight:600; }
+    .panel .sub { margin:2px 16px 0; font-size:12px; color:var(--muted); }
+    canvas { display:block; width:100%; }
+    canvas.land { aspect-ratio:1.2; cursor:crosshair; touch-action:manipulation; }
+    canvas.chart { aspect-ratio:1.2; }
+    .legend { display:flex; flex-wrap:wrap; gap:6px 16px; font-size:12px; color:var(--muted); padding:8px 16px 12px; }
+    .legend label, .legend span { display:inline-flex; align-items:center; gap:6px; }
+    .legend label { cursor:pointer; }
+    .legend input { margin:0; accent-color:var(--text); }
+    .sw { display:inline-block; width:20px; height:0; border-top:2.5px solid; }
+    .sw.dash { border-top-style:dashed; border-top-width:2px; }
+    .sw.gd { border-color:var(--gd); } .sw.hb { border-color:var(--hb); } .sw.agd { border-color:var(--agd); } .sw.rst { border-color:var(--rst); }
+    .readout { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px 18px; margin-top:14px; padding:12px 16px; border:1px solid var(--line); border-radius:12px; font-size:12px; color:var(--muted); }
+    .readout strong { display:block; font-size:18px; font-weight:620; color:var(--text); font-variant-numeric:tabular-nums; }
+    .try { margin:16px 0 0; font-size:14px; }
+    .try ol { margin:6px 0 0; padding-left:20px; }
+    .try li { margin:3px 0; }
+    details.setup { margin-top:14px; border-top:1px solid var(--line); padding-top:10px; font-size:14px; }
+    details.setup summary { cursor:pointer; font-weight:600; font-size:13px; color:var(--muted); }
+    details.setup p { margin:8px 0 0; }
+    .eq { font-family:Georgia,"Times New Roman",serif; font-size:17px; }
+    .strip-wrap { margin-top:8px; }
+    canvas.strip { height:16px; border-radius:4px; }
+    .strip-note { font-size:11px; color:var(--muted); margin-top:3px; }
+    .note { font-size:12px; color:var(--muted); margin:10px 2px 0; }
+    noscript { display:block; padding:20px; color:var(--hb); }
+    @media(max-width:760px) { main { padding:24px 16px; } .stage-body { padding:0 14px 16px; } details.stage > summary { padding:15px 14px; font-size:17px; } .panels { grid-template-columns:1fr; } }
+    @media(max-width:520px) { .speed-label { margin-left:0; } button,select { min-height:44px; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Optimization for Data Science · Lecture 5 demo</p>
+    <h1>Momentum, acceleration, and restarts</h1>
+    <p class="intro">Four short experiments, meant to be opened one at a time. Every method uses one gradient per iteration. Nothing runs until you press <b>Run</b>; click a landscape to move the starting point.</p>
+  </header>
+  <noscript>This demo needs JavaScript.</noscript>
+
+  <!-- ===================== 1. Zigzag ===================== -->
+  <details class="stage" id="s1">
+    <summary><span class="num">1</span>Gradient descent zigzags</summary>
+    <div class="stage-body">
+      <p class="lede">On an ill-conditioned quadratic, gradient descent bounces between the steep walls of a narrow valley while it creeps along the valley floor. The step size cannot fix both directions at once.</p>
+      <div class="controls">
+        <div>
+          <div class="control-label"><span>Condition number <span class="math">κ = L/μ</span></span><output id="s1-kappa-out"></output></div>
+          <input type="range" id="s1-kappa" min="0" max="3" step="0.01" value="1.6" aria-label="Condition number, logarithmic">
+          <div class="range-ticks"><span>1</span><span>10</span><span>100</span><span>1000</span></div>
+        </div>
+        <div>
+          <div class="control-label"><span>Step size <span class="math">η</span> (in units of 1/L)</span><output id="s1-eta-out"></output></div>
+          <input type="range" id="s1-eta" min="0.05" max="1.99" step="0.01" value="1.95" aria-label="Step size times L">
+          <div class="presets"><button class="small" id="s1-best" aria-pressed="true">η = 2/(L+μ)</button><button class="small" id="s1-one" aria-pressed="false">η = 1/L</button></div>
+        </div>
+        <div class="transport"><button class="primary" id="s1-run">Run</button><button id="s1-step">Step</button><button id="s1-reset">Restart</button>
+          <label class="speed-label">Speed <select id="s1-speed"><option value="0.25">¼×</option><option value="1" selected>1×</option><option value="4">4×</option></select></label></div>
+        <div class="timeline"><div class="timeline-label"><span>Iteration</span><b id="s1-iter-value">k = 0</b></div><input type="range" id="s1-iter" min="0" max="10" value="0" aria-label="Iteration"></div>
+      </div>
+      <div class="panels">
+        <div class="panel"><h3>Parameter space</h3><p class="sub">Contours of f. Click to choose the starting point.</p><canvas class="land" id="s1-land" role="img" aria-label="Contour plot with the gradient descent path"></canvas>
+          <div class="legend"><span><i class="sw gd"></i>gradient descent</span></div></div>
+        <div class="panel"><h3>Objective</h3><p class="sub">f(w<sub>k</sub>)/f(w<sub>0</sub>), logarithmic scale</p><canvas class="chart" id="s1-chart" role="img" aria-label="Convergence plot"></canvas>
+          <div class="legend"><span><i class="sw gd"></i>gradient descent</span><span><i class="sw gd dash"></i>worst-mode bound q<sup>2k</sup></span></div></div>
+      </div>
+      <div class="readout">
+        <div>Steep direction, per step<strong id="s1-steep"></strong></div>
+        <div>Flat direction, per step<strong id="s1-flat"></strong></div>
+        <div>Iterations to f/f<sub>0</sub> ≤ 10⁻⁶<strong id="s1-count"></strong></div>
+      </div>
+      <div class="try"><b>Try this</b><ol>
+        <li>Run with the default step. The steep coordinate is multiplied by 1 − ηL &lt; 0 at every step, so it flips sign: that is the zigzag. The flat coordinate barely shrinks.</li>
+        <li>Press <i>η = 1/L</i>. The zigzag disappears after one step, but progress along the valley is no faster.</li>
+        <li>Increase κ. The number of iterations grows like κ, whatever the step size.</li>
+      </ol></div>
+      <details class="setup"><summary>Mathematical setup</summary>
+        <p class="eq">f(w) = ½(L⟨u<sub>1</sub>,w⟩² + μ⟨u<sub>2</sub>,w⟩²),&nbsp; L = 1,&nbsp; μ = 1/κ,&nbsp; w⋆ = 0,&nbsp; w<sub>k+1</sub> = w<sub>k</sub> − η∇f(w<sub>k</sub>).</p>
+        <p>The valley floor u<sub>2</sub> is tilted by 25°. Each eigen-coordinate evolves on its own: the coordinate with curvature λ is multiplied by 1 − ηλ at every step. The dashed line is q<sup>2k</sup> with q = max{|1 − ηL|, |1 − ημ|}. The best fixed step, 2/(L+μ), makes both factors equal to (κ−1)/(κ+1).</p>
+      </details>
+    </div>
+  </details>
+
+  <!-- ===================== 2. Momentum ===================== -->
+  <details class="stage" id="s2">
+    <summary><span class="num">2</span>Momentum helps on quadratics</summary>
+    <div class="stage-body">
+      <p class="lede">Heavy ball adds a fraction of the previous step, <span class="math">w<sub>k+1</sub> = w<sub>k</sub> − η∇f(w<sub>k</sub>) + β(w<sub>k</sub> − w<sub>k−1</sub>)</span>. Along the valley the steps point the same way and accumulate. Polyak's choice also takes long steps (η close to 4/L), so the first few iterations overshoot across the valley before the momentum damps the oscillation.</p>
+      <div class="controls">
+        <div>
+          <div class="control-label"><span>Condition number <span class="math">κ</span></span><output id="s2-kappa-out"></output></div>
+          <input type="range" id="s2-kappa" min="0" max="3" step="0.01" value="1.6" aria-label="Condition number, logarithmic">
+          <div class="range-ticks"><span>1</span><span>10</span><span>100</span><span>1000</span></div>
+        </div>
+        <div>
+          <div class="control-label"><span>Momentum <span class="math">β</span></span><output id="s2-beta-out"></output></div>
+          <input type="range" id="s2-beta" min="0" max="0.99" step="0.01" value="0.5" aria-label="Momentum parameter">
+          <div class="control-label" style="margin-top:8px"><span>Heavy-ball step <span class="math">η</span> (units of 1/L)</span><output id="s2-eta-out"></output></div>
+          <input type="range" id="s2-eta" min="0.05" max="3.95" step="0.01" value="2" aria-label="Heavy-ball step size times L">
+          <div class="presets"><button class="small" id="s2-polyak" aria-pressed="true">Polyak's choice</button></div>
+        </div>
+        <div class="transport"><button class="primary" id="s2-run">Run</button><button id="s2-step">Step</button><button id="s2-reset">Restart</button>
+          <label class="speed-label">Speed <select id="s2-speed"><option value="0.25">¼×</option><option value="1" selected>1×</option><option value="4">4×</option></select></label></div>
+        <div class="timeline"><div class="timeline-label"><span>Iteration</span><b id="s2-iter-value">k = 0</b></div><input type="range" id="s2-iter" min="0" max="10" value="0" aria-label="Iteration"></div>
+      </div>
+      <div class="panels">
+        <div class="panel"><h3>Parameter space</h3><p class="sub">Same quadratic and start for both methods. Click to move the start.</p><canvas class="land" id="s2-land" role="img" aria-label="Contour plot with gradient descent and heavy-ball paths"></canvas>
+          <div class="legend"><span><i class="sw gd"></i>GD, η = 2/(L+μ)</span><span><i class="sw hb"></i>heavy ball</span></div></div>
+        <div class="panel"><h3>Objective</h3><p class="sub">f(w<sub>k</sub>)/f(w<sub>0</sub>), logarithmic scale</p><canvas class="chart" id="s2-chart" role="img" aria-label="Convergence plot"></canvas>
+          <div class="legend"><span><i class="sw gd"></i>GD</span><span><i class="sw hb"></i>heavy ball</span><span><i class="sw gd dash"></i><i class="sw hb dash"></i>asymptotic rates</span></div></div>
+      </div>
+      <div class="readout">
+        <div>GD rate per step<strong id="s2-rate-gd"></strong></div>
+        <div>Heavy-ball rate per step<strong id="s2-rate-hb"></strong></div>
+        <div>Iterations to 10⁻⁶: GD<strong id="s2-count-gd"></strong></div>
+        <div>Iterations to 10⁻⁶: heavy ball<strong id="s2-count-hb"></strong></div>
+      </div>
+      <div class="try"><b>Try this</b><ol>
+        <li>Run with Polyak's choice. Watch the first few steps overshoot across the valley (f even increases briefly), then settle. Heavy ball still needs about √κ times fewer iterations than GD.</li>
+        <li>Increase κ to 1000. GD's count grows like κ, heavy ball's like √κ.</li>
+        <li>Move β away from Polyak's value. Too little momentum and progress along the valley slows; too much and the path overshoots and spirals.</li>
+      </ol></div>
+      <details class="setup"><summary>Mathematical setup</summary>
+        <p>Same quadratic as in Section 1. Polyak's choice is η = 4/(√L+√μ)² and β = ρ², with ρ = (√κ−1)/(√κ+1), the rate from the Lecture 4 lower bound. On a quadratic each eigen-coordinate follows c<sub>k+1</sub> = (1+β−ηλ)c<sub>k</sub> − βc<sub>k−1</sub>; with Polyak's choice every root has modulus ρ. The dashed lines are r<sup>2k</sup>, where r is the largest root modulus over λ ∈ [μ, L]: (κ−1)/(κ+1) for GD and ρ for heavy ball with Polyak's choice. Heavy ball's actual curve can lag its dashed line by a polynomial factor (double roots at λ = μ and λ = L).</p>
+      </details>
+    </div>
+  </details>
+
+  <!-- ===================== 3. Failure ===================== -->
+  <details class="stage" id="s3">
+    <summary><span class="num">3</span>…but momentum can fail</summary>
+    <div class="stage-body">
+      <p class="lede">This function is 1-strongly convex and 25-smooth: it has curvature 25 everywhere except on [1, 2], where its curvature is 1. Heavy ball uses Polyak's parameters for κ = 25, which are optimal on every quadratic in this class. From many starting points it never converges.</p>
+      <div class="controls">
+        <div>
+          <div class="control-label"><span>Starting point <span class="math">w<sub>0</sub> = w<sub>−1</sub></span></span><output id="s3-start-out"></output></div>
+          <input type="range" id="s3-start" min="-5" max="5" step="0.01" value="3.3" aria-label="Starting point">
+          <div class="strip-wrap"><canvas class="strip" id="s3-strip" role="img" aria-label="Starting points from which heavy ball fails"></canvas>
+            <div class="strip-note" id="s3-strip-note"></div></div>
+        </div>
+        <div class="transport"><button class="primary" id="s3-run">Run</button><button id="s3-step">Step</button><button id="s3-reset">Restart</button>
+          <label class="speed-label">Speed <select id="s3-speed"><option value="0.25">¼×</option><option value="1" selected>1×</option><option value="4">4×</option></select></label></div>
+        <div class="timeline"><div class="timeline-label"><span>Iteration</span><b id="s3-iter-value">k = 0</b></div><input type="range" id="s3-iter" min="0" max="10" value="0" aria-label="Iteration"></div>
+      </div>
+      <div class="panels">
+        <div class="panel"><h3>The function and the iterates</h3><p class="sub">Shaded: the interval [1, 2] with curvature 1.</p><canvas class="land" id="s3-land" style="cursor:default" role="img" aria-label="Graph of the function with heavy-ball iterates"></canvas>
+          <div class="legend"><span><i class="sw hb"></i>heavy ball</span><span><i class="sw gd"></i>gradient descent, η = 1/L</span></div></div>
+        <div class="panel"><h3>Distance to the minimizer</h3><p class="sub">|w<sub>k</sub> − w⋆|, logarithmic scale; exact zeros drawn at the bottom</p><canvas class="chart" id="s3-chart" role="img" aria-label="Distance to the minimizer"></canvas>
+          <div class="legend"><span><i class="sw hb"></i>heavy ball</span><span><i class="sw gd"></i>gradient descent</span></div></div>
+      </div>
+      <div class="readout">
+        <div>Heavy ball (3,000 iterations)<strong id="s3-hb"></strong></div>
+        <div>Gradient descent<strong id="s3-gd"></strong></div>
+      </div>
+      <div class="try"><b>Try this</b><ol>
+        <li>Run from w<sub>0</sub> = 3.3. After a few iterations heavy ball settles into a cycle of three points and stays there.</li>
+        <li>Drag the starting point. The strip shows every start in [−5, 5] from which heavy ball fails.</li>
+        <li>Gradient descent with step 1/L converges from every start. Here it even lands on w⋆ within two steps.</li>
+      </ol></div>
+      <p class="note">This is not a matter of tuning. Goujaud, Taylor, and Dieuleveut proved that for every choice of η and β, heavy ball is either not accelerated even on quadratics, or fails to converge on some smooth strongly convex function.</p>
+      <details class="setup"><summary>Mathematical setup</summary>
+        <p class="eq">f′(w) = 25w for w &lt; 1,&nbsp; w + 24 for 1 ≤ w &lt; 2,&nbsp; 25w − 24 for w ≥ 2;&nbsp; f(0) = 0.</p>
+        <p>Heavy ball uses η = 4/(√25+1)² = 1/9 and β = ρ² = 4/9. The example is from Lessard, Recht, and Packard (SIAM J. Optim., 2016, Section 4.6).</p>
+      </details>
+    </div>
+  </details>
+
+  <!-- ===================== 4. Restarted AGD ===================== -->
+  <details class="stage" id="s4">
+    <summary><span class="num">4</span>Restarted accelerated gradient descent</summary>
+    <div class="stage-body">
+      <p class="lede">Nesterov's method evaluates the gradient after the momentum step, and its momentum grows like k/(k+3). Restarting it every N iterations throws its momentum away and starts again from the current point. When heavy ball converges it can be faster still; the difference is the guarantee.</p>
+      <div class="controls">
+        <div>
+          <div class="control-label"><span>Problem</span></div>
+          <select id="s4-problem" style="width:100%;margin-top:8px">
+            <option value="kink">Section 3's function, made ill-conditioned (κ = 100)</option>
+            <option value="logistic">Logistic regression (strongly convex only locally)</option>
+          </select>
+          <div class="control-label" style="margin-top:12px"><span>Restart rule</span></div>
+          <select id="s4-rule" style="width:100%;margin-top:8px">
+            <option value="fixed">Every N iterations</option>
+            <option value="adaptive">Whenever f increases (adaptive)</option>
+          </select>
+        </div>
+        <div id="s4-N-box">
+          <div class="control-label"><span>Restart period <span class="math">N</span></span><output id="s4-N-out"></output></div>
+          <input type="range" id="s4-N" min="2" max="200" step="1" value="50" aria-label="Restart period">
+          <div class="range-ticks"><span>2</span><span>200</span></div>
+        </div>
+        <div class="transport"><button class="primary" id="s4-run">Run</button><button id="s4-step">Step</button><button id="s4-reset">Restart</button>
+          <label class="speed-label">Speed <select id="s4-speed"><option value="0.25">¼×</option><option value="1" selected>1×</option><option value="4">4×</option></select></label></div>
+        <div class="timeline"><div class="timeline-label"><span>Iteration</span><b id="s4-iter-value">k = 0</b></div><input type="range" id="s4-iter" min="0" max="10" value="0" aria-label="Iteration"></div>
+      </div>
+      <div class="panels">
+        <div class="panel"><h3>Parameter space</h3><p class="sub" id="s4-land-sub"></p><canvas class="land" id="s4-land" role="img" aria-label="Contour plot with four method paths"></canvas>
+          <div class="legend" id="s4-legend">
+            <label><input type="checkbox" data-m="gd" checked><i class="sw gd"></i>GD</label>
+            <label><input type="checkbox" data-m="hb" checked><i class="sw hb"></i>heavy ball</label>
+            <label><input type="checkbox" data-m="agd" checked><i class="sw agd"></i>AGD</label>
+            <label><input type="checkbox" data-m="rst" checked><i class="sw rst"></i>restarted AGD</label>
+          </div></div>
+        <div class="panel"><h3>Objective gap</h3><p class="sub">(f(w<sub>k</sub>) − f⋆)/(f(w<sub>0</sub>) − f⋆), logarithmic scale; ticks mark restarts</p><canvas class="chart" id="s4-chart" role="img" aria-label="Convergence plot of four methods"></canvas>
+          <div class="legend"><span><i class="sw gd"></i>GD</span><span><i class="sw hb"></i>heavy ball</span><span><i class="sw agd"></i>AGD</span><span><i class="sw rst"></i>restarted AGD</span></div></div>
+      </div>
+      <div class="readout">
+        <div>GD: iterations to 10⁻⁸<strong id="s4-c-gd"></strong></div>
+        <div>Heavy ball<strong id="s4-c-hb"></strong></div>
+        <div>AGD<strong id="s4-c-agd"></strong></div>
+        <div>Restarted AGD<strong id="s4-c-rst"></strong></div>
+      </div>
+      <p class="note" id="s4-constants"></p>
+      <div class="try"><b>Try this</b><ol>
+        <li>Run from the default start. Heavy ball is trapped in a cycle, GD crawls, AGD converges with ripples, and restarted AGD converges linearly.</li>
+        <li>Click a start whose w₁ lies outside the red strip. There heavy ball converges, and it is the fastest. Above the red strip it never converges.</li>
+        <li>Change N, or switch to the adaptive rule, and compare the restarted curve with AGD.</li>
+        <li>Switch to logistic regression. Its curvature is only local, and AGD's iterates stay in a ball around the solution.</li>
+      </ol></div>
+      <details class="setup"><summary>Mathematical setup</summary>
+        <p class="eq">AGD: w<sub>k+1</sub> = y<sub>k</sub> − ∇f(y<sub>k</sub>)/L,&nbsp; y<sub>k+1</sub> = w<sub>k+1</sub> + β<sub>k</sub>(w<sub>k+1</sub> − w<sub>k</sub>),&nbsp; β<sub>k</sub> = (λ<sub>k+1</sub> − 1)/λ<sub>k+2</sub>,&nbsp; λ<sub>k+1</sub> = (1 + √(1+4λ<sub>k</sub>²))/2.</p>
+        <p>A restart sets y = w and λ back to its initial value, so the momentum starts again from zero. GD uses η = 1/L. Heavy ball uses Polyak's choice for the stated μ and L. In the first problem, f(w) = φ(w<sub>1</sub>) + w<sub>2</sub>²/8, where φ is Section 3's function: L = 25 and μ = 1/4. Because f is separable, heavy ball fails exactly when w<sub>1</sub> starts in the red strip. In logistic regression (80 points in ℝ², no intercept), L = λ<sub>max</sub>(XᵀX)/(4n), and μ is the smallest Hessian eigenvalue at the solution: f is strongly convex near w⋆ but not globally.</p>
+      </details>
+    </div>
+  </details>
+</main>
+
+<script>
+'use strict';
+(() => {
+const $ = id => document.getElementById(id);
+const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const SUP = { '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹' };
+const pow10 = e => e === 0 ? '1' : '10' + String(e).split('').map(c => SUP[c]).join('');
+const fix = (x, d = 3) => Number.isFinite(x) ? x.toFixed(d) : '—';
+
+/* ---------- canvas utilities ---------- */
+function fit(canvas) {
+  const r = canvas.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, r.width, r.height);
+  return { ctx, W: r.width, H: r.height };
+}
+function seg(ctx, x1, y1, x2, y2) { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); }
+function dot(ctx, x, y, r, fill, ring) {
+  ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.fillStyle = fill; ctx.fill();
+  if (ring) { ctx.lineWidth = 1.5; ctx.strokeStyle = ring; ctx.stroke(); }
+}
+function niceStep(range, target) {
+  const raw = range / target, p = 10 ** Math.floor(Math.log10(raw)), m = raw / p;
+  return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p;
+}
+
+/* Logarithmic convergence chart. series: {values, color, visible, ticks}; refs: {color, r, c} draws c * r^k dashed. */
+function drawLogChart(canvas, o) {
+  const { ctx, W, H } = fit(canvas);
+  const m = { l: 54, r: 14, t: 14, b: 40 }, pw = W - m.l - m.r, ph = H - m.t - m.b;
+  if (pw < 20 || ph < 20) return;
+  const lo = Math.log10(o.ymin), hi = Math.log10(o.ymax);
+  const X = k => m.l + pw * k / o.K;
+  const Y = v => m.t + ph * (hi - Math.log10(Math.min(o.ymax, Math.max(o.ymin, v)))) / (hi - lo);
+  const grid = cssv('--grid'), axis = cssv('--axis'), muted = cssv('--muted'), text = cssv('--text');
+  ctx.font = '11px system-ui, sans-serif'; ctx.lineWidth = 1;
+  const every = Math.max(1, Math.ceil((hi - lo) / 7));
+  ctx.textBaseline = 'middle'; ctx.textAlign = 'right';
+  for (let e = Math.ceil(lo); e <= Math.floor(hi); e++) {
+    const y = Y(10 ** e); ctx.strokeStyle = grid; seg(ctx, m.l, y, m.l + pw, y);
+    if ((Math.floor(hi) - e) % every === 0) { ctx.fillStyle = muted; ctx.fillText(pow10(e), m.l - 6, y); }
+  }
+  const step = niceStep(o.K, 5); ctx.textBaseline = 'top'; ctx.textAlign = 'center';
+  for (let k = 0; k <= o.K + 1e-9; k += step) { const x = X(k); ctx.strokeStyle = grid; seg(ctx, x, m.t, x, m.t + ph); ctx.fillStyle = muted; ctx.fillText(String(Math.round(k)), x, m.t + ph + 5); }
+  ctx.strokeStyle = axis; seg(ctx, m.l, m.t, m.l, m.t + ph); seg(ctx, m.l, m.t + ph, m.l + pw, m.t + ph);
+  ctx.fillStyle = text; ctx.font = 'italic 13px Georgia, serif'; ctx.fillText('iteration k', m.l + pw / 2, m.t + ph + 21);
+  ctx.save(); ctx.beginPath(); ctx.rect(m.l, m.t, pw, ph); ctx.clip();
+  for (const ref of o.refs || []) {
+    if (!(ref.r > 0)) continue;
+    ctx.strokeStyle = ref.color; ctx.globalAlpha = .55; ctx.lineWidth = 1.6; ctx.setLineDash([6, 5]); ctx.beginPath();
+    const n = 80;
+    for (let i = 0; i <= n; i++) { const k = o.K * i / n, v = (ref.c || 1) * Math.exp(k * Math.log(ref.r)); const x = X(k), y = Y(v); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+  }
+  for (const s of o.series) {
+    if (s.visible === false) continue;
+    const n = Math.min(o.t, s.values.length - 1);
+    ctx.strokeStyle = s.color; ctx.lineWidth = s.width || 2; ctx.globalAlpha = s.alpha || 1; ctx.beginPath();
+    let pen = false;
+    for (let k = 0; k <= n; k++) {
+      const v = s.values[k];
+      if (!Number.isFinite(v)) { pen = false; continue; }
+      const x = X(k), y = Y(v); pen ? ctx.lineTo(x, y) : ctx.moveTo(x, y); pen = true;
+    }
+    ctx.stroke(); ctx.globalAlpha = 1;
+    if (s.ticks) { ctx.fillStyle = s.color; for (const k of s.ticks) if (k <= o.t) { const x = X(k); ctx.beginPath(); ctx.moveTo(x, m.t + ph); ctx.lineTo(x - 3.5, m.t + ph - 7); ctx.lineTo(x + 3.5, m.t + ph - 7); ctx.fill(); } }
+    if (n >= 0 && Number.isFinite(s.values[n])) dot(ctx, X(n), Y(s.values[n]), 3.6, s.color, cssv('--surface'));
+  }
+  ctx.restore();
+  ctx.strokeStyle = muted; ctx.globalAlpha = .35; seg(ctx, X(o.t), m.t, X(o.t), m.t + ph); ctx.globalAlpha = 1;
+}
+
+/* Contours by marching squares, in world coordinates. */
+const MS = { 1: [[3, 0]], 2: [[0, 1]], 3: [[3, 1]], 4: [[1, 2]], 5: [[3, 0], [1, 2]], 6: [[0, 2]], 7: [[3, 2]], 8: [[3, 2]], 9: [[0, 2]], 10: [[0, 1], [2, 3]], 11: [[1, 2]], 12: [[3, 1]], 13: [[0, 1]], 14: [[3, 0]] };
+function contours(f, b, levels, nx = 150, ny = 130) {
+  const xs = i => b.x0 + (b.x1 - b.x0) * i / nx, ys = j => b.y0 + (b.y1 - b.y0) * j / ny;
+  const V = new Float64Array((nx + 1) * (ny + 1));
+  for (let j = 0; j <= ny; j++) for (let i = 0; i <= nx; i++) V[j * (nx + 1) + i] = f([xs(i), ys(j)]);
+  const segs = [];
+  for (const c of levels) for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+    const v00 = V[j * (nx + 1) + i], v10 = V[j * (nx + 1) + i + 1], v11 = V[(j + 1) * (nx + 1) + i + 1], v01 = V[(j + 1) * (nx + 1) + i];
+    const idx = (v00 > c) | ((v10 > c) << 1) | ((v11 > c) << 2) | ((v01 > c) << 3);
+    if (!MS[idx]) continue;
+    const x0 = xs(i), x1 = xs(i + 1), y0 = ys(j), y1 = ys(j + 1);
+    const edge = e => {
+      if (e === 0) return [x0 + (x1 - x0) * (c - v00) / (v10 - v00), y0];
+      if (e === 1) return [x1, y0 + (y1 - y0) * (c - v10) / (v11 - v10)];
+      if (e === 2) return [x0 + (x1 - x0) * (c - v01) / (v11 - v01), y1];
+      return [x0, y0 + (y1 - y0) * (c - v00) / (v01 - v00)];
+    };
+    for (const [a, bb] of MS[idx]) { const p = edge(a), q = edge(bb); segs.push(p[0], p[1], q[0], q[1]); }
+  }
+  return { segs, maxV: V.reduce((a, v) => Math.max(a, v), -Infinity) };
+}
+function geometricLevels(fstar, fmax, n = 15, r = 0.56) { const out = []; for (let j = 1; j <= n; j++) out.push(fstar + (fmax - fstar) * r ** j); return out; }
+
+/* Landscape panel with equal scaling. */
+function drawLandscape(canvas, view, cont, paths, extra) {
+  const { ctx, W, H } = fit(canvas);
+  const pad = 10, sx0 = (W - 2 * pad) / (view.x1 - view.x0), sy0 = (H - 2 * pad) / (view.y1 - view.y0);
+  const sx = extra.equal === false ? sx0 : Math.min(sx0, sy0), sy = extra.equal === false ? sy0 : sx;
+  const ox = (W - sx * (view.x1 - view.x0)) / 2, oy = (H - sy * (view.y1 - view.y0)) / 2;
+  const P = (x, y) => [ox + sx * (x - view.x0), H - oy - sy * (y - view.y0)];
+  canvas._inv = (px, py) => [view.x0 + (px - ox) / sx, view.y0 + (H - oy - py) / sy];
+  ctx.save(); ctx.beginPath(); ctx.rect(ox, oy, sx * (view.x1 - view.x0), sy * (view.y1 - view.y0)); ctx.clip();
+  ctx.strokeStyle = cssv('--axis'); ctx.globalAlpha = .7; ctx.lineWidth = 1; ctx.beginPath();
+  const S = cont.segs;
+  for (let i = 0; i < S.length; i += 4) { const p = P(S[i], S[i + 1]), q = P(S[i + 2], S[i + 3]); ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); }
+  ctx.stroke(); ctx.globalAlpha = 1;
+  const surface = cssv('--surface');
+  for (const pth of paths) {
+    if (pth.visible === false) continue;
+    const n = Math.min(extra.t, pth.W.length - 1);
+    ctx.strokeStyle = pth.color; ctx.lineWidth = pth.width || 1.7; ctx.globalAlpha = pth.alpha || .9; ctx.beginPath();
+    for (let k = 0; k <= n; k++) { const w = pth.W[k]; if (!w) break; const p = P(w[0], w[1]); k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); }
+    ctx.stroke(); ctx.globalAlpha = 1;
+    for (let k = Math.max(1, n - 60); k < n; k++) { const w = pth.W[k]; if (!w) break; const p = P(w[0], w[1]); dot(ctx, p[0], p[1], 2, pth.color); }
+    const w = pth.W[n]; if (w) { const p = P(w[0], w[1]); dot(ctx, p[0], p[1], 5, pth.color, surface); }
+  }
+  if (extra && extra.wstar) { const p = P(extra.wstar[0], extra.wstar[1]); ctx.strokeStyle = cssv('--text'); ctx.lineWidth = 1.8; seg(ctx, p[0] - 7, p[1], p[0] + 7, p[1]); seg(ctx, p[0], p[1] - 7, p[0], p[1] + 7); }
+  if (extra.bands) {
+    const yb = H - oy; ctx.fillStyle = cssv('--grid'); ctx.fillRect(ox, yb - 9, sx * (view.x1 - view.x0), 9);
+    ctx.fillStyle = cssv('--hb'); for (const [a, b] of extra.bands) { const p = P(a, 0), q = P(b, 0); ctx.fillRect(p[0], yb - 9, Math.max(1, q[0] - p[0]), 9); }
+    const ps = P(extra.w0[0], 0); ctx.fillStyle = cssv('--text'); ctx.fillRect(ps[0] - 1, yb - 12, 2, 12);
+  }
+  const w0 = extra.w0, p0 = P(w0[0], w0[1]);
+  ctx.strokeStyle = cssv('--text'); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(p0[0], p0[1], 6.5, 0, 2 * Math.PI); ctx.stroke();
+  ctx.restore();
+}
+function fitView(b, aspect) {
+  const w = b.x1 - b.x0, h = b.y1 - b.y0, cx = (b.x0 + b.x1) / 2, cy = (b.y0 + b.y1) / 2;
+  return w / h > aspect ? { x0: b.x0, x1: b.x1, y0: cy - w / aspect / 2, y1: cy + w / aspect / 2 } : { x0: cx - h * aspect / 2, x1: cx + h * aspect / 2, y0: b.y0, y1: b.y1 };
+}
+
+/* ---------- methods (one gradient per iteration) ---------- */
+const BIG = 1e7;
+const ok = w => w.every(x => Number.isFinite(x) && Math.abs(x) < BIG);
+function runGD(P, w0, K, eta) {
+  let w = w0.slice(); const W = [w.slice()], F = [P.f(w)];
+  for (let k = 0; k < K; k++) { const g = P.grad(w); w = w.map((x, i) => x - eta * g[i]); if (!ok(w)) break; W.push(w.slice()); F.push(P.f(w)); }
+  return { W, F };
+}
+function runHB(P, w0, K, eta, beta) {
+  let w = w0.slice(), wp = w0.slice(); const W = [w.slice()], F = [P.f(w)];
+  for (let k = 0; k < K; k++) { const g = P.grad(w), wn = w.map((x, i) => x - eta * g[i] + beta * (x - wp[i])); wp = w; w = wn; if (!ok(w)) break; W.push(w.slice()); F.push(P.f(w)); }
+  return { W, F };
+}
+function runAGD(P, w0, K, rule) {
+  let w = w0.slice(), z = w0.slice(), A = 0, j = 0; const W = [w.slice()], F = [P.f(w)], restarts = [];
+  for (let k = 0; k < K; k++) {
+    const a = (1 + Math.sqrt(1 + 4 * P.L * A)) / (2 * P.L), An = A + a;
+    const y = w.map((x, i) => (A * x + a * z[i]) / An), g = P.grad(y);
+    const wn = y.map((x, i) => x - g[i] / P.L);
+    z = z.map((x, i) => x - a * g[i]); A = An; j++;
+    const fw = P.f(wn);
+    if ((rule.type === 'fixed' && j >= rule.N) || (rule.type === 'adaptive' && fw > F[F.length - 1])) { z = wn.slice(); A = 0; j = 0; restarts.push(k + 1); }
+    w = wn; W.push(w.slice()); F.push(fw);
+  }
+  return { W, F, restarts };
+}
+const firstBelow = (vals, tol) => { for (let k = 0; k < vals.length; k++) if (vals[k] <= tol) return k; return null; };
+
+/* ---------- transport (run / step / scrub) ---------- */
+class Transport {
+  constructor(prefix, draw) {
+    this.t = 0; this.K = 1; this.playing = false; this.draw = draw; this.acc = 0;
+    this.runBtn = $(prefix + '-run'); this.speed = $(prefix + '-speed'); this.slider = $(prefix + '-iter'); this.label = $(prefix + '-iter-value');
+    if (reducedMotion.matches) this.speed.value = '0.25';
+    this.runBtn.addEventListener('click', () => this.playing ? this.pause() : this.play());
+    $(prefix + '-step').addEventListener('click', () => { this.pause(); this.set(this.t + 1); });
+    $(prefix + '-reset').addEventListener('click', () => { this.pause(); this.set(0); });
+    this.slider.addEventListener('input', () => { this.pause(); this.set(+this.slider.value); });
+    this.frame = this.frame.bind(this);
+  }
+  setHorizon(K) { this.K = K; this.slider.max = K; this.set(Math.min(this.t, K)); }
+  set(t) { this.t = Math.max(0, Math.min(this.K, Math.round(t))); this.slider.value = this.t; this.label.textContent = 'k = ' + this.t; this.draw(); if (this.playing && this.t >= this.K) this.pause(); }
+  play() { if (this.t >= this.K) this.set(0); this.playing = true; this.runBtn.textContent = 'Pause'; this.last = performance.now(); this.acc = 0; requestAnimationFrame(this.frame); }
+  pause() { this.playing = false; this.runBtn.textContent = 'Run'; }
+  frame(now) {
+    if (!this.playing) return;
+    const dt = Math.min(0.1, (now - this.last) / 1000); this.last = now;
+    this.acc += dt * Math.max(5, this.K / 12) * parseFloat(this.speed.value);
+    const n = Math.floor(this.acc);
+    if (n > 0) { this.acc -= n; this.set(this.t + n); }
+    if (this.playing) requestAnimationFrame(this.frame);
+  }
+}
+
+/* ---------- quadratic of Sections 1-2 ---------- */
+const TH = 25 * Math.PI / 180, U_FLAT = [Math.cos(TH), Math.sin(TH)], U_STEEP = [-Math.sin(TH), Math.cos(TH)];
+function quadratic(kappa) {
+  const L = 1, mu = 1 / kappa;
+  return {
+    L, mu, fstar: 0,
+    f: w => { const s = U_STEEP[0] * w[0] + U_STEEP[1] * w[1], c = U_FLAT[0] * w[0] + U_FLAT[1] * w[1]; return 0.5 * (L * s * s + mu * c * c); },
+    grad: w => { const s = U_STEEP[0] * w[0] + U_STEEP[1] * w[1], c = U_FLAT[0] * w[0] + U_FLAT[1] * w[1]; return [L * s * U_STEEP[0] + mu * c * U_FLAT[0], L * s * U_STEEP[1] + mu * c * U_FLAT[1]]; }
+  };
+}
+const QBOX = fitView({ x0: -5, x1: 5, y0: -4.2, y1: 4.2 }, 1.2);
+const QSTART = [-3.6 * U_FLAT[0] + 1.3 * U_STEEP[0], -3.6 * U_FLAT[1] + 1.3 * U_STEEP[1]];
+const kappaFrom = v => Math.round(10 ** v);
+const contourCache = new Map();
+function quadContours(kappa) {
+  const key = 'q' + kappa;
+  if (!contourCache.has(key)) { const P = quadratic(kappa), pre = contours(P.f, QBOX, []); contourCache.set(key, contours(P.f, QBOX, geometricLevels(0, pre.maxV, 16, 0.55))); }
+  return contourCache.get(key);
+}
+function onLandClick(canvas, cb) {
+  canvas.addEventListener('click', e => { if (!canvas._inv) return; const r = canvas.getBoundingClientRect(); cb(canvas._inv(e.clientX - r.left, e.clientY - r.top)); });
+}
+
+/* ===== Section 1 ===== */
+const s1 = { mode: 'best', start: QSTART.slice() };
+s1.compute = () => {
+  const kappa = kappaFrom(+$('s1-kappa').value), P = quadratic(kappa);
+  if (s1.mode === 'best') $('s1-eta').value = (2 / (1 + 1 / kappa)).toFixed(2);
+  if (s1.mode === 'one') $('s1-eta').value = '1';
+  const eta = s1.mode === 'best' ? 2 / (P.L + P.mu) : s1.mode === 'one' ? 1 : +$('s1-eta').value;
+  $('s1-kappa-out').textContent = kappa; $('s1-eta-out').textContent = 'η = ' + fix(eta, 3) + '/L';
+  $('s1-best').setAttribute('aria-pressed', s1.mode === 'best'); $('s1-one').setAttribute('aria-pressed', s1.mode === 'one');
+  const steep = 1 - eta * P.L, flat = 1 - eta * P.mu, q = Math.max(Math.abs(steep), Math.abs(flat));
+  const K = Math.min(1500, Math.max(30, Math.ceil(Math.log(1e-8) / (2 * Math.log(Math.max(q, 1e-9))))));
+  s1.P = P; s1.kappa = kappa; s1.q = q; s1.gd = runGD(P, s1.start, K, eta);
+  const f0 = s1.gd.F[0]; s1.rel = s1.gd.F.map(v => f0 > 0 ? v / f0 : 0);
+  $('s1-steep').textContent = '× ' + fix(steep, 3) + (steep < 0 ? '  (flips sign)' : '');
+  $('s1-flat').textContent = '× ' + fix(flat, 4);
+  const c = firstBelow(s1.rel, 1e-6); $('s1-count').textContent = c === null ? '> ' + K : c;
+  s1.tr.setHorizon(K);
+};
+s1.draw = () => {
+  if (!s1.P) return;
+  drawLandscape($('s1-land'), QBOX, quadContours(s1.kappa), [{ W: s1.gd.W, color: cssv('--gd') }], { t: s1.tr.t, w0: s1.start, wstar: [0, 0] });
+  drawLogChart($('s1-chart'), { K: s1.tr.K, t: s1.tr.t, ymin: 1e-10, ymax: 3, series: [{ values: s1.rel, color: cssv('--gd') }], refs: [{ color: cssv('--gd'), r: s1.q * s1.q }] });
+};
+s1.tr = new Transport('s1', s1.draw);
+$('s1-kappa').addEventListener('input', () => { s1.tr.pause(); s1.tr.t = 0; s1.compute(); });
+$('s1-eta').addEventListener('input', () => { s1.mode = 'custom'; s1.tr.pause(); s1.tr.t = 0; s1.compute(); });
+$('s1-best').addEventListener('click', () => { s1.mode = 'best'; s1.tr.pause(); s1.tr.t = 0; s1.compute(); });
+$('s1-one').addEventListener('click', () => { s1.mode = 'one'; s1.tr.pause(); s1.tr.t = 0; s1.compute(); });
+onLandClick($('s1-land'), w => { s1.start = w; s1.tr.pause(); s1.tr.t = 0; s1.compute(); });
+
+/* ===== Section 2 ===== */
+function hbRate(eta, beta, mu, L) {
+  let r = 0;
+  for (let i = 0; i <= 400; i++) {
+    const lam = mu + (L - mu) * i / 400, b = 1 + beta - eta * lam, disc = b * b - 4 * beta;
+    const m = disc >= 0 ? Math.max(Math.abs((b + Math.sqrt(disc)) / 2), Math.abs((b - Math.sqrt(disc)) / 2)) : Math.sqrt(beta);
+    r = Math.max(r, m);
+  }
+  return r;
+}
+const S2START = [-3.8 * U_FLAT[0] + 0.5 * U_STEEP[0], -3.8 * U_FLAT[1] + 0.5 * U_STEEP[1]];
+const s2 = { polyak: true, start: S2START.slice() };
+s2.compute = () => {
+  const kappa = kappaFrom(+$('s2-kappa').value), P = quadratic(kappa), rho = (Math.sqrt(kappa) - 1) / (Math.sqrt(kappa) + 1);
+  if (s2.polyak) { $('s2-beta').value = (rho * rho).toFixed(2); $('s2-eta').value = (4 / (1 + Math.sqrt(P.mu)) ** 2).toFixed(2); }
+  const beta = s2.polyak ? rho * rho : +$('s2-beta').value, eta = s2.polyak ? 4 / (Math.sqrt(P.L) + Math.sqrt(P.mu)) ** 2 : +$('s2-eta').value;
+  $('s2-kappa-out').textContent = kappa; $('s2-beta-out').textContent = fix(beta, 3); $('s2-eta-out').textContent = fix(eta, 3) + '/L';
+  $('s2-polyak').setAttribute('aria-pressed', s2.polyak);
+  const qgd = (kappa - 1) / (kappa + 1), rhb = hbRate(eta, beta, P.mu, P.L);
+  const K = Math.min(1500, Math.max(30, Math.ceil(Math.log(1e-7) / (2 * Math.log(Math.max(Math.min(qgd, 0.999999), 1e-9))))));
+  s2.P = P; s2.kappa = kappa; s2.qgd = qgd; s2.rhb = rhb;
+  s2.gd = runGD(P, s2.start, K, 2 / (P.L + P.mu)); s2.hb = runHB(P, s2.start, K, eta, beta);
+  const f0 = s2.gd.F[0];
+  s2.relgd = s2.gd.F.map(v => v / f0); s2.relhb = s2.hb.F.map(v => v / f0);
+  $('s2-rate-gd').textContent = '× ' + fix(qgd, 4);
+  $('s2-rate-hb').textContent = rhb >= 1 ? 'unstable (' + fix(rhb, 3) + ')' : '× ' + fix(rhb, 4);
+  const cg = firstBelow(s2.relgd, 1e-6), ch = firstBelow(s2.relhb, 1e-6);
+  $('s2-count-gd').textContent = cg === null ? '> ' + K : cg;
+  $('s2-count-hb').textContent = ch === null ? (s2.hb.F.length <= K ? 'diverges' : '> ' + K) : ch + (cg !== null && ch > 0 ? '  (' + (cg / ch).toFixed(1) + '× fewer)' : '');
+  s2.tr.setHorizon(K);
+};
+s2.draw = () => {
+  if (!s2.P) return;
+  drawLandscape($('s2-land'), QBOX, quadContours(s2.kappa), [{ W: s2.gd.W, color: cssv('--gd') }, { W: s2.hb.W, color: cssv('--hb') }], { t: s2.tr.t, w0: s2.start, wstar: [0, 0] });
+  drawLogChart($('s2-chart'), { K: s2.tr.K, t: s2.tr.t, ymin: 1e-10, ymax: 30,
+    series: [{ values: s2.relgd, color: cssv('--gd') }, { values: s2.relhb, color: cssv('--hb') }],
+    refs: [{ color: cssv('--gd'), r: s2.qgd * s2.qgd }, { color: cssv('--hb'), r: s2.rhb < 1 ? s2.rhb * s2.rhb : 0 }] });
+};
+s2.tr = new Transport('s2', s2.draw);
+$('s2-kappa').addEventListener('input', () => { s2.tr.pause(); s2.tr.t = 0; s2.compute(); });
+for (const id of ['s2-beta', 's2-eta']) $(id).addEventListener('input', () => { s2.polyak = false; s2.tr.pause(); s2.tr.t = 0; s2.compute(); });
+$('s2-polyak').addEventListener('click', () => { s2.polyak = true; s2.tr.pause(); s2.tr.t = 0; s2.compute(); });
+onLandClick($('s2-land'), w => { s2.start = w; s2.tr.pause(); s2.tr.t = 0; s2.compute(); });
+
+/* ===== Section 3: Lessard-Recht-Packard ===== */
+const phi = x => x < 1 ? 12.5 * x * x : x < 2 ? 0.5 * x * x + 24 * x - 12 : 12.5 * x * x - 24 * x + 36;
+const dphi = x => x < 1 ? 25 * x : x < 2 ? x + 24 : 25 * x - 24;
+const LRP = { L: 25, mu: 1, fstar: 0, f: w => phi(w[0]), grad: w => [dphi(w[0])] };
+const HB3 = { eta: 1 / 9, beta: 4 / 9 };
+function hb1dFinal(x0, eta, beta, d, K = 3000) { let x = x0, xp = x0; const tail = []; for (let k = 0; k < K; k++) { const xn = x - eta * d(x) + beta * (x - xp); xp = x; x = xn; if (k >= K - 6) tail.push(x); } return { x, tail }; }
+const s3 = {};
+s3.strip = (() => { const n = 1001, fails = new Uint8Array(n); for (let i = 0; i < n; i++) fails[i] = Math.abs(hb1dFinal(-5 + 10 * i / (n - 1), HB3.eta, HB3.beta, dphi).x) > 1e-6 ? 1 : 0; return fails; })();
+$('s3-strip-note').textContent = 'Red: starts in [−5, 5] from which heavy ball has not converged after 3,000 iterations (' + Math.round(100 * s3.strip.reduce((a, b) => a + b, 0) / s3.strip.length) + '% of them).';
+s3.drawStrip = () => {
+  const { ctx, W, H } = fit($('s3-strip')); const n = s3.strip.length;
+  ctx.fillStyle = cssv('--grid'); ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = cssv('--hb');
+  for (let i = 0; i < n; i++) if (s3.strip[i]) ctx.fillRect(W * i / n, 0, Math.ceil(W / n) + 0.5, H);
+  const x0 = +$('s3-start').value, px = W * (x0 + 5) / 10;
+  ctx.fillStyle = cssv('--text'); ctx.fillRect(px - 1, 0, 2, H);
+};
+s3.compute = () => {
+  const x0 = +$('s3-start').value, K = 60;
+  $('s3-start-out').textContent = x0.toFixed(2);
+  s3.hb = runHB(LRP, [x0], K, HB3.eta, HB3.beta); s3.gd = runGD(LRP, [x0], K, 1 / 25);
+  s3.dhb = s3.hb.W.map(w => Math.abs(w[0])); s3.dgd = s3.gd.W.map(w => Math.abs(w[0]));
+  const fin = hb1dFinal(x0, HB3.eta, HB3.beta, dphi);
+  if (Math.abs(fin.x) <= 1e-6) $('s3-hb').textContent = 'converges';
+  else {
+    const t = fin.tail, periodic = Math.abs(t[5] - t[2]) < 1e-6;
+    $('s3-hb').textContent = periodic ? 'cycles: ' + t.slice(3).map(v => v.toFixed(2)).join(', ') : 'does not converge';
+  }
+  const g = firstBelow(s3.dgd, 1e-12); $('s3-gd').textContent = g === null ? 'converges' : 'reaches w⋆ in ' + g + (g === 1 ? ' step' : ' steps');
+  s3.tr.setHorizon(K); s3.drawStrip();
+};
+s3.draw = () => {
+  if (!s3.hb) return;
+  const c = $('s3-land'), { ctx, W, H } = fit(c), t = s3.tr.t;
+  const x0v = -3.6, x1v = 4.2, ymax = Math.max(60, phi(+$('s3-start').value) * 1.08);
+  const m = { l: 40, r: 12, t: 12, b: 30 }, pw = W - m.l - m.r, ph = H - m.t - m.b;
+  const X = x => m.l + pw * (x - x0v) / (x1v - x0v), Y = y => m.t + ph * (1 - y / ymax);
+  ctx.fillStyle = cssv('--region'); ctx.fillRect(X(1), m.t, X(2) - X(1), ph);
+  ctx.strokeStyle = cssv('--grid'); ctx.lineWidth = 1; ctx.font = '11px system-ui, sans-serif'; ctx.fillStyle = cssv('--muted'); ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  for (let x = -3; x <= 4; x++) { seg(ctx, X(x), m.t, X(x), m.t + ph); ctx.fillText(String(x), X(x), m.t + ph + 5); }
+  ctx.strokeStyle = cssv('--axis'); seg(ctx, m.l, m.t + ph, m.l + pw, m.t + ph);
+  ctx.fillText('curvature 1', X(1.5), m.t + 4);
+  ctx.save(); ctx.beginPath(); ctx.rect(m.l, m.t, pw, ph); ctx.clip();
+  ctx.strokeStyle = cssv('--text'); ctx.lineWidth = 2; ctx.beginPath();
+  for (let i = 0; i <= 400; i++) { const x = x0v + (x1v - x0v) * i / 400, p = [X(x), Y(phi(x))]; i ? ctx.lineTo(...p) : ctx.moveTo(...p); }
+  ctx.stroke();
+  const surface = cssv('--surface');
+  for (const [run, col] of [[s3.gd, cssv('--gd')], [s3.hb, cssv('--hb')]]) {
+    const n = Math.min(t, run.W.length - 1);
+    ctx.strokeStyle = col; ctx.lineWidth = 1.3; ctx.globalAlpha = .55; ctx.beginPath();
+    for (let k = Math.max(0, n - 12); k <= n; k++) { const x = run.W[k][0], p = [X(x), Y(phi(x))]; k > Math.max(0, n - 12) ? ctx.lineTo(...p) : ctx.moveTo(...p); }
+    ctx.stroke(); ctx.globalAlpha = 1;
+    for (let k = Math.max(0, n - 12); k < n; k++) { const x = run.W[k][0]; dot(ctx, X(x), Y(phi(x)), 2.6, col); }
+    const x = run.W[n][0]; dot(ctx, X(x), Y(phi(x)), 5.5, col, surface);
+  }
+  ctx.restore();
+  ctx.fillStyle = cssv('--text'); ctx.font = 'italic 13px Georgia, serif'; ctx.textAlign = 'center'; ctx.fillText('w', m.l + pw / 2, m.t + ph + 17);
+  drawLogChart($('s3-chart'), { K: s3.tr.K, t, ymin: 1e-14, ymax: 20, series: [{ values: s3.dhb, color: cssv('--hb') }, { values: s3.dgd, color: cssv('--gd') }] });
+};
+s3.tr = new Transport('s3', s3.draw);
+$('s3-start').addEventListener('input', () => { s3.tr.pause(); s3.tr.t = 0; s3.compute(); });
+
+/* ===== Section 4 ===== */
+const MU2 = 0.25;
+const KINK = { name: 'kink', L: 25, mu: MU2, fstar: 0, wstar: [0, 0], f: w => phi(w[0]) + 0.5 * MU2 * w[1] * w[1], grad: w => [dphi(w[0]), MU2 * w[1]], box: { x0: -4, x1: 8, y0: -9.5, y1: 3 }, start: [6, -8] };
+const LOGI_X = [[-1.586,0.382],[0.481,-0.18],[-3.793,0.014],[2.792,0.116],[1.277,0.093],[-0.584,-0.308],[-0.624,-0.166],[0.608,-0.049],[-0.535,-0.213],[-0.452,0.169],[1.44,0.147],[1.029,-0.489],[-0.128,-0.451],[-0.171,-0.32],[0.322,0.029],[-1.228,0.508],[-0.808,-0.096],[1.097,0.063],[-0.261,-0.266],[-2.749,-0.262],[-0.955,-0.489],[1.313,-0.007],[-0.465,0.237],[-0.297,-0.089],[1.284,0.349],[3.649,0.049],[-1.426,-0.009],[2.696,0.129],[-2.46,0.122],[0.35,0.287],[-2.339,-0.2],[2.703,-0.572],[1.668,0.029],[2.275,-0.153],[-1.771,-0.007],[1.369,0.416],[-1.038,-0.276],[-0.915,0.191],[1.013,0.236],[1.753,0.115],[0.409,0.28],[-1.256,-0.115],[-1.652,-0.17],[2.889,0.26],[1.188,0.18],[1.439,0.348],[4.367,0.053],[-1.632,0.406],[5.119,-0.071],[6.302,-0.265],[3.237,-0.509],[1.654,-0.275],[-1.328,0.205],[1.989,-0.366],[-0.885,-0.113],[-0.043,0.527],[-0.581,0.212],[0.568,0.448],[2.576,-0.248],[-1.111,-0.615],[-1.971,0.379],[-2.006,-0.354],[-1.937,0.023],[-2.862,0.054],[-1.826,-0.237],[2.587,0.388],[-1.187,0.387],[0.514,0.138],[-2.434,-0.007],[0.339,0.048],[-3.482,-0.274],[-1.398,-0.06],[4.509,-0.026],[-1.166,-0.213],[2.24,0.212],[0.91,-0.357],[-0.306,-0.113],[-1.304,-0.563],[2.574,0.124],[-0.355,0.186]];
+const LOGI_Y = [1,1,-1,1,1,-1,-1,-1,1,-1,1,-1,-1,-1,-1,-1,-1,1,-1,-1,-1,1,1,1,1,1,-1,1,-1,-1,-1,1,1,1,-1,1,-1,-1,1,1,1,-1,-1,1,1,1,1,1,1,1,-1,-1,1,1,-1,1,1,1,1,-1,-1,-1,-1,1,-1,1,1,1,-1,1,-1,-1,1,-1,1,-1,-1,-1,1,1];
+const LOGI = (() => {
+  const n = LOGI_X.length, sp = t => t > 0 ? t + Math.log1p(Math.exp(-t)) : Math.log1p(Math.exp(t)), sig = t => 1 / (1 + Math.exp(-t));
+  const f = w => { let s = 0; for (let i = 0; i < n; i++) s += sp(-LOGI_Y[i] * (LOGI_X[i][0] * w[0] + LOGI_X[i][1] * w[1])); return s / n; };
+  const grad = w => { let g0 = 0, g1 = 0; for (let i = 0; i < n; i++) { const yi = LOGI_Y[i], xi = LOGI_X[i], c = -yi * sig(-yi * (xi[0] * w[0] + xi[1] * w[1])); g0 += c * xi[0]; g1 += c * xi[1]; } return [g0 / n, g1 / n]; };
+  const hess = w => { let a = 0, b = 0, d = 0; for (let i = 0; i < n; i++) { const xi = LOGI_X[i], s = sig(xi[0] * w[0] + xi[1] * w[1]), q = s * (1 - s); a += q * xi[0] * xi[0]; b += q * xi[0] * xi[1]; d += q * xi[1] * xi[1]; } return [a / n, b / n, d / n]; };
+  const eig = ([a, b, d]) => { const m = (a + d) / 2, r = Math.hypot((a - d) / 2, b); return [m - r, m + r]; };
+  let w = [0, 0];
+  for (let k = 0; k < 60; k++) { const g = grad(w), [a, b, d] = hess(w), det = a * d - b * b; w = [w[0] - (d * g[0] - b * g[1]) / det, w[1] - (-b * g[0] + a * g[1]) / det]; }
+  let a = 0, b = 0, d = 0; for (const xi of LOGI_X) { a += xi[0] * xi[0]; b += xi[0] * xi[1]; d += xi[1] * xi[1]; }
+  const L = eig([a / n, b / n, d / n])[1] / 4, mu = eig(hess(w))[0];
+  return { name: 'logistic', f, grad, L, mu, fstar: f(w), wstar: w, box: { x0: -8, x1: 6, y0: -12, y1: 10 }, start: [-6, -10] };
+})();
+const s4 = { problem: KINK, start: KINK.start.slice(), visible: { gd: true, hb: true, agd: true, rst: true } };
+s4.kink = (() => {   // heavy-ball failure bands in w1 for the separable problem
+  const L = 25, rho = (Math.sqrt(L / MU2) - 1) / (Math.sqrt(L / MU2) + 1), eta = 4 / (Math.sqrt(L) + Math.sqrt(MU2)) ** 2, beta = rho * rho;
+  const bands = []; let open = null; const b = KINK.box, step = 0.01;
+  for (let x = b.x0; x <= b.x1 + 1e-9; x += step) {
+    const fail = Math.abs(hb1dFinal(x, eta, beta, dphi, 3000).x) > 1e-6;
+    if (fail && open === null) open = x - step / 2;
+    if (!fail && open !== null) { bands.push([open, x - step / 2]); open = null; }
+  }
+  if (open !== null) bands.push([open, b.x1]);
+  return { bands };
+})();
+s4.views = new Map();
+s4.getView = P => {
+  if (!s4.views.has(P.name)) { const v = P.box, pre = contours(P.f, v, []); s4.views.set(P.name, { view: v, cont: contours(P.f, v, geometricLevels(P.fstar, pre.maxV, 16, 0.5)) }); }
+  return s4.views.get(P.name);
+};
+s4.compute = () => {
+  const P = s4.problem, kappa = P.L / P.mu, rho = (Math.sqrt(kappa) - 1) / (Math.sqrt(kappa) + 1), K = 800;
+  const N = +$('s4-N').value, rule = $('s4-rule').value;
+  $('s4-N-out').textContent = N;
+  $('s4-N-box').style.opacity = rule === 'adaptive' ? .45 : 1;
+  s4.runs = {
+    gd: runGD(P, s4.start, K, 1 / P.L),
+    hb: runHB(P, s4.start, K, 4 / (Math.sqrt(P.L) + Math.sqrt(P.mu)) ** 2, rho * rho),
+    agd: runAGD(P, s4.start, K, { type: 'none' }),
+    rst: runAGD(P, s4.start, K, rule === 'adaptive' ? { type: 'adaptive' } : { type: 'fixed', N })
+  };
+  const gap0 = P.f(s4.start) - P.fstar;
+  s4.rel = {};
+  for (const [k, r] of Object.entries(s4.runs)) s4.rel[k] = r.F.map(v => Math.max(0, v - P.fstar) / gap0);
+  for (const k of ['gd', 'hb', 'agd', 'rst']) {
+    const c = firstBelow(s4.rel[k], 1e-8);
+    let txt = c === null ? '> ' + K : String(c);
+    if (k === 'hb' && c === null) txt = s4.runs.hb.F.length <= K ? 'diverges' : 'does not converge';
+    $('s4-c-' + k).textContent = txt;
+  }
+  $('s4-land-sub').textContent = P.name === 'kink' ? 'Red strip: values of w₁ from which heavy ball never converges (w₂ does not matter). Axes are scaled independently. Click to move the start.' : 'Contours of the logistic loss; + marks the minimizer. Axes are scaled independently. Click to move the start.';
+  $('s4-constants').textContent = P.name === 'kink'
+    ? 'L = 25, μ = 1/4, κ = 100. Heavy ball: η = ' + (4 / (5.5 ** 2)).toFixed(4) + ', β = ' + (rho * rho).toFixed(4) + '.'
+    : 'L = ' + P.L.toFixed(3) + ', μ at the solution = ' + P.mu.toFixed(4) + ', local κ = ' + kappa.toFixed(0) + '. The minimizer is w⋆ = (' + P.wstar[0].toFixed(2) + ', ' + P.wstar[1].toFixed(2) + ').';
+  s4.tr.setHorizon(K);
+};
+s4.draw = () => {
+  if (!s4.runs) return;
+  const P = s4.problem, { view, cont } = s4.getView(P), cols = { gd: cssv('--gd'), hb: cssv('--hb'), agd: cssv('--agd'), rst: cssv('--rst') };
+  const order = ['gd', 'agd', 'hb', 'rst'];
+  drawLandscape($('s4-land'), view, cont, order.map(k => ({ W: s4.runs[k].W, color: cols[k], visible: s4.visible[k], width: k === 'hb' ? 1 : 2, alpha: k === 'hb' ? 0.45 : 0.95 })), { t: s4.tr.t, w0: s4.start, wstar: P.wstar, equal: false, bands: P.name === 'kink' ? s4.kink.bands : null });
+  drawLogChart($('s4-chart'), { K: s4.tr.K, t: s4.tr.t, ymin: 1e-15, ymax: 3,
+    series: order.map(k => ({ values: s4.rel[k], color: cols[k], visible: s4.visible[k], width: k === 'hb' ? 1.1 : 2, alpha: k === 'hb' ? 0.75 : 1, ticks: k === 'rst' ? s4.runs.rst.restarts : null })) });
+};
+s4.tr = new Transport('s4', s4.draw);
+$('s4-problem').addEventListener('change', () => { s4.problem = $('s4-problem').value === 'kink' ? KINK : LOGI; s4.start = s4.problem.start.slice(); s4.tr.pause(); s4.tr.t = 0; s4.compute(); });
+$('s4-rule').addEventListener('change', () => { s4.tr.pause(); s4.tr.t = 0; s4.compute(); });
+$('s4-N').addEventListener('input', () => { s4.tr.pause(); s4.tr.t = 0; s4.compute(); });
+for (const cb of document.querySelectorAll('#s4-legend input')) cb.addEventListener('change', () => { s4.visible[cb.dataset.m] = cb.checked; s4.draw(); });
+onLandClick($('s4-land'), w => { s4.start = w; s4.tr.pause(); s4.tr.t = 0; s4.compute(); });
+
+/* ---------- lifecycle ---------- */
+const sections = { s1, s2, s3, s4 };
+for (const [id, s] of Object.entries(sections)) {
+  const det = $(id);
+  det.addEventListener('toggle', () => { if (det.open) { if (!s.ready) { s.compute(); s.ready = true; } else s.draw(); } else s.tr.pause(); });
+}
+const redrawAll = () => { for (const [id, s] of Object.entries(sections)) if ($(id).open && s.ready) { s.draw(); if (s.drawStrip) s.drawStrip(); } };
+let resizeTimer = null;
+new ResizeObserver(() => { clearTimeout(resizeTimer); resizeTimer = setTimeout(redrawAll, 60); }).observe(document.querySelector('main'));
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', redrawAll);
+window.__demo = sections;
+})();
+</script>
+</body>
+</html>
