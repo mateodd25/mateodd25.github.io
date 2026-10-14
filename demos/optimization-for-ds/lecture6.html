@@ -1,0 +1,956 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Four foldable experiments for Lecture 6: preconditioning as a change of coordinates, affine invariance of Newton's method, Newton's method and critical points, and Newton fractals.">
+  <title>Preconditioning and Newton's method · Optimization for Data Science</title>
+  <style>
+    :root { color-scheme: light dark; --bg:#f7f6f2; --surface:#ffffff; --text:#23262b; --muted:#616771; --line:#deded8; --grid:#eaeae5; --axis:#a5a8a9; --soft:#f0efe9; --focus:#146eaa;
+      --gd:#14796e; --hb:#9c3455; --agd:#426db3; --rst:#a36400; --band:rgba(156,52,85,.11); --region:rgba(66,109,179,.08); }
+    @media (prefers-color-scheme:dark) { :root { --bg:#181b20; --surface:#20242a; --text:#eeeef0; --muted:#b2b7c0; --line:#3f444b; --grid:#30353d; --axis:#717985; --soft:#2b3037; --focus:#82c9fa;
+      --gd:#69cbb9; --hb:#f494af; --agd:#91b8ff; --rst:#eac17a; --band:rgba(244,148,175,.13); --region:rgba(145,184,255,.10); } }
+    * { box-sizing:border-box; }
+    [hidden] { display:none !important; }
+    body { margin:0; background:var(--bg); color:var(--text); font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    main { max-width:1180px; margin:0 auto; padding:34px 28px 48px; }
+    .eyebrow { margin:0 0 9px; font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); font-weight:650; }
+    h1 { margin:0; font-size:clamp(25px,3.4vw,38px); line-height:1.2; font-weight:650; letter-spacing:-.035em; }
+    .intro { margin:11px 0 22px; max-width:860px; color:var(--muted); }
+    .math { font-family:Georgia,"Times New Roman",serif; }
+    details.stage { margin:0 0 16px; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+    details.stage > summary { list-style:none; cursor:pointer; padding:18px 22px; display:flex; align-items:center; gap:14px; font-size:19px; font-weight:620; letter-spacing:-.015em; }
+    details.stage > summary::-webkit-details-marker { display:none; }
+    details.stage > summary::after { content:"Show"; margin-left:auto; font-size:12px; font-weight:550; color:var(--muted); border:1px solid var(--line); border-radius:20px; padding:2px 11px; }
+    details.stage[open] > summary::after { content:"Hide"; }
+    .num { flex:0 0 auto; width:30px; height:30px; border-radius:50%; display:grid; place-items:center; background:var(--text); color:var(--surface); font-size:14px; font-weight:650; }
+    .stage-body { padding:0 22px 22px; }
+    .lede { margin:0 0 16px; max-width:900px; }
+    .controls { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:16px 34px; align-items:end; padding:16px 18px; border:1px solid var(--line); background:var(--soft); border-radius:12px; }
+    .control-label { display:flex; justify-content:space-between; align-items:baseline; gap:12px; font-size:14px; font-weight:600; }
+    .control-label output { font-weight:600; font-variant-numeric:tabular-nums; }
+    input,select,button { font:inherit; color:inherit; }
+    select { border:1px solid var(--line); background:var(--surface); border-radius:6px; padding:5px 8px; min-height:36px; }
+    input[type=range] { width:100%; margin:9px 0 0; accent-color:var(--text); cursor:pointer; min-height:20px; }
+    .range-ticks { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); }
+    .presets { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+    button { border:1px solid var(--line); background:var(--surface); border-radius:7px; padding:7px 12px; cursor:pointer; font-size:14px; font-weight:550; min-height:38px; }
+    button.primary { background:var(--text); color:var(--surface); border-color:var(--text); min-width:92px; }
+    button.small { font-size:12px; padding:4px 10px; min-height:30px; }
+    button[aria-pressed=true] { border-color:var(--text); box-shadow:inset 0 0 0 1px var(--text); }
+    button:hover { filter:brightness(.94); }
+    :focus-visible { outline:3px solid var(--focus); outline-offset:3px; }
+    .transport { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .speed-label { display:flex; align-items:center; gap:6px; margin-left:auto; font-size:12px; color:var(--muted); }
+    .timeline { grid-column:1/-1; }
+    .timeline-label { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; }
+    .timeline-label b { color:var(--text); font-size:14px; }
+    .panels { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:16px; }
+    .panel { min-width:0; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--surface); }
+    .panel h3 { margin:0; padding:13px 16px 0; font-size:15px; font-weight:600; }
+    .panel .sub { margin:2px 16px 0; font-size:12px; color:var(--muted); }
+    canvas { display:block; width:100%; }
+    canvas.land { aspect-ratio:1.2; cursor:crosshair; touch-action:manipulation; }
+    canvas.chart { aspect-ratio:1.2; }
+    .legend { display:flex; flex-wrap:wrap; gap:6px 16px; font-size:12px; color:var(--muted); padding:8px 16px 12px; }
+    .legend label, .legend span { display:inline-flex; align-items:center; gap:6px; }
+    .legend label { cursor:pointer; }
+    .legend input { margin:0; accent-color:var(--text); }
+    .sw { display:inline-block; width:20px; height:0; border-top:2.5px solid; }
+    .sw.dash { border-top-style:dashed; border-top-width:2px; }
+    .sw.gd { border-color:var(--gd); } .sw.hb { border-color:var(--hb); } .sw.agd { border-color:var(--agd); } .sw.rst { border-color:var(--rst); }
+    .readout { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px 18px; margin-top:14px; padding:12px 16px; border:1px solid var(--line); border-radius:12px; font-size:12px; color:var(--muted); }
+    .readout strong { display:block; font-size:18px; font-weight:620; color:var(--text); font-variant-numeric:tabular-nums; }
+    .try { margin:16px 0 0; font-size:14px; }
+    .try ol { margin:6px 0 0; padding-left:20px; }
+    .try li { margin:3px 0; }
+    details.setup { margin-top:14px; border-top:1px solid var(--line); padding-top:10px; font-size:14px; }
+    details.setup summary { cursor:pointer; font-weight:600; font-size:13px; color:var(--muted); }
+    details.setup p { margin:8px 0 0; }
+    .eq { font-family:Georgia,"Times New Roman",serif; font-size:17px; }
+    .strip-wrap { margin-top:8px; }
+    canvas.strip { height:16px; border-radius:4px; }
+    .strip-note { font-size:11px; color:var(--muted); margin-top:3px; }
+    .note { font-size:12px; color:var(--muted); margin:10px 2px 0; }
+    noscript { display:block; padding:20px; color:var(--hb); }
+    @media(max-width:760px) { main { padding:24px 16px; } .stage-body { padding:0 14px 16px; } details.stage > summary { padding:15px 14px; font-size:17px; } .panels { grid-template-columns:1fr; } }
+    @media(max-width:520px) { .speed-label { margin-left:0; } button,select { min-height:44px; } }
+
+    :root { --pgd:#426db3; --nt:#9c3455; --model:#a36400; }
+    @media (prefers-color-scheme:dark) { :root { --pgd:#91b8ff; --nt:#f494af; --model:#eac17a; } }
+    .sw.pgd { border-color:var(--pgd); } .sw.nt { border-color:var(--nt); } .sw.model { border-color:var(--model); }
+    .ring { display:inline-block; width:11px; height:11px; border-radius:50%; border:1.6px solid var(--text); }
+    .ring.nt { border-color:var(--nt); } .ring.gd { border-color:var(--gd); }
+    .blk { display:inline-block; width:12px; height:10px; border-radius:2px; }
+    canvas.wide { aspect-ratio:2.6; }
+    canvas.fractal { aspect-ratio:1.6; cursor:crosshair; }
+    .panel.full { grid-column:1/-1; }
+    label.check { display:flex; gap:8px; align-items:center; margin-top:12px; font-size:14px; cursor:pointer; }
+    label.check input { margin:0; accent-color:var(--text); }
+    #s3-plot { cursor:crosshair; } #s3-strip { height:18px; cursor:pointer; }
+    .panel.full canvas.wide { max-height:420px; }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Optimization for Data Science · Lecture 6 demo</p>
+    <h1>Preconditioning and Newton's method</h1>
+    <p class="intro">Four short experiments that follow the board notes, meant to be opened one at a time. As in class, preconditioned gradient descent is <span class="math">w<sub>k+1</sub> = w<sub>k</sub> − η P<sup>−1</sup>∇f(w<sub>k</sub>)</span>, which minimizes the linear model plus the anchor <span class="math">‖z − w<sub>k</sub>‖<sub>P</sub><sup>2</sup>/(2η)</span>. Nothing runs until you press <b>Run</b>; click a plot to move the starting point.</p>
+  </header>
+  <noscript>This demo needs JavaScript.</noscript>
+
+  <!-- ===================== 1. Preconditioning ===================== -->
+  <details class="stage" id="s1">
+    <summary><span class="num">1</span>Preconditioning rescales directions</summary>
+    <div class="stage-body">
+      <p class="lede">On the quadratic <span class="math">f(w) = ½ wᵀAw</span> with <span class="math">A = UDUᵀ</span>, gradient descent crawls along the flat direction of the valley. A preconditioner <span class="math">P</span> changes the norm in which steps are measured. In the coordinates <span class="math">z = P<sup>1/2</sup>w</span> the same run is plain gradient descent on a function whose condition number is <span class="math">κ(P<sup>−1/2</sup>AP<sup>−1/2</sup>)</span>.</p>
+      <div class="controls">
+        <div>
+          <div class="control-label"><span>Condition number <span class="math">κ(A)</span></span><output id="s1-kappa-out"></output></div>
+          <input type="range" id="s1-kappa" min="0" max="3" step="0.01" value="1.7" aria-label="Condition number of A, logarithmic">
+          <div class="range-ticks"><span>1</span><span>10</span><span>100</span><span>1000</span></div>
+          <div class="control-label" style="margin-top:8px"><span>Valley angle <span class="math">θ</span></span><output id="s1-theta-out"></output></div>
+          <input type="range" id="s1-theta" min="0" max="90" step="1" value="30" aria-label="Angle of the valley floor in degrees">
+        </div>
+        <div>
+          <div class="control-label"><span>Preconditioner</span><output id="s1-p-out"></output></div>
+          <div class="presets"><button class="small" id="s1-pI" aria-pressed="false">P = I (GD)</button><button class="small" id="s1-pJ" aria-pressed="false">Jacobi: P = diag(A)</button><button class="small" id="s1-pA" aria-pressed="false">P = A</button></div>
+          <div class="control-label" style="margin-top:8px"><span>Power <span class="math">α</span> in <span class="math">P = A<sup>α</sup></span></span><output id="s1-alpha-out"></output></div>
+          <input type="range" id="s1-alpha" min="0" max="1" step="0.01" value="0.5" aria-label="Power alpha in P equals A to the alpha">
+          <label class="check"><input type="checkbox" id="s1-anchor" checked> Show anchor balls</label>
+        </div>
+        <div class="transport"><button class="primary" id="s1-run">Run</button><button id="s1-step">Step</button><button id="s1-reset">Restart</button>
+          <label class="speed-label">Speed <select id="s1-speed"><option value="0.25">¼×</option><option value="1" selected>1×</option><option value="4">4×</option></select></label></div>
+        <div class="timeline"><div class="timeline-label"><span>Iteration</span><b id="s1-iter-value">k = 0</b></div><input type="range" id="s1-iter" min="0" max="10" value="0" aria-label="Iteration"></div>
+      </div>
+      <div class="panels">
+        <div class="panel"><h3>Original coordinates <span class="math">w</span></h3><p class="sub">Contours of f. Click to choose the starting point.</p><canvas class="land" id="s1-land" role="img" aria-label="Contour plot of f with gradient descent and preconditioned gradient descent paths"></canvas>
+          <div class="legend"><span><i class="sw gd"></i>GD, η = 1/L</span><span><i class="sw pgd"></i>PGD, η = 1/L<sub>P</sub></span><span><i class="sw dash pgd"></i>anchor ball ‖z − w<sub>k</sub>‖<sub>P</sub> = r</span></div></div>
+        <div class="panel"><h3>New coordinates <span class="math">z = P<sup>1/2</sup>w</span></h3><p class="sub">Contours of φ(z) = f(P<sup>−1/2</sup>z). Click to choose the starting point.</p><canvas class="land" id="s1-zland" role="img" aria-label="Contour plot of phi with the gradient descent path in the new coordinates"></canvas>
+          <div class="legend"><span><i class="sw pgd"></i>GD on φ</span><span><i class="ring"></i>P<sup>1/2</sup>w<sub>k</sub> for the PGD iterates</span></div></div>
+        <div class="panel full"><h3>Objective</h3><p class="sub">f(w<sub>k</sub>)/f(w<sub>0</sub>), logarithmic scale. Dashed: the theorem's bounds (1 − μ/L)<sup>k</sup> and (1 − μ<sub>P</sub>/L<sub>P</sub>)<sup>k</sup>.</p><canvas class="chart wide" id="s1-chart" role="img" aria-label="Convergence plot"></canvas>
+          <div class="legend"><span><i class="sw gd"></i>GD</span><span><i class="sw pgd"></i>PGD</span></div></div>
+      </div>
+      <div class="readout">
+        <div>κ(A)<strong id="s1-ka"></strong></div>
+        <div>κ<sub>P</sub> = κ(P<sup>−1/2</sup>AP<sup>−1/2</sup>)<strong id="s1-kp"></strong></div>
+        <div>GD iterations to f/f<sub>0</sub> ≤ 10⁻⁶<strong id="s1-ngd"></strong></div>
+        <div>PGD iterations to f/f<sub>0</sub> ≤ 10⁻⁶<strong id="s1-npgd"></strong></div>
+        <div>Diagram check: max<sub>k</sub> ‖P<sup>1/2</sup>w<sub>k</sub> − z<sub>k</sub>‖<strong id="s1-diag"></strong></div>
+      </div>
+      <div class="try"><b>Try this</b><ol>
+        <li>Press <i>P = I</i> and run. Gradient descent kills the steep direction at once and then crawls along the valley.</li>
+        <li>Move α from 0 to 1. With <span class="math">P = A<sup>α</sup></span> the condition number becomes <span class="math">κ<sub>P</sub> = κ<sup>1−α</sup></span>. At <i>P = A</i>, PGD reaches the minimizer in one step, but that step requires solving a linear system with A.</li>
+        <li>Press <i>Jacobi</i> and change the valley angle. A diagonal preconditioner is perfect when the valley is aligned with an axis (θ = 0° or 90°) and does nothing at θ = 45°: it fixes scaling, not rotation.</li>
+        <li>Compare the two panels. The hollow circles on the right are the PGD iterates mapped by <span class="math">P<sup>1/2</sup></span>; they sit on the gradient descent path for φ. This is the commutative diagram from the board.</li>
+        <li>With <i>Show anchor balls</i>, the dashed ellipse is <span class="math">{z : ‖z − w<sub>k</sub>‖<sub>P</sub> = r}</span> through the next iterate. The next iterate is the point of that ellipse with the smallest value of the linear model. For GD the ball is a circle.</li>
+      </ol></div>
+      <details class="setup"><summary>Mathematical setup</summary>
+        <p class="eq">f(w) = ½ wᵀAw,&nbsp; A = U diag(1, 1/κ) Uᵀ,&nbsp; w<sub>k+1</sub> = w<sub>k</sub> − η P<sup>−1</sup>Aw<sub>k</sub>.</p>
+        <p>The valley floor, the eigenvector with eigenvalue 1/κ, makes the angle θ with the horizontal axis. With <span class="math">M = P<sup>−1/2</sup>AP<sup>−1/2</sup></span>, the constants are <span class="math">L<sub>P</sub> = λ<sub>max</sub>(M)</span> and <span class="math">μ<sub>P</sub> = λ<sub>min</sub>(M)</span>, and PGD uses η = 1/L<sub>P</sub>. GD is the case P = I, with η = 1/L = 1. In <span class="math">z = P<sup>1/2</sup>w</span>, the function <span class="math">φ(z) = f(P<sup>−1/2</sup>z) = ½ zᵀMz</span> has gradient <span class="math">P<sup>−1/2</sup>∇f(w)</span>, so GD on φ from <span class="math">z<sub>0</sub> = P<sup>1/2</sup>w<sub>0</sub></span> produces <span class="math">z<sub>k</sub> = P<sup>1/2</sup>w<sub>k</sub></span>. The dashed lines in the chart are the bounds of the convergence theorem; on a quadratic the actual decrease is faster.</p>
+      </details>
+    </div>
+  </details>
+
+  <!-- ===================== 2. Affine invariance ===================== -->
+  <details class="stage" id="s2">
+    <summary><span class="num">2</span>Newton's method does not care about coordinates</summary>
+    <div class="stage-body">
+      <p class="lede">Run Newton's method and gradient descent on a smooth convex function <span class="math">f</span> and on <span class="math">ψ(z) = f(Az)</span>, a stretched and rotated copy. Newton's iterates on ψ are exactly <span class="math">A<sup>−1</sup></span> times its iterates on f. Gradient descent's are not, and it slows down when the stretch makes ψ badly conditioned.</p>
+      <div class="controls">
+        <div>
+          <div class="control-label"><span>Stretch <span class="math">s</span> in <span class="math">A = R(θ) diag(s, 1/s)</span></span><output id="s2-s-out"></output></div>
+          <input type="range" id="s2-s" min="-0.7" max="0.7" step="0.01" value="0.48" aria-label="Stretch factor, logarithmic">
+          <div class="range-ticks"><span>0.2</span><span>1</span><span>5</span></div>
+          <div class="control-label" style="margin-top:8px"><span>Rotation <span class="math">θ</span></span><output id="s2-theta-out"></output></div>
+          <input type="range" id="s2-theta" min="0" max="180" step="1" value="35" aria-label="Rotation angle in degrees">
+        </div>
+        <div>
+          <label class="check"><input type="checkbox" id="s2-ls" checked> Backtracking line search (damped steps)</label>
+          <p class="note" style="margin-top:6px">The line search starts with t = 1 and halves t until f decreases enough. Gradient descent always uses it. Turning it off makes Newton take full steps, t = 1.</p>
+        </div>
+        <div class="transport"><button class="primary" id="s2-run">Run</button><button id="s2-step">Step</button><button id="s2-reset">Restart</button>
+          <label class="speed-label">Speed <select id="s2-speed"><option value="0.25">¼×</option><option value="1" selected>1×</option><option value="4">4×</option></select></label></div>
+        <div class="timeline"><div class="timeline-label"><span>Iteration</span><b id="s2-iter-value">k = 0</b></div><input type="range" id="s2-iter" min="0" max="10" value="0" aria-label="Iteration"></div>
+      </div>
+      <div class="panels">
+        <div class="panel"><h3>Coordinates <span class="math">w</span>: minimize f</h3><p class="sub">Click to choose w<sub>0</sub>.</p><canvas class="land" id="s2-land" role="img" aria-label="Contour plot of f with Newton and gradient descent paths"></canvas>
+          <div class="legend"><span><i class="sw nt"></i>Newton on f</span><span><i class="sw gd"></i>GD on f</span></div></div>
+        <div class="panel"><h3>Coordinates <span class="math">z</span>: minimize ψ(z) = f(Az)</h3><p class="sub">Click to choose z<sub>0</sub> = A<sup>−1</sup>w<sub>0</sub>.</p><canvas class="land" id="s2-zland" role="img" aria-label="Contour plot of psi with Newton and gradient descent paths"></canvas>
+          <div class="legend"><span><i class="sw nt"></i>Newton on ψ</span><span><i class="ring nt"></i>A<sup>−1</sup>(Newton on f)</span><span><i class="sw gd"></i>GD on ψ</span><span><i class="ring gd"></i>A<sup>−1</sup>(GD on f)</span></div></div>
+        <div class="panel full"><h3>Objective gap</h3><p class="sub">f(w<sub>k</sub>) − f⋆ and ψ(z<sub>k</sub>) − ψ⋆, logarithmic scale. The two Newton curves coincide.</p><canvas class="chart wide" id="s2-chart" role="img" aria-label="Convergence plot"></canvas>
+          <div class="legend"><span><i class="sw nt"></i>Newton on f</span><span><i class="sw dash nt"></i>Newton on ψ</span><span><i class="sw gd"></i>GD on f</span><span><i class="sw dash gd"></i>GD on ψ</span></div></div>
+      </div>
+      <div class="readout">
+        <div>Newton: max<sub>k</sub> ‖Az<sub>k</sub> − w<sub>k</sub>‖<strong id="s2-dn"></strong></div>
+        <div>GD: max<sub>k</sub> ‖Az<sub>k</sub> − w<sub>k</sub>‖<strong id="s2-dg"></strong></div>
+        <div>Newton iterations to gap ≤ 10⁻¹⁰ (f / ψ)<strong id="s2-nn"></strong></div>
+        <div>GD iterations to gap ≤ 10⁻¹⁰ (f / ψ)<strong id="s2-ng"></strong></div>
+        <div>κ of the Hessian at the minimizer (f / ψ)<strong id="s2-kh"></strong></div>
+      </div>
+      <div class="try"><b>Try this</b><ol>
+        <li>Run. After a few damped steps, Newton's gap drops like 10⁻², 10⁻⁶, 10⁻¹²: the number of correct digits doubles at every step.</li>
+        <li>Increase the stretch or change the rotation. The condition number of ψ grows and GD on ψ (dashed teal) needs many more iterations, while the hollow teal circles, A<sup>−1</sup> times GD on f, drift away from its path. Newton's two curves stay on top of each other.</li>
+        <li>Set the stretch to 1 and the rotation to 0: then A = I and everything coincides.</li>
+        <li>Turn off the line search and click far from the minimizer. Pure Newton can take wild steps, yet its iterates on f and on ψ still correspond exactly.</li>
+      </ol></div>
+      <details class="setup"><summary>Mathematical setup</summary>
+        <p class="eq">f(w) = e<sup>w₁+3w₂−0.1</sup> + e<sup>w₁−3w₂−0.1</sup> + e<sup>−w₁−0.1</sup>,&nbsp; w⋆ = (−½ ln 2, 0),&nbsp; f⋆ = 2√2 e<sup>−0.1</sup>.</p>
+        <p>This is the two-dimensional example of Boyd and Vandenberghe, <i>Convex Optimization</i>, Chapter 9. Newton's direction is <span class="math">d = −∇²f(w)<sup>−1</sup>∇f(w)</span> and GD's is <span class="math">d = −∇f(w)</span>. Both use the step <span class="math">w + td</span>, where t starts at 1 and is halved until <span class="math">f(w + td) ≤ f(w) + ¼ t⟨∇f(w), d⟩</span>. Since <span class="math">∇ψ(z) = Aᵀ∇f(Az)</span> and <span class="math">∇²ψ(z) = Aᵀ∇²f(Az)A</span>, Newton's direction for ψ is <span class="math">A<sup>−1</sup></span> times its direction for f. The line search compares only function values and <span class="math">⟨∇f, d⟩</span>, which do not change, so the damped method is affine invariant too. GD's direction for ψ is <span class="math">−Aᵀ∇f(Az)</span>, which corresponds to the step <span class="math">−AAᵀ∇f(w)</span> in the original coordinates: a different method.</p>
+      </details>
+    </div>
+  </details>
+
+  <!-- ===================== 3. Critical points ===================== -->
+  <details class="stage" id="s3">
+    <summary><span class="num">3</span>Newton looks for critical points, not minimizers</summary>
+    <div class="stage-body">
+      <p class="lede">Each Newton step jumps to the critical point of the second-order Taylor model. When <span class="math">f″(x<sub>k</sub>) &gt; 0</span> the model is convex and the step goes to its minimizer. When <span class="math">f″(x<sub>k</sub>) &lt; 0</span> it goes to its maximizer. The method sees only <span class="math">f′/f″</span>, so on f and on −f it produces the same iterates.</p>
+      <div class="controls">
+        <div>
+          <div class="control-label"><span>Starting point <span class="math">x<sub>0</sub></span></span><output id="s3-x0-out"></output></div>
+          <input type="range" id="s3-x0" min="-2.2" max="2.2" step="0.001" value="0.3" aria-label="Starting point">
+          <div class="presets"><button class="small" data-x0="0.3">x₀ = 0.3</button><button class="small" data-x0="0.45">x₀ = 0.45</button><button class="small" data-x0="0.6">x₀ = 0.6</button><button class="small" data-x0="1.8">x₀ = 1.8</button></div>
+        </div>
+        <div>
+          <div class="control-label"><span>Function</span></div>
+          <div class="presets"><button class="small" id="s3-pos" aria-pressed="true">f(x) = x⁴/4 − x²/2</button><button class="small" id="s3-neg" aria-pressed="false">−f(x)</button></div>
+        </div>
+        <div class="transport"><button class="primary" id="s3-run">Run</button><button id="s3-step">Step</button><button id="s3-reset">Restart</button>
+          <label class="speed-label">Speed <select id="s3-speed"><option value="0.25" selected>¼×</option><option value="1">1×</option><option value="4">4×</option></select></label></div>
+        <div class="timeline"><div class="timeline-label"><span>Iteration</span><b id="s3-iter-value">k = 0</b></div><input type="range" id="s3-iter" min="0" max="10" value="0" aria-label="Iteration"></div>
+      </div>
+      <div class="panels">
+        <div class="panel full"><h3>The function and its quadratic model at x<sub>k</sub></h3><p class="sub">Click to choose x<sub>0</sub>. The strip below colors every starting point in [−2.2, 2.2] by the critical point that Newton reaches.</p>
+          <canvas class="chart wide" id="s3-plot" role="img" aria-label="Plot of the function, its quadratic model, and the Newton iterates"></canvas>
+          <div class="strip-wrap" style="padding:0 16px"><canvas class="strip" id="s3-strip" role="img" aria-label="Basins of attraction of Newton's method"></canvas></div>
+          <div class="legend"><span><i class="sw"></i>current function</span><span><i class="sw dash model"></i>quadratic model at x<sub>k</sub></span><span><i class="blk" style="background:var(--gd)"></i>limit −1</span><span><i class="blk" style="background:var(--nt)"></i>limit 0</span><span><i class="blk" style="background:var(--pgd)"></i>limit +1</span><span><i class="blk" style="background:var(--axis)"></i>no limit in 200 steps</span></div></div>
+      </div>
+      <div class="readout">
+        <div>x<sub>k</sub><strong id="s3-xk"></strong></div>
+        <div>f″(x<sub>k</sub>) of the current function<strong id="s3-fpp"></strong></div>
+        <div>The step goes to the model's<strong id="s3-kind"></strong></div>
+        <div>Newton converges to<strong id="s3-lim"></strong></div>
+      </div>
+      <div class="try"><b>Try this</b><ol>
+        <li>Run from x₀ = 0.3. The model is concave, Newton jumps to its maximizer, and the iterates converge to the local maximum at 0.</li>
+        <li>Press <i>−f</i>. The curve and the model flip upside down, but the iterates do not move: Newton cannot tell a minimizer from a maximizer.</li>
+        <li>Move x₀ toward 1/√3 ≈ 0.577, where f″ = 0. The model's critical point runs off to infinity. In the strip, the colors interleave on finer and finer scales near ±1/√3.</li>
+        <li>Start at x₀ = 1.8. Newton converges to the minimizer at 1, and near the end the number of correct digits doubles at each step.</li>
+      </ol></div>
+      <details class="setup"><summary>Mathematical setup</summary>
+        <p class="eq">f(x) = x⁴/4 − x²/2,&nbsp; f′(x) = x³ − x,&nbsp; f″(x) = 3x² − 1,&nbsp; x<sub>k+1</sub> = x<sub>k</sub> − f′(x<sub>k</sub>)/f″(x<sub>k</sub>) = 2x<sub>k</sub>³/(3x<sub>k</sub>² − 1).</p>
+        <p>The critical points are −1 and 1 (minimizers of f) and 0 (a local maximizer). Replacing f by −f changes the signs of f′ and f″ together, so the ratio and the iterates are unchanged. The strip runs up to 200 Newton steps from each starting point and colors it by the critical point it converges to.</p>
+      </details>
+    </div>
+  </details>
+
+  <!-- ===================== 4. Fractals ===================== -->
+  <details class="stage" id="s4">
+    <summary><span class="num">4</span>Newton fractals</summary>
+    <div class="stage-body">
+      <p class="lede">Let <span class="math">f(x, y) = Re G(x + iy)</span>, where G is a polynomial with <span class="math">G′ = p</span>. Newton's method for f is exactly Newton's root-finding method <span class="math">z<sub>k+1</sub> = z<sub>k</sub> − p(z<sub>k</sub>)/p′(z<sub>k</sub>)</span> in the complex plane. The critical points of f are the roots of p, and every one of them is a saddle point of f. Each starting point is colored by the critical point Newton reaches, and darker means more steps.</p>
+      <div class="controls">
+        <div>
+          <div class="control-label"><span>Polynomial <span class="math">p = G′</span></span></div>
+          <select id="s4-poly" aria-label="Polynomial">
+            <option value="z3">p(z) = z³ − 1</option>
+            <option value="z4">p(z) = z⁴ − 1</option>
+            <option value="cyc">p(z) = z³ − 2z + 2</option>
+          </select>
+          <p class="note" id="s4-G"></p>
+        </div>
+        <div>
+          <div class="control-label"><span>Iteration budget</span><output id="s4-max-out"></output></div>
+          <input type="range" id="s4-max" min="10" max="120" step="1" value="40" aria-label="Maximum number of Newton steps">
+          <div class="presets"><button class="small" id="s4-zin">Zoom in ×2</button><button class="small" id="s4-zout">Zoom out</button><button class="small" id="s4-zreset">Reset view</button></div>
+        </div>
+      </div>
+      <div class="panels">
+        <div class="panel full"><h3>Basins of attraction</h3><p class="sub">Click a point to draw the Newton path from it; zooming centers on the last point clicked. White circles: the critical points of f, all saddles. Black: no convergence within the iteration budget.</p>
+          <canvas class="fractal" id="s4-canvas" role="img" aria-label="Newton fractal: basins of attraction in the complex plane"></canvas></div>
+      </div>
+      <div class="readout">
+        <div>Start<strong id="s4-start">click the picture</strong></div>
+        <div>Result<strong id="s4-res">—</strong></div>
+        <div>View<strong id="s4-view"></strong></div>
+      </div>
+      <div class="try"><b>Try this</b><ol>
+        <li>With z³ − 1, zoom in on a boundary between two colors. Every neighborhood of a boundary point contains starting points that go to each of the three saddles.</li>
+        <li>Click points in different basins. Newton converges, often in a handful of steps, but always to a saddle point: f has no minimizers at all.</li>
+        <li>Switch to z³ − 2z + 2 and click inside one of the black regions. What do the iterates do?</li>
+        <li>Increase the iteration budget. Black pixels near basin boundaries become colored (they were just slow), but the large black regions do not change.</li>
+      </ol></div>
+      <details class="setup"><summary>Mathematical setup</summary>
+        <p>Write <span class="math">z = x + iy</span> and <span class="math">p = G′</span>. Since <span class="math">∂f/∂x = Re p</span> and <span class="math">∂f/∂y = −Im p</span>, the gradient of f, read as a complex number, is <span class="math">\overline{p(z)}</span>. Similarly, the Hessian maps a direction <span class="math">v = v₁ + iv₂</span> to <span class="math">\overline{p′(z)v}</span>. The Newton system <span class="math">∇²f(w)d = −∇f(w)</span> therefore reads <span class="math">p′(z)d = −p(z)</span>, which gives the complex Newton step. The Hessian is <span class="math">[[Re p′, −Im p′], [−Im p′, −Re p′]]</span>. It has trace 0 and determinant <span class="math">−|p′|²</span>, so every critical point with <span class="math">p′ ≠ 0</span> is a saddle. A pixel is assigned to a root once an iterate comes within 10⁻⁶ of it. It is black if this does not happen within the budget, if <span class="math">p′</span> vanishes, or if the iterates leave every bounded region.</p>
+      </details>
+    </div>
+  </details>
+</main>
+
+<script>
+'use strict';
+(() => {
+const $ = id => document.getElementById(id);
+const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const SUP = { '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹' };
+const pow10 = e => e === 0 ? '1' : '10' + String(e).split('').map(c => SUP[c]).join('');
+const fix = (x, d = 3) => Number.isFinite(x) ? x.toFixed(d) : '—';
+
+/* ---------- canvas utilities ---------- */
+function fit(canvas) {
+  const r = canvas.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, r.width, r.height);
+  return { ctx, W: r.width, H: r.height };
+}
+function seg(ctx, x1, y1, x2, y2) { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); }
+function dot(ctx, x, y, r, fill, ring) {
+  ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.fillStyle = fill; ctx.fill();
+  if (ring) { ctx.lineWidth = 1.5; ctx.strokeStyle = ring; ctx.stroke(); }
+}
+function niceStep(range, target) {
+  const raw = range / target, p = 10 ** Math.floor(Math.log10(raw)), m = raw / p;
+  return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p;
+}
+
+/* Logarithmic convergence chart. series: {values, color, visible, ticks}; refs: {color, r, c} draws c * r^k dashed. */
+function drawLogChart(canvas, o) {
+  const { ctx, W, H } = fit(canvas);
+  const m = { l: 54, r: 14, t: 14, b: 40 }, pw = W - m.l - m.r, ph = H - m.t - m.b;
+  if (pw < 20 || ph < 20) return;
+  const lo = Math.log10(o.ymin), hi = Math.log10(o.ymax);
+  const X = k => m.l + pw * k / o.K;
+  const Y = v => m.t + ph * (hi - Math.log10(Math.min(o.ymax, Math.max(o.ymin, v)))) / (hi - lo);
+  const grid = cssv('--grid'), axis = cssv('--axis'), muted = cssv('--muted'), text = cssv('--text');
+  ctx.font = '11px system-ui, sans-serif'; ctx.lineWidth = 1;
+  const every = Math.max(1, Math.ceil((hi - lo) / 7));
+  ctx.textBaseline = 'middle'; ctx.textAlign = 'right';
+  for (let e = Math.ceil(lo); e <= Math.floor(hi); e++) {
+    const y = Y(10 ** e); ctx.strokeStyle = grid; seg(ctx, m.l, y, m.l + pw, y);
+    if ((Math.floor(hi) - e) % every === 0) { ctx.fillStyle = muted; ctx.fillText(pow10(e), m.l - 6, y); }
+  }
+  const step = niceStep(o.K, 5); ctx.textBaseline = 'top'; ctx.textAlign = 'center';
+  for (let k = 0; k <= o.K + 1e-9; k += step) { const x = X(k); ctx.strokeStyle = grid; seg(ctx, x, m.t, x, m.t + ph); ctx.fillStyle = muted; ctx.fillText(String(Math.round(k)), x, m.t + ph + 5); }
+  ctx.strokeStyle = axis; seg(ctx, m.l, m.t, m.l, m.t + ph); seg(ctx, m.l, m.t + ph, m.l + pw, m.t + ph);
+  ctx.fillStyle = text; ctx.font = 'italic 13px Georgia, serif'; ctx.fillText('iteration k', m.l + pw / 2, m.t + ph + 21);
+  ctx.save(); ctx.beginPath(); ctx.rect(m.l, m.t, pw, ph); ctx.clip();
+  for (const ref of o.refs || []) {
+    if (!(ref.r > 0)) continue;
+    ctx.strokeStyle = ref.color; ctx.globalAlpha = .55; ctx.lineWidth = 1.6; ctx.setLineDash([6, 5]); ctx.beginPath();
+    const n = 80;
+    for (let i = 0; i <= n; i++) { const k = o.K * i / n, v = (ref.c || 1) * Math.exp(k * Math.log(ref.r)); const x = X(k), y = Y(v); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+  }
+  for (const s of o.series) {
+    if (s.visible === false) continue;
+    const n = Math.min(o.t, s.values.length - 1);
+    ctx.strokeStyle = s.color; ctx.lineWidth = s.width || 2; ctx.globalAlpha = s.alpha || 1; ctx.setLineDash(s.dash || []); ctx.beginPath();
+    let pen = false;
+    for (let k = 0; k <= n; k++) {
+      const v = s.values[k];
+      if (!Number.isFinite(v)) { pen = false; continue; }
+      const x = X(k), y = Y(v); pen ? ctx.lineTo(x, y) : ctx.moveTo(x, y); pen = true;
+    }
+    ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+    if (s.ticks) { ctx.fillStyle = s.color; for (const k of s.ticks) if (k <= o.t) { const x = X(k); ctx.beginPath(); ctx.moveTo(x, m.t + ph); ctx.lineTo(x - 3.5, m.t + ph - 7); ctx.lineTo(x + 3.5, m.t + ph - 7); ctx.fill(); } }
+    if (n >= 0 && Number.isFinite(s.values[n])) dot(ctx, X(n), Y(s.values[n]), 3.6, s.color, cssv('--surface'));
+  }
+  ctx.restore();
+  ctx.strokeStyle = muted; ctx.globalAlpha = .35; seg(ctx, X(o.t), m.t, X(o.t), m.t + ph); ctx.globalAlpha = 1;
+}
+
+/* Contours by marching squares, in world coordinates. */
+const MS = { 1: [[3, 0]], 2: [[0, 1]], 3: [[3, 1]], 4: [[1, 2]], 5: [[3, 0], [1, 2]], 6: [[0, 2]], 7: [[3, 2]], 8: [[3, 2]], 9: [[0, 2]], 10: [[0, 1], [2, 3]], 11: [[1, 2]], 12: [[3, 1]], 13: [[0, 1]], 14: [[3, 0]] };
+function contours(f, b, levels, nx = 150, ny = 130) {
+  const xs = i => b.x0 + (b.x1 - b.x0) * i / nx, ys = j => b.y0 + (b.y1 - b.y0) * j / ny;
+  const V = new Float64Array((nx + 1) * (ny + 1));
+  for (let j = 0; j <= ny; j++) for (let i = 0; i <= nx; i++) V[j * (nx + 1) + i] = f([xs(i), ys(j)]);
+  const segs = [];
+  for (const c of levels) for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+    const v00 = V[j * (nx + 1) + i], v10 = V[j * (nx + 1) + i + 1], v11 = V[(j + 1) * (nx + 1) + i + 1], v01 = V[(j + 1) * (nx + 1) + i];
+    const idx = (v00 > c) | ((v10 > c) << 1) | ((v11 > c) << 2) | ((v01 > c) << 3);
+    if (!MS[idx]) continue;
+    const x0 = xs(i), x1 = xs(i + 1), y0 = ys(j), y1 = ys(j + 1);
+    const edge = e => {
+      if (e === 0) return [x0 + (x1 - x0) * (c - v00) / (v10 - v00), y0];
+      if (e === 1) return [x1, y0 + (y1 - y0) * (c - v10) / (v11 - v10)];
+      if (e === 2) return [x0 + (x1 - x0) * (c - v01) / (v11 - v01), y1];
+      return [x0, y0 + (y1 - y0) * (c - v00) / (v01 - v00)];
+    };
+    for (const [a, bb] of MS[idx]) { const p = edge(a), q = edge(bb); segs.push(p[0], p[1], q[0], q[1]); }
+  }
+  return { segs, maxV: V.reduce((a, v) => Math.max(a, v), -Infinity) };
+}
+function geometricLevels(fstar, fmax, n = 15, r = 0.56) { const out = []; for (let j = 1; j <= n; j++) out.push(fstar + (fmax - fstar) * r ** j); return out; }
+
+/* Landscape panel with equal scaling. */
+function drawLandscape(canvas, view, cont, paths, extra) {
+  const { ctx, W, H } = fit(canvas);
+  const pad = 10, sx0 = (W - 2 * pad) / (view.x1 - view.x0), sy0 = (H - 2 * pad) / (view.y1 - view.y0);
+  const sx = extra.equal === false ? sx0 : Math.min(sx0, sy0), sy = extra.equal === false ? sy0 : sx;
+  const ox = (W - sx * (view.x1 - view.x0)) / 2, oy = (H - sy * (view.y1 - view.y0)) / 2;
+  const P = (x, y) => [ox + sx * (x - view.x0), H - oy - sy * (y - view.y0)];
+  canvas._inv = (px, py) => [view.x0 + (px - ox) / sx, view.y0 + (H - oy - py) / sy];
+  ctx.save(); ctx.beginPath(); ctx.rect(ox, oy, sx * (view.x1 - view.x0), sy * (view.y1 - view.y0)); ctx.clip();
+  ctx.strokeStyle = cssv('--axis'); ctx.globalAlpha = .7; ctx.lineWidth = 1; ctx.beginPath();
+  const S = cont.segs;
+  for (let i = 0; i < S.length; i += 4) { const p = P(S[i], S[i + 1]), q = P(S[i + 2], S[i + 3]); ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); }
+  ctx.stroke(); ctx.globalAlpha = 1;
+  const surface = cssv('--surface');
+  for (const pth of paths) {
+    if (pth.visible === false) continue;
+    const n = Math.min(extra.t, pth.W.length - 1);
+    ctx.strokeStyle = pth.color; ctx.lineWidth = pth.width || 1.7; ctx.globalAlpha = pth.alpha || .9; ctx.beginPath();
+    for (let k = 0; k <= n; k++) { const w = pth.W[k]; if (!w) break; const p = P(w[0], w[1]); k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); }
+    ctx.stroke(); ctx.globalAlpha = 1;
+    for (let k = Math.max(1, n - 60); k < n; k++) { const w = pth.W[k]; if (!w) break; const p = P(w[0], w[1]); dot(ctx, p[0], p[1], 2, pth.color); }
+    const w = pth.W[n]; if (w) { const p = P(w[0], w[1]); dot(ctx, p[0], p[1], 5, pth.color, surface); }
+  }
+  if (extra && extra.wstar) { const p = P(extra.wstar[0], extra.wstar[1]); ctx.strokeStyle = cssv('--text'); ctx.lineWidth = 1.8; seg(ctx, p[0] - 7, p[1], p[0] + 7, p[1]); seg(ctx, p[0], p[1] - 7, p[0], p[1] + 7); }
+  if (extra.bands) {
+    const yb = H - oy; ctx.fillStyle = cssv('--grid'); ctx.fillRect(ox, yb - 9, sx * (view.x1 - view.x0), 9);
+    ctx.fillStyle = cssv('--hb'); for (const [a, b] of extra.bands) { const p = P(a, 0), q = P(b, 0); ctx.fillRect(p[0], yb - 9, Math.max(1, q[0] - p[0]), 9); }
+    const ps = P(extra.w0[0], 0); ctx.fillStyle = cssv('--text'); ctx.fillRect(ps[0] - 1, yb - 12, 2, 12);
+  }
+  const w0 = extra.w0, p0 = P(w0[0], w0[1]);
+  ctx.strokeStyle = cssv('--text'); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(p0[0], p0[1], 6.5, 0, 2 * Math.PI); ctx.stroke();
+  ctx.restore();
+}
+function fitView(b, aspect) {
+  const w = b.x1 - b.x0, h = b.y1 - b.y0, cx = (b.x0 + b.x1) / 2, cy = (b.y0 + b.y1) / 2;
+  return w / h > aspect ? { x0: b.x0, x1: b.x1, y0: cy - w / aspect / 2, y1: cy + w / aspect / 2 } : { x0: cx - h * aspect / 2, x1: cx + h * aspect / 2, y0: b.y0, y1: b.y1 };
+}
+
+/* ---------- transport (run / step / scrub) ---------- */
+class Transport {
+  constructor(prefix, draw) {
+    this.t = 0; this.K = 1; this.playing = false; this.draw = draw; this.acc = 0;
+    this.runBtn = $(prefix + '-run'); this.speed = $(prefix + '-speed'); this.slider = $(prefix + '-iter'); this.label = $(prefix + '-iter-value');
+    if (reducedMotion.matches) this.speed.value = '0.25';
+    this.runBtn.addEventListener('click', () => this.playing ? this.pause() : this.play());
+    $(prefix + '-step').addEventListener('click', () => { this.pause(); this.set(this.t + 1); });
+    $(prefix + '-reset').addEventListener('click', () => { this.pause(); this.set(0); });
+    this.slider.addEventListener('input', () => { this.pause(); this.set(+this.slider.value); });
+    this.frame = this.frame.bind(this);
+  }
+  setHorizon(K) { this.K = K; this.slider.max = K; this.set(Math.min(this.t, K)); }
+  set(t) { this.t = Math.max(0, Math.min(this.K, Math.round(t))); this.slider.value = this.t; this.label.textContent = 'k = ' + this.t; this.draw(); if (this.playing && this.t >= this.K) this.pause(); }
+  play() { if (this.t >= this.K) this.set(0); this.playing = true; this.runBtn.textContent = 'Pause'; this.last = performance.now(); this.acc = 0; requestAnimationFrame(this.frame); }
+  pause() { this.playing = false; this.runBtn.textContent = 'Run'; }
+  frame(now) {
+    if (!this.playing) return;
+    const dt = Math.min(0.1, (now - this.last) / 1000); this.last = now;
+    this.acc += dt * Math.max(5, this.K / 12) * parseFloat(this.speed.value);
+    const n = Math.floor(this.acc);
+    if (n > 0) { this.acc -= n; this.set(this.t + n); }
+    if (this.playing) requestAnimationFrame(this.frame);
+  }
+}
+
+
+/* ---------- 2x2 linear algebra ---------- */
+const mm = (A, B) => [[A[0][0] * B[0][0] + A[0][1] * B[1][0], A[0][0] * B[0][1] + A[0][1] * B[1][1]],
+                      [A[1][0] * B[0][0] + A[1][1] * B[1][0], A[1][0] * B[0][1] + A[1][1] * B[1][1]]];
+const mv = (A, v) => [A[0][0] * v[0] + A[0][1] * v[1], A[1][0] * v[0] + A[1][1] * v[1]];
+const tp = A => [[A[0][0], A[1][0]], [A[0][1], A[1][1]]];
+const solve2 = (A, b) => { const d = A[0][0] * A[1][1] - A[0][1] * A[1][0]; return [(A[1][1] * b[0] - A[0][1] * b[1]) / d, (A[0][0] * b[1] - A[1][0] * b[0]) / d]; };
+const dot2 = (u, v) => u[0] * v[0] + u[1] * v[1];
+const nrm = v => Math.hypot(v[0], v[1]);
+const finite2 = w => w && Number.isFinite(w[0]) && Number.isFinite(w[1]) && Math.abs(w[0]) < 1e6 && Math.abs(w[1]) < 1e6;
+function symEig(S) {
+  const a = S[0][0], b = (S[0][1] + S[1][0]) / 2, c = S[1][1];
+  const m = (a + c) / 2, r = Math.hypot((a - c) / 2, b), l1 = m + r, l2 = m - r;
+  let v = Math.abs(b) > 1e-15 * (Math.abs(a) + Math.abs(c)) ? [l1 - c, b] : (a >= c ? [1, 0] : [0, 1]);
+  if (Math.abs(b) > 1e-15 * (Math.abs(a) + Math.abs(c)) && nrm(v) < 1e-300) v = [b, l1 - a];
+  const n = nrm(v); v = [v[0] / n, v[1] / n];
+  return { l: [l1, l2], v1: v, v2: [-v[1], v[0]] };
+}
+function symFun(S, phi) {
+  const { l, v1, v2 } = symEig(S), d1 = phi(l[0]), d2 = phi(l[1]);
+  const o = d1 * v1[0] * v1[1] + d2 * v2[0] * v2[1];
+  return [[d1 * v1[0] * v1[0] + d2 * v2[0] * v2[0], o], [o, d1 * v1[1] * v1[1] + d2 * v2[1] * v2[1]]];
+}
+const condSym = S => { const e = symEig(S).l; return e[0] / e[1]; };
+const sci = x => {
+  if (!Number.isFinite(x)) return '—';
+  if (x === 0) return '0';
+  const e = Math.floor(Math.log10(Math.abs(x))), m = x / 10 ** e;
+  if (e >= -2 && e <= 3) return x.toPrecision(3).replace(/\.?0+$/, '');
+  return m.toFixed(1) + '×' + pow10(e);
+};
+
+/* ---------- landscape drawing ---------- */
+function viewFor(canvas, pts, minFrac = 0.35, margin = 0.12) {
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  for (const p of pts) { if (!finite2(p)) continue; x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]); }
+  if (!Number.isFinite(x0)) { x0 = -1; x1 = 1; y0 = -1; y1 = 1; }
+  const span = Math.max(x1 - x0, y1 - y0, 1e-9);
+  if (x1 - x0 < minFrac * span) { const c = (x0 + x1) / 2; x0 = c - minFrac * span / 2; x1 = c + minFrac * span / 2; }
+  if (y1 - y0 < minFrac * span) { const c = (y0 + y1) / 2; y0 = c - minFrac * span / 2; y1 = c + minFrac * span / 2; }
+  const mx = margin * (x1 - x0), my = margin * (y1 - y0);
+  const r = canvas.getBoundingClientRect(), aspect = r.width > 0 && r.height > 0 ? r.width / r.height : 1.2;
+  return fitView({ x0: x0 - mx, x1: x1 + mx, y0: y0 - my, y1: y1 + my }, aspect);
+}
+function landFrame(canvas, view, cont) {
+  const { ctx, W, H } = fit(canvas);
+  const pad = 10, s = Math.min((W - 2 * pad) / (view.x1 - view.x0), (H - 2 * pad) / (view.y1 - view.y0));
+  const ox = (W - s * (view.x1 - view.x0)) / 2, oy = (H - s * (view.y1 - view.y0)) / 2;
+  const P = (x, y) => [ox + s * (x - view.x0), H - oy - s * (y - view.y0)];
+  canvas._inv = (px, py) => [view.x0 + (px - ox) / s, view.y0 + (H - oy - py) / s];
+  ctx.save(); ctx.beginPath(); ctx.rect(ox, oy, s * (view.x1 - view.x0), s * (view.y1 - view.y0)); ctx.clip();
+  ctx.strokeStyle = cssv('--axis'); ctx.globalAlpha = .7; ctx.lineWidth = 1; ctx.beginPath();
+  const S = cont.segs;
+  for (let i = 0; i < S.length; i += 4) { const p = P(S[i], S[i + 1]), q = P(S[i + 2], S[i + 3]); ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); }
+  ctx.stroke(); ctx.globalAlpha = 1;
+  return { ctx, P, s, done: () => ctx.restore() };
+}
+function lastFinite(pts, t) { let n = Math.min(t, pts.length - 1); while (n > 0 && !finite2(pts[n])) n--; return n; }
+function drawPath(L, pts, t, color, o = {}) {
+  const { ctx, P } = L, n = lastFinite(pts, t);
+  ctx.strokeStyle = color; ctx.lineWidth = o.width || 2; ctx.globalAlpha = o.alpha || .95; ctx.setLineDash(o.dash || []); ctx.beginPath();
+  for (let k = 0; k <= n; k++) { const p = P(pts[k][0], pts[k][1]); k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); }
+  ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+  for (let k = Math.max(1, n - 80); k < n; k++) { const p = P(pts[k][0], pts[k][1]); dot(ctx, p[0], p[1], 2.2, color); }
+  const p = P(pts[n][0], pts[n][1]); dot(ctx, p[0], p[1], 5, color, cssv('--surface'));
+}
+function drawRings(L, pts, t, color, r = 6.5) {
+  const { ctx, P } = L, n = lastFinite(pts, t);
+  ctx.strokeStyle = color; ctx.lineWidth = 1.6;
+  for (let k = 0; k <= n; k++) { const p = P(pts[k][0], pts[k][1]); ctx.beginPath(); ctx.arc(p[0], p[1], r, 0, 2 * Math.PI); ctx.stroke(); }
+}
+function drawCross(L, w) { const { ctx, P } = L, p = P(w[0], w[1]); ctx.strokeStyle = cssv('--text'); ctx.lineWidth = 1.8; seg(ctx, p[0] - 7, p[1], p[0] + 7, p[1]); seg(ctx, p[0], p[1] - 7, p[0], p[1] + 7); }
+function drawStart(L, w) { const { ctx, P } = L, p = P(w[0], w[1]); ctx.strokeStyle = cssv('--text'); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(p[0], p[1], 8, 0, 2 * Math.PI); ctx.stroke(); }
+function sizeKey(...cvs) { return cvs.map(c => { const r = c.getBoundingClientRect(); return Math.round(r.width) + 'x' + Math.round(r.height); }).join('|'); }
+function onPlotClick(canvas, cb) {
+  canvas.addEventListener('click', e => { if (!canvas._inv) return; const r = canvas.getBoundingClientRect(); cb(canvas._inv(e.clientX - r.left, e.clientY - r.top)); });
+}
+function setPressed(map) { for (const [id, v] of Object.entries(map)) $(id).setAttribute('aria-pressed', v ? 'true' : 'false'); }
+
+/* ===== Section 1: preconditioning ===== */
+const s1 = { mode: 'pow', start: [-1.7, 1.25], anchors: true };
+function countTo(step, f, w0, tol, maxit) { let w = w0, f0 = f(w0); for (let k = 0; k <= maxit; k++) { if (f(w) <= tol * f0) return k; w = step(w); } return null; }
+s1.compute = () => {
+  const kappa = 10 ** (+$('s1-kappa').value), thDeg = +$('s1-theta').value, th = thDeg * Math.PI / 180, alpha = +$('s1-alpha').value;
+  $('s1-kappa-out').textContent = kappa < 9.95 ? kappa.toFixed(1) : String(Math.round(kappa));
+  $('s1-theta-out').textContent = Math.round(thDeg) + '°';
+  $('s1-alpha-out').textContent = alpha.toFixed(2);
+  const uf = [Math.cos(th), Math.sin(th)], us = [-Math.sin(th), Math.cos(th)], lf = 1 / kappa;
+  const A = [[us[0] * us[0] + lf * uf[0] * uf[0], us[0] * us[1] + lf * uf[0] * uf[1]],
+             [us[0] * us[1] + lf * uf[0] * uf[1], us[1] * us[1] + lf * uf[1] * uf[1]]];
+  const P = s1.mode === 'jac' ? [[A[0][0], 0], [0, A[1][1]]] : symFun(A, l => l ** alpha);
+  const Pinv = symFun(P, l => 1 / l), Ph = symFun(P, Math.sqrt), Pmh = symFun(P, l => 1 / Math.sqrt(l));
+  const M = mm(mm(Pmh, A), Pmh), eM = symEig(M), LP = eM.l[0], muP = eM.l[1];
+  const f = w => 0.5 * dot2(w, mv(A, w)), phi = z => 0.5 * dot2(z, mv(M, z));
+  const B = mm(Pinv, A), eta = 1 / LP;
+  const stepG = w => { const g = mv(A, w); return [w[0] - g[0], w[1] - g[1]]; };
+  const stepP = w => { const g = mv(B, w); return [w[0] - eta * g[0], w[1] - eta * g[1]]; };
+  const stepZ = z => { const g = mv(M, z); return [z[0] - eta * g[0], z[1] - eta * g[1]]; };
+  const w0 = s1.start.slice(), f0 = f(w0);
+  const nG = countTo(stepG, f, w0, 1e-6, 400000), nP = countTo(stepP, f, w0, 1e-6, 400000);
+  const K = Math.max(20, Math.min(300, Math.ceil(1.6 * Math.max(nG ?? 300, nP ?? 300))));
+  const gd = [w0], pg = [w0], zs = [mv(Ph, w0)], relG = [1], relP = [1];
+  for (let k = 0; k < K; k++) {
+    gd.push(stepG(gd[k])); pg.push(stepP(pg[k])); zs.push(stepZ(zs[k]));
+    relG.push(f(gd[k + 1]) / f0); relP.push(f(pg[k + 1]) / f0);
+  }
+  let diag = 0; const mapped = pg.map(w => mv(Ph, w));
+  for (let k = 0; k <= K; k++) diag = Math.max(diag, nrm([mapped[k][0] - zs[k][0], mapped[k][1] - zs[k][1]]) / Math.max(1, nrm(zs[0])));
+  s1.data = { kappa, A, P, Pmh, Ph, LP, muP, f, phi, f0, K, gd, pg, zs, mapped, relG, relP };
+  s1.cache = null;
+  const isI = s1.mode === 'pow' && alpha === 0, isA = s1.mode === 'pow' && alpha === 1;
+  setPressed({ 's1-pI': isI, 's1-pJ': s1.mode === 'jac', 's1-pA': isA });
+  $('s1-p-out').textContent = s1.mode === 'jac' ? 'P = diag(A)' : isI ? 'P = I' : isA ? 'P = A' : 'P = A^' + alpha.toFixed(2);
+  $('s1-ka').textContent = kappa < 9.95 ? kappa.toFixed(2) : String(Math.round(kappa));
+  const kP = LP / muP; $('s1-kp').textContent = kP < 9.95 ? kP.toFixed(2) : String(Math.round(kP));
+  $('s1-ngd').textContent = nG === null ? '> 400 000' : nG.toLocaleString('en-US');
+  $('s1-npgd').textContent = nP === null ? '> 400 000' : nP.toLocaleString('en-US');
+  $('s1-diag').textContent = sci(diag) + ' (relative)';
+  s1.tr.setHorizon(K);
+};
+s1.draw = () => {
+  const d = s1.data; if (!d) return;
+  const t = s1.tr.t, cw = $('s1-land'), cz = $('s1-zland');
+  const key = sizeKey(cw, cz);
+  if (!s1.cache || s1.cache.key !== key) {
+    const vW = viewFor(cw, d.gd.concat(d.pg, [[0, 0]])), vZ = viewFor(cz, d.zs.concat([[0, 0]]));
+    const lev = geometricLevels(0, 4 * d.f0, 18, 0.5);
+    s1.cache = { key, vW, vZ, cW: contours(d.f, vW, lev), cZ: contours(d.phi, vZ, lev) };
+  }
+  const c = s1.cache, gdc = cssv('--gd'), pgc = cssv('--pgd');
+  const L = landFrame(cw, c.vW, c.cW);
+  if (s1.anchors && t < d.K) {
+    const { ctx, P } = L;
+    ctx.setLineDash([5, 4]); ctx.lineWidth = 1.5;
+    // GD: Euclidean ball through the next GD iterate
+    const g0 = d.gd[t], g1 = d.gd[t + 1], rg = nrm([g1[0] - g0[0], g1[1] - g0[1]]);
+    ctx.strokeStyle = gdc; ctx.globalAlpha = .8; ctx.beginPath();
+    for (let i = 0; i <= 120; i++) { const a = 2 * Math.PI * i / 120, p = P(g0[0] + rg * Math.cos(a), g0[1] + rg * Math.sin(a)); i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); }
+    ctx.stroke();
+    // PGD: ball of the P-norm through the next PGD iterate
+    const p0 = d.pg[t], p1 = d.pg[t + 1], dv = [p1[0] - p0[0], p1[1] - p0[1]], r = Math.sqrt(dot2(dv, mv(d.P, dv)));
+    ctx.strokeStyle = pgc; ctx.beginPath();
+    for (let i = 0; i <= 160; i++) { const a = 2 * Math.PI * i / 160, u = mv(d.Pmh, [r * Math.cos(a), r * Math.sin(a)]), p = P(p0[0] + u[0], p0[1] + u[1]); i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); }
+    ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+  }
+  drawPath(L, d.gd, t, gdc, { width: 2 });
+  drawPath(L, d.pg, t, pgc, { width: 2.4 });
+  drawCross(L, [0, 0]); drawStart(L, d.gd[0]); L.done();
+  const Z = landFrame(cz, c.vZ, c.cZ);
+  drawPath(Z, d.zs, t, pgc, { width: 2.4 });
+  drawRings(Z, d.mapped, t, cssv('--text'), 7);
+  drawCross(Z, [0, 0]); drawStart(Z, d.zs[0]); Z.done();
+  drawLogChart($('s1-chart'), { K: d.K, t, ymin: 1e-14, ymax: 2,
+    series: [{ values: d.relG, color: gdc }, { values: d.relP, color: pgc, width: 2.4 }],
+    refs: [{ r: 1 - 1 / d.kappa, color: gdc }, { r: 1 - d.muP / d.LP, color: pgc }] });
+};
+s1.tr = new Transport('s1', s1.draw);
+const s1Restart = () => { s1.tr.pause(); s1.tr.t = 0; s1.compute(); };
+$('s1-kappa').addEventListener('input', s1Restart);
+$('s1-theta').addEventListener('input', s1Restart);
+$('s1-alpha').addEventListener('input', () => { s1.mode = 'pow'; s1Restart(); });
+$('s1-pI').addEventListener('click', () => { s1.mode = 'pow'; $('s1-alpha').value = 0; s1Restart(); });
+$('s1-pA').addEventListener('click', () => { s1.mode = 'pow'; $('s1-alpha').value = 1; s1Restart(); });
+$('s1-pJ').addEventListener('click', () => { s1.mode = 'jac'; s1Restart(); });
+$('s1-anchor').addEventListener('change', () => { s1.anchors = $('s1-anchor').checked; s1.draw(); });
+onPlotClick($('s1-land'), w => { s1.start = w; s1Restart(); });
+onPlotClick($('s1-zland'), z => { if (s1.data) { s1.start = mv(s1.data.Pmh, z); s1Restart(); } });
+
+/* ===== Section 2: affine invariance ===== */
+const FST = 2 * Math.SQRT2 * Math.exp(-0.1), WST = [-Math.log(2) / 2, 0];
+function bvParts(w) { return [Math.exp(w[0] + 3 * w[1] - 0.1), Math.exp(w[0] - 3 * w[1] - 0.1), Math.exp(-w[0] - 0.1)]; }
+const bvF = w => { const [a, b, c] = bvParts(w); return a + b + c; };
+const bvG = w => { const [a, b, c] = bvParts(w); return [a + b - c, 3 * (a - b)]; };
+const bvH = w => { const [a, b, c] = bvParts(w); return [[a + b + c, 3 * (a - b)], [3 * (a - b), 9 * (a + b)]]; };
+function runMethod(F, G, Hs, x0, K, newton, ls) {
+  let x = x0.slice(); const X = [x], V = [F(x) - FST];
+  for (let k = 0; k < K; k++) {
+    const g = G(x);
+    const d = newton ? solve2(Hs(x), g).map(v => -v) : [-g[0], -g[1]];
+    let t = 1;
+    if (ls || !newton) {
+      const fx = F(x), gd = dot2(g, d); let it = 0;
+      while (!(F([x[0] + t * d[0], x[1] + t * d[1]]) <= fx + 0.25 * t * gd) && it < 80) { t *= 0.5; it++; }
+    }
+    const xn = [x[0] + t * d[0], x[1] + t * d[1]];
+    if (!finite2(xn) || !Number.isFinite(F(xn))) break;
+    x = xn; X.push(x); V.push(F(x) - FST);
+  }
+  return { X, V };
+}
+const firstAtMost = (V, tol) => { for (let k = 0; k < V.length; k++) if (V[k] <= tol) return k; return null; };
+const s2 = { start: [1.0, 0.6] };
+s2.compute = () => {
+  const s = 10 ** (+$('s2-s').value), thDeg = +$('s2-theta').value, th = thDeg * Math.PI / 180, ls = $('s2-ls').checked;
+  $('s2-s-out').textContent = s.toFixed(2); $('s2-theta-out').textContent = Math.round(thDeg) + '°';
+  const c = Math.cos(th), sn = Math.sin(th);
+  const A = [[c * s, -sn / s], [sn * s, c / s]], At = tp(A);
+  const F2 = z => bvF(mv(A, z)), G2 = z => mv(At, bvG(mv(A, z))), H2 = z => mm(mm(At, bvH(mv(A, z))), A);
+  const w0 = s2.start.slice(), z0 = solve2(A, w0), K = 40;
+  const nf = runMethod(bvF, bvG, bvH, w0, K, true, ls), np = runMethod(F2, G2, H2, z0, K, true, ls);
+  const gf = runMethod(bvF, bvG, bvH, w0, K, false, true), gp = runMethod(F2, G2, H2, z0, K, false, true);
+  const back = X => X.map(w => solve2(A, w));
+  const gap = (U, X) => { let m = 0; const n = Math.min(U.length, X.length); for (let k = 0; k < n; k++) { const v = mv(A, X[k]); m = Math.max(m, nrm([v[0] - U[k][0], v[1] - U[k][1]])); } return m; };
+  const cnt = (F, G, Hs, x, newton) => firstAtMost(runMethod(F, G, Hs, x, newton ? 200 : 8000, newton, newton ? ls : true).V, 1e-10);
+  const cNf = cnt(bvF, bvG, bvH, w0, true), cNp = cnt(F2, G2, H2, z0, true), cGf = cnt(bvF, bvG, bvH, w0, false), cGp = cnt(F2, G2, H2, z0, false);
+  const fmt = n => n === null ? '—' : String(n);
+  $('s2-dn').textContent = sci(gap(nf.X, np.X)); $('s2-dg').textContent = sci(gap(gf.X, gp.X));
+  $('s2-nn').textContent = fmt(cNf) + ' / ' + fmt(cNp); $('s2-ng').textContent = fmt(cGf) + ' / ' + fmt(cGp);
+  const zst = solve2(A, WST);
+  $('s2-kh').textContent = condSym(bvH(WST)).toFixed(1) + ' / ' + condSym(H2(zst)).toFixed(1);
+  s2.data = { A, F2, w0, z0, zst, K, nf, np, gf, gp, nfB: back(nf.X), gfB: back(gf.X), ls };
+  s2.cache = null;
+  s2.tr.setHorizon(K);
+};
+s2.draw = () => {
+  const d = s2.data; if (!d) return;
+  const t = s2.tr.t, cw = $('s2-land'), cz = $('s2-zland'), key = sizeKey(cw, cz);
+  if (!s2.cache || s2.cache.key !== key) {
+    const vW = viewFor(cw, d.nf.X.concat(d.gf.X, [WST]), 0.5), vZ = viewFor(cz, d.np.X.concat(d.gp.X, d.nfB, d.gfB, [d.zst]), 0.5);
+    const top = Math.min(bvF(d.w0), 60) - FST, lev = geometricLevels(FST, FST + 3 * Math.max(top, 0.5), 18, 0.55);
+    s2.cache = { key, vW, vZ, cW: contours(bvF, vW, lev), cZ: contours(d.F2, vZ, lev) };
+  }
+  const c = s2.cache, ntc = cssv('--nt'), gdc = cssv('--gd');
+  const L = landFrame(cw, c.vW, c.cW);
+  drawPath(L, d.gf.X, t, gdc, { width: 2 }); drawPath(L, d.nf.X, t, ntc, { width: 2.4 });
+  drawCross(L, WST); drawStart(L, d.w0); L.done();
+  const Z = landFrame(cz, c.vZ, c.cZ);
+  drawPath(Z, d.gp.X, t, gdc, { width: 2 }); drawPath(Z, d.np.X, t, ntc, { width: 2.4 });
+  drawRings(Z, d.gfB, t, gdc, 6); drawRings(Z, d.nfB, t, ntc, 7.5);
+  drawCross(Z, d.zst); drawStart(Z, d.z0); Z.done();
+  const ymax = 2 * Math.max(d.nf.V[0], d.np.V[0], 1);
+  drawLogChart($('s2-chart'), { K: d.K, t, ymin: 1e-14, ymax,
+    series: [{ values: d.gf.V, color: gdc }, { values: d.gp.V, color: gdc, dash: [6, 4] },
+             { values: d.nf.V, color: ntc, width: 4, alpha: .45 }, { values: d.np.V, color: ntc, width: 2, dash: [6, 4] }] });
+};
+s2.tr = new Transport('s2', s2.draw);
+const s2Restart = () => { s2.tr.pause(); s2.tr.t = 0; s2.compute(); };
+$('s2-s').addEventListener('input', s2Restart);
+$('s2-theta').addEventListener('input', s2Restart);
+$('s2-ls').addEventListener('change', s2Restart);
+onPlotClick($('s2-land'), w => { s2.start = w; s2Restart(); });
+onPlotClick($('s2-zland'), z => { if (s2.data) { s2.start = mv(s2.data.A, z); s2Restart(); } });
+
+/* ===== Section 3: critical points, not minimizers ===== */
+const q1 = { f: x => x ** 4 / 4 - x * x / 2, d1: x => x * x * x - x, d2: x => 3 * x * x - 1 };
+const XR = [-2.2, 2.2];
+function newton1(x0, K) {
+  const xs = [x0]; let x = x0, status = 'ok';
+  for (let k = 0; k < K; k++) {
+    const g = q1.d1(x), h = q1.d2(x);
+    if (Math.abs(g) < 1e-15) { xs.push(x); continue; }
+    if (Math.abs(h) < 1e-14) { status = 'flat'; break; }
+    x = x - g / h;
+    if (!Number.isFinite(x) || Math.abs(x) > 1e9) { status = 'diverged'; break; }
+    xs.push(x);
+  }
+  return { xs, status };
+}
+function limit1(x0) {
+  let x = x0;
+  for (let k = 0; k < 200; k++) {
+    const g = q1.d1(x), h = q1.d2(x);
+    if (Math.abs(g) < 1e-13) break;
+    if (Math.abs(h) < 1e-14) return null;
+    x -= g / h;
+    if (!Number.isFinite(x) || Math.abs(x) > 1e9) return null;
+  }
+  for (const c of [-1, 0, 1]) if (Math.abs(x - c) < 1e-6) return c;
+  return null;
+}
+const s3 = { sign: 1 };
+s3.compute = () => {
+  const x0 = +$('s3-x0').value; $('s3-x0-out').textContent = x0.toFixed(3);
+  const lim = limit1(x0), run = newton1(x0, 60);
+  let K = run.xs.length - 1;
+  if (lim !== null) { let k = 0; while (k < run.xs.length && Math.abs(run.xs[k] - lim) > 1e-12) k++; K = Math.min(run.xs.length - 1, k + 1); }
+  K = Math.max(4, Math.min(40, K));
+  s3.data = { x0, lim, xs: run.xs, status: run.status, K };
+  s3.tr.setHorizon(Math.min(K, run.xs.length - 1 + (run.status === 'ok' ? 0 : 0)));
+};
+s3.basins = null;
+s3.drawStrip = () => {
+  const cv = $('s3-strip'), { ctx, W, H } = fit(cv);
+  const n = Math.max(2, Math.round(W)), key = n;
+  if (!s3.basins || s3.basins.key !== key) {
+    const cls = new Int8Array(n);
+    for (let i = 0; i < n; i++) { const x = XR[0] + (XR[1] - XR[0]) * (i + 0.5) / n, l = limit1(x); cls[i] = l === null ? 9 : l; }
+    s3.basins = { key, cls };
+  }
+  const col = { '-1': cssv('--gd'), '0': cssv('--nt'), '1': cssv('--pgd'), '9': cssv('--axis') };
+  const cls = s3.basins.cls;
+  for (let i = 0; i < n; i++) { ctx.fillStyle = col[cls[i]]; ctx.fillRect(i * W / n, 0, W / n + 0.6, H); }
+  if (s3.data) { const x = (s3.data.x0 - XR[0]) / (XR[1] - XR[0]) * W; ctx.fillStyle = cssv('--text'); ctx.fillRect(x - 1.5, 0, 3, H); }
+  cv._x = px => XR[0] + (XR[1] - XR[0]) * px / W;
+};
+s3.draw = () => {
+  const d = s3.data; if (!d) return;
+  const cv = $('s3-plot'), { ctx, W, H } = fit(cv), sg = s3.sign, t = Math.min(s3.tr.t, d.xs.length - 1);
+  const m = { l: 44, r: 16, t: 16, b: 30 }, pw = W - m.l - m.r, ph = H - m.t - m.b;
+  const yr = sg > 0 ? [-0.9, 2.2] : [-2.2, 0.9];
+  const X = x => m.l + pw * (x - XR[0]) / (XR[1] - XR[0]), Y = y => m.t + ph * (yr[1] - y) / (yr[1] - yr[0]);
+  cv._inv = (px, py) => [XR[0] + (XR[1] - XR[0]) * (px - m.l) / pw, 0];
+  const grid = cssv('--grid'), axis = cssv('--axis'), muted = cssv('--muted'), text = cssv('--text'), ntc = cssv('--nt'), mod = cssv('--model'), surface = cssv('--surface');
+  ctx.font = '11px system-ui, sans-serif'; ctx.lineWidth = 1;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  for (let x = -2; x <= 2; x++) { ctx.strokeStyle = grid; seg(ctx, X(x), m.t, X(x), m.t + ph); ctx.fillStyle = muted; ctx.fillText(String(x), X(x), m.t + ph + 6); }
+  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  for (let y = Math.ceil(yr[0]); y <= yr[1]; y++) { ctx.strokeStyle = grid; seg(ctx, m.l, Y(y), m.l + pw, Y(y)); ctx.fillStyle = muted; ctx.fillText(String(y), m.l - 6, Y(y)); }
+  ctx.strokeStyle = axis; seg(ctx, m.l, Y(0), m.l + pw, Y(0));
+  ctx.save(); ctx.beginPath(); ctx.rect(m.l, m.t, pw, ph); ctx.clip();
+  // the function
+  ctx.strokeStyle = text; ctx.lineWidth = 2.2; ctx.beginPath();
+  for (let i = 0; i <= 400; i++) { const x = XR[0] + (XR[1] - XR[0]) * i / 400, y = sg * q1.f(x); i ? ctx.lineTo(X(x), Y(y)) : ctx.moveTo(X(x), Y(y)); }
+  ctx.stroke();
+  // critical points
+  ctx.font = '12px system-ui, sans-serif'; ctx.textAlign = 'center';
+  for (const c of [-1, 0, 1]) {
+    const y = sg * q1.f(c), isMin = sg * q1.d2(c) > 0;
+    dot(ctx, X(c), Y(y), 4, surface, text);
+    ctx.fillStyle = muted; ctx.textBaseline = isMin === (sg > 0) ? 'top' : 'bottom';
+    ctx.fillText(isMin ? 'min' : 'max', X(c), Y(y) + (ctx.textBaseline === 'top' ? 8 : -8));
+  }
+  // earlier iterates
+  for (let k = 0; k < t; k++) { const x = d.xs[k]; if (x >= XR[0] && x <= XR[1]) { ctx.globalAlpha = .35; dot(ctx, X(x), Y(sg * q1.f(x)), 3, ntc); ctx.globalAlpha = 1; } }
+  const xk = d.xs[t], inRange = x => x >= XR[0] && x <= XR[1];
+  const hasNext = t + 1 < d.xs.length;
+  if (inRange(xk)) {
+    const g = q1.d1(xk), h = q1.d2(xk), fk = q1.f(xk);
+    // quadratic model of the current function at x_k
+    ctx.strokeStyle = mod; ctx.lineWidth = 2; ctx.setLineDash([7, 5]); ctx.beginPath();
+    for (let i = 0; i <= 400; i++) { const x = XR[0] + (XR[1] - XR[0]) * i / 400, dx = x - xk, y = sg * (fk + g * dx + 0.5 * h * dx * dx); i ? ctx.lineTo(X(x), Y(y)) : ctx.moveTo(X(x), Y(y)); }
+    ctx.stroke(); ctx.setLineDash([]);
+    ctx.strokeStyle = ntc; ctx.globalAlpha = .6; ctx.setLineDash([2, 3]); seg(ctx, X(xk), Y(0), X(xk), Y(sg * fk)); ctx.setLineDash([]); ctx.globalAlpha = 1;
+    dot(ctx, X(xk), Y(sg * fk), 5.5, ntc, surface);
+    if (hasNext && Math.abs(h) > 1e-14) {
+      const xn = d.xs[t + 1], dn = xn - xk, yv = sg * (fk + g * dn + 0.5 * h * dn * dn);
+      if (inRange(xn)) {
+        ctx.strokeStyle = mod; ctx.setLineDash([2, 3]); seg(ctx, X(xn), Y(0), X(xn), Y(yv)); ctx.setLineDash([]);
+        const px = X(xn), py = Y(yv); ctx.fillStyle = surface; ctx.strokeStyle = mod; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(px, py - 7); ctx.lineTo(px + 7, py); ctx.lineTo(px, py + 7); ctx.lineTo(px - 7, py); ctx.closePath(); ctx.fill(); ctx.stroke();
+      } else {
+        ctx.fillStyle = mod; ctx.font = '12px system-ui, sans-serif'; ctx.textBaseline = 'middle';
+        const right = xn > XR[1]; ctx.textAlign = right ? 'right' : 'left';
+        ctx.fillText((right ? '' : '← ') + 'next iterate x = ' + xn.toPrecision(4) + (right ? ' →' : ''), right ? m.l + pw - 6 : m.l + 6, m.t + 14);
+      }
+    }
+  } else {
+    ctx.fillStyle = ntc; ctx.font = '12px system-ui, sans-serif'; ctx.textBaseline = 'middle';
+    const right = xk > XR[1]; ctx.textAlign = right ? 'right' : 'left';
+    ctx.fillText((right ? '' : '← ') + 'x_k = ' + xk.toPrecision(4) + ' is off the plot' + (right ? ' →' : ''), right ? m.l + pw - 6 : m.l + 6, m.t + 14);
+  }
+  ctx.restore();
+  // readout
+  const h = sg * q1.d2(xk);
+  $('s3-xk').textContent = Number.isFinite(xk) ? xk.toPrecision(6) : '—';
+  $('s3-fpp').textContent = Number.isFinite(h) ? h.toPrecision(3) : '—';
+  $('s3-kind').textContent = !hasNext && Math.abs(q1.d1(xk)) < 1e-12 ? 'critical point reached' : Math.abs(h) < 1e-12 ? 'undefined (f″ = 0)' : h > 0 ? 'minimizer (convex model)' : 'maximizer (concave model)';
+  const lim = d.lim;
+  $('s3-lim').textContent = lim === null ? 'no limit within 200 steps'
+    : 'x = ' + lim + ', a ' + (lim === 0 ? 'local ' : '') + ((sg * q1.d2(lim) > 0) ? 'minimizer' : 'maximizer') + ' of ' + (sg > 0 ? 'f' : '−f');
+  s3.drawStrip();
+};
+s3.tr = new Transport('s3', s3.draw);
+const s3Restart = () => { s3.tr.pause(); s3.tr.t = 0; s3.compute(); };
+$('s3-x0').addEventListener('input', s3Restart);
+for (const b of document.querySelectorAll('#s3 [data-x0]')) b.addEventListener('click', () => { $('s3-x0').value = b.dataset.x0; s3Restart(); });
+$('s3-pos').addEventListener('click', () => { s3.sign = 1; setPressed({ 's3-pos': true, 's3-neg': false }); s3.draw(); });
+$('s3-neg').addEventListener('click', () => { s3.sign = -1; setPressed({ 's3-pos': false, 's3-neg': true }); s3.draw(); });
+onPlotClick($('s3-plot'), p => { $('s3-x0').value = Math.max(XR[0], Math.min(XR[1], p[0])).toFixed(3); s3Restart(); });
+$('s3-strip').addEventListener('click', e => { const cv = $('s3-strip'); if (!cv._x) return; const r = cv.getBoundingClientRect(); $('s3-x0').value = cv._x(e.clientX - r.left).toFixed(3); s3Restart(); });
+
+/* ===== Section 4: Newton fractals ===== */
+const POLYS = {
+  z3: { c: [1, 0, 0, -1], G: 'Here f(x, y) = Re G(x + iy) with G(z) = z⁴/4 − z.', view: { cx: 0, cy: 0, half: 1.8 } },
+  z4: { c: [1, 0, 0, 0, -1], G: 'Here f(x, y) = Re G(x + iy) with G(z) = z⁵/5 − z.', view: { cx: 0, cy: 0, half: 1.8 } },
+  cyc: { c: [1, 0, -2, 2], G: 'Here f(x, y) = Re G(x + iy) with G(z) = z⁴/4 − z² + 2z.', view: { cx: -0.3, cy: 0, half: 2.3 } }
+};
+const PAL = [[214, 82, 92], [52, 138, 189], [236, 170, 64], [88, 170, 120]];
+function polyRoots(c) {
+  const n = c.length - 1; let zr = [], zi = [];
+  let ar = 1, ai = 0;
+  for (let k = 0; k < n; k++) { zr.push(ar); zi.push(ai); const nr = ar * 0.4 - ai * 0.9, ni = ar * 0.9 + ai * 0.4; ar = nr; ai = ni; }
+  for (let it = 0; it < 500; it++) {
+    for (let i = 0; i < n; i++) {
+      let pr = c[0], pi = 0; for (let k = 1; k <= n; k++) { const npr = pr * zr[i] - pi * zi[i] + c[k], npi = pr * zi[i] + pi * zr[i]; pr = npr; pi = npi; }
+      let dr = 1, di = 0; for (let j = 0; j < n; j++) if (j !== i) { const ur = zr[i] - zr[j], ui = zi[i] - zi[j]; const ndr = dr * ur - di * ui, ndi = dr * ui + di * ur; dr = ndr; di = ndi; }
+      const den = dr * dr + di * di; zr[i] -= (pr * dr + pi * di) / den; zi[i] -= (pi * dr - pr * di) / den;
+    }
+  }
+  return zr.map((x, i) => [x, Math.abs(zi[i]) < 1e-12 ? 0 : zi[i]]);
+}
+function newtonC(c, x, y) {
+  const n = c.length - 1; let pr = c[0], pi = 0, dr = 0, di = 0;
+  for (let k = 1; k <= n; k++) { const ndr = dr * x - di * y + pr, ndi = dr * y + di * x + pi; dr = ndr; di = ndi; const npr = pr * x - pi * y + c[k], npi = pr * y + pi * x; pr = npr; pi = npi; }
+  const den = dr * dr + di * di; if (den < 1e-300) return null;
+  return [x - (pr * dr + pi * di) / den, y - (pi * dr - pr * di) / den];
+}
+const s4 = { poly: 'z3', sel: null };
+s4.compute = () => {
+  s4.poly = $('s4-poly').value; s4.roots = polyRoots(POLYS[s4.poly].c); s4.view = { ...POLYS[s4.poly].view }; s4.sel = null;
+  $('s4-G').textContent = POLYS[s4.poly].G;
+  s4.render(); s4.paint(); s4.readout();
+};
+s4.render = () => {
+  const cv = $('s4-canvas'), r = cv.getBoundingClientRect(), q = Math.min(window.devicePixelRatio || 1, 1.5);
+  const W = Math.max(1, Math.round(r.width * q)), H = Math.max(1, Math.round(r.height * q));
+  if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+  const off = s4.off || (s4.off = document.createElement('canvas')); off.width = W; off.height = H;
+  const octx = off.getContext('2d'), img = octx.createImageData(W, H), data = img.data;
+  const { cx, cy, half } = s4.view, S = W / (2 * half), c = POLYS[s4.poly].c, n = c.length - 1, roots = s4.roots, maxIt = +$('s4-max').value;
+  const nr = roots.length, rx = roots.map(p => p[0]), ry = roots.map(p => p[1]);
+  for (let py = 0; py < H; py++) {
+    const y0 = cy - (py + 0.5 - H / 2) / S;
+    for (let px = 0; px < W; px++) {
+      let x = cx + (px + 0.5 - W / 2) / S, y = y0, cls = -1, it = 0;
+      for (; it < maxIt; it++) {
+        let pr = c[0], pi = 0, dr = 0, di = 0;
+        for (let k = 1; k <= n; k++) { const ndr = dr * x - di * y + pr, ndi = dr * y + di * x + pi; dr = ndr; di = ndi; const npr = pr * x - pi * y + c[k], npi = pr * y + pi * x; pr = npr; pi = npi; }
+        const den = dr * dr + di * di; if (den < 1e-300) break;
+        x -= (pr * dr + pi * di) / den; y -= (pi * dr - pr * di) / den;
+        if (x * x + y * y > 1e12) break;
+        let found = -1;
+        for (let j = 0; j < nr; j++) { const ex = x - rx[j], ey = y - ry[j]; if (ex * ex + ey * ey < 1e-12) { found = j; break; } }
+        if (found >= 0) { cls = found; it++; break; }
+      }
+      const o = 4 * (py * W + px);
+      if (cls < 0) { data[o] = 16; data[o + 1] = 16; data[o + 2] = 19; }
+      else { const sh = 1 - 0.72 * Math.pow(it / maxIt, 0.55), col = PAL[cls % PAL.length]; data[o] = col[0] * sh; data[o + 1] = col[1] * sh; data[o + 2] = col[2] * sh; }
+      data[o + 3] = 255;
+    }
+  }
+  octx.putImageData(img, 0, 0);
+  s4.S = S; s4.W = W; s4.H = H; s4.q = q; s4.key = sizeKey(cv) + '|' + maxIt;
+};
+s4.toPx = (x, y) => [(x - s4.view.cx) * s4.S + s4.W / 2, s4.H / 2 - (y - s4.view.cy) * s4.S];
+s4.path = () => {
+  if (!s4.sel) return null;
+  const c = POLYS[s4.poly].c, maxIt = +$('s4-max').value, pts = [s4.sel.slice()]; let p = s4.sel, res = null;
+  for (let k = 0; k < maxIt; k++) {
+    const nx = newtonC(c, p[0], p[1]); if (!nx || !Number.isFinite(nx[0]) || nx[0] * nx[0] + nx[1] * nx[1] > 1e12) { res = { kind: 'bad', k: k + 1 }; break; }
+    p = nx; pts.push(p);
+    const j = s4.roots.findIndex(r => (p[0] - r[0]) ** 2 + (p[1] - r[1]) ** 2 < 1e-12);
+    if (j >= 0) { res = { kind: 'root', j, k: k + 1 }; break; }
+  }
+  return { pts, res: res || { kind: 'none', k: maxIt } };
+};
+s4.paint = () => {
+  const cv = $('s4-canvas'); if (!s4.off) return;
+  const ctx = cv.getContext('2d'); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(s4.off, 0, 0);
+  const q = s4.q;
+  const P = s4.path();
+  if (P) {
+    const pts = P.pts.slice(0, 60).map(p => s4.toPx(p[0], p[1]));
+    for (const [w, col] of [[3.5 * q, 'rgba(0,0,0,.75)'], [1.6 * q, '#ffffff']]) {
+      ctx.strokeStyle = col; ctx.lineWidth = w; ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.stroke();
+    }
+    for (let i = 1; i < pts.length; i++) { ctx.beginPath(); ctx.arc(pts[i][0], pts[i][1], 2.6 * q, 0, 2 * Math.PI); ctx.fillStyle = '#fff'; ctx.fill(); ctx.strokeStyle = '#000'; ctx.lineWidth = q; ctx.stroke(); }
+    ctx.beginPath(); ctx.arc(pts[0][0], pts[0][1], 7 * q, 0, 2 * Math.PI); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2 * q; ctx.stroke();
+  }
+  for (const r of s4.roots) { const p = s4.toPx(r[0], r[1]); ctx.beginPath(); ctx.arc(p[0], p[1], 5 * q, 0, 2 * Math.PI); ctx.fillStyle = '#fff'; ctx.fill(); ctx.strokeStyle = '#111'; ctx.lineWidth = 1.5 * q; ctx.stroke(); }
+};
+s4.readout = () => {
+  const P = s4.path(), v = s4.view;
+  $('s4-view').textContent = 'center ' + v.cx.toFixed(3) + (v.cy < 0 ? ' − ' : ' + ') + Math.abs(v.cy).toFixed(3) + 'i, width ' + sci(2 * v.half);
+  if (!P) { $('s4-start').textContent = 'click the picture'; $('s4-res').textContent = '—'; return; }
+  const z = P.pts[0]; $('s4-start').textContent = z[0].toFixed(4) + (z[1] < 0 ? ' − ' : ' + ') + Math.abs(z[1]).toFixed(4) + 'i';
+  const R = P.res;
+  if (R.kind === 'root') { const r = s4.roots[R.j]; $('s4-res').textContent = 'saddle at ' + r[0].toFixed(3) + (r[1] < 0 ? ' − ' : ' + ') + Math.abs(r[1]).toFixed(3) + 'i after ' + R.k + ' steps'; }
+  else if (R.kind === 'bad') $('s4-res').textContent = 'step undefined or escaping after ' + R.k + ' steps';
+  else $('s4-res').textContent = 'no convergence within ' + R.k + ' steps';
+};
+s4.draw = () => { if (!s4.roots) return; const key = sizeKey($('s4-canvas')) + '|' + $('s4-max').value; if (key !== s4.key) s4.render(); s4.paint(); s4.readout(); };
+let s4Pending = null;
+const s4Rerender = () => { if (s4Pending) return; s4Pending = requestAnimationFrame(() => { s4Pending = null; s4.render(); s4.paint(); s4.readout(); }); };
+$('s4-poly').addEventListener('change', () => s4.compute());
+$('s4-max').addEventListener('input', () => { $('s4-max-out').textContent = $('s4-max').value; s4Rerender(); });
+$('s4-zin').addEventListener('click', () => { if (s4.sel) { s4.view.cx = s4.sel[0]; s4.view.cy = s4.sel[1]; } s4.view.half /= 2; s4Rerender(); });
+$('s4-zout').addEventListener('click', () => { s4.view.half *= 2; s4Rerender(); });
+$('s4-zreset').addEventListener('click', () => { s4.view = { ...POLYS[s4.poly].view }; s4Rerender(); });
+$('s4-canvas').addEventListener('click', e => {
+  if (!s4.S) return; const cv = $('s4-canvas'), r = cv.getBoundingClientRect();
+  const px = (e.clientX - r.left) * s4.W / r.width, py = (e.clientY - r.top) * s4.H / r.height;
+  s4.sel = [s4.view.cx + (px - s4.W / 2) / s4.S, s4.view.cy - (py - s4.H / 2) / s4.S]; s4.paint(); s4.readout();
+});
+$('s4-max-out').textContent = $('s4-max').value;
+
+/* ---------- lifecycle ---------- */
+const sections = { s1, s2, s3, s4 };
+for (const [id, s] of Object.entries(sections)) {
+  const det = $(id);
+  det.addEventListener('toggle', () => { if (det.open) { if (!s.ready) { s.compute(); s.ready = true; } else s.draw(); } else if (s.tr) s.tr.pause(); });
+}
+const redrawAll = () => { for (const [id, s] of Object.entries(sections)) if ($(id).open && s.ready) s.draw(); };
+let resizeTimer = null;
+new ResizeObserver(() => { clearTimeout(resizeTimer); resizeTimer = setTimeout(redrawAll, 80); }).observe(document.querySelector('main'));
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', redrawAll);
+window.__demo = sections;
+})();
+</script>
+</body>
+</html>
