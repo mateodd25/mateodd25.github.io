@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Float32 storage and idealized arithmetic time for linear, quadratic, and cubic scaling, alongside dense Cholesky factorization.">
+  <title>Memory and time · Optimization for Data Science</title>
+  <style>
+    :root { color-scheme:light dark; --bg:#f7f6f2; --surface:#fff; --text:#23262b; --muted:#545b65; --line:#d7d9dd; --accent:#800000; --soft:#f0e9e9; }
+    @media(prefers-color-scheme:dark) { :root { --bg:#181b20; --surface:#20242a; --text:#eeeef0; --muted:#bdc2ca; --line:#424852; --accent:#f3a6af; --soft:#35272c; } }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font:17px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    main { max-width:1240px; margin:0 auto; padding:48px 32px; }
+    .eyebrow { color:var(--muted); font-size:12px; letter-spacing:.12em; text-transform:uppercase; margin:0 0 12px; }
+    h1 { font-size:clamp(28px,4vw,42px); line-height:1.15; letter-spacing:-.03em; font-weight:650; margin:0 0 16px; }
+    .assumptions { margin:0 0 28px; color:var(--muted); max-width:900px; }
+    .math { font-family:Georgia,"Times New Roman",serif; }
+    .scroll { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; background:var(--surface); font-variant-numeric:tabular-nums; }
+    caption { text-align:left; padding:0 0 12px; font-weight:600; font-size:18px; }
+    caption span { color:var(--muted); font-weight:400; font-size:15px; }
+    th,td { padding:22px 16px; text-align:center; border-bottom:1px solid var(--line); vertical-align:middle; }
+    thead th { font-weight:600; border-top:2px solid var(--text); border-bottom:2px solid var(--text); }
+    thead .sub { display:block; font-size:13px; font-weight:400; color:var(--muted); margin-top:5px; }
+    tbody th { text-align:left; font-weight:600; white-space:nowrap; }
+    tbody tr:last-child > * { border-bottom:2px solid var(--text); }
+    .chol { background:var(--soft); }
+    .value { display:inline-block; white-space:nowrap; }
+    .sep { display:inline-block; margin:0 .3em; color:var(--muted); }
+    .note { margin:18px 0 0; font-size:14px; color:var(--muted); max-width:1100px; }
+    .note strong { color:var(--text); font-weight:600; }
+    .takeaway { margin:22px 0 0; color:var(--accent); font-weight:600; }
+    @media(max-width:700px) { main { padding:28px 16px; } th,td { padding:16px 12px; } table { min-width:850px; } .note { font-size:14px; } }
+    @media print { :root { color-scheme:light; --bg:#fff; --surface:#fff; --text:#111; --muted:#444; --line:#aaa; --accent:#111; --soft:#f4f4f4; } @page { size:landscape; margin:15mm; } main { max-width:none; padding:0; } body { font-size:13px; } h1 { font-size:26px; } table { min-width:0; } th,td { padding:15px 9px; } .scroll { overflow:visible; } .note { font-size:11px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Optimization for Data Science · Lecture 7</p>
+    <h1>Memory and time as dimension grows</h1>
+    <p class="assumptions">Float32: <strong>4 bytes per number</strong>. Arithmetic time at a hypothetical sustained <strong>100 GFLOP/s</strong> (10<sup>11</sup> operations per second). These are scaling estimates, not measured runtimes.</p>
+    <div class="scroll" role="region" aria-label="Memory and time comparison" tabindex="0">
+      <table aria-describedby="units interpretation">
+        <caption>Each cell: memory / time <span>· Decimal storage units</span></caption>
+        <thead>
+          <tr>
+            <th scope="col">Dimension <span class="math">d</span></th>
+            <th scope="col"><span class="math">d</span><span class="sub">d entries / d operations</span></th>
+            <th scope="col"><span class="math">d<sup>2</sup></span><span class="sub">d² entries / d² operations</span></th>
+            <th scope="col"><span class="math">d<sup>3</sup></span><span class="sub">d³ entries / d³ operations</span></th>
+            <th scope="col" class="chol">Cholesky<span class="sub">d² entries / ≈ d³/3 operations</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">1,000 <span class="math">(10<sup>3</sup>)</span></th>
+            <td><span class="value">4 kB</span><span class="sep">/</span><span class="value">10 ns</span></td>
+            <td><span class="value">4 MB</span><span class="sep">/</span><span class="value">10 μs</span></td>
+            <td><span class="value">4 GB</span><span class="sep">/</span><span class="value">10 ms</span></td>
+            <td class="chol"><span class="value">4 MB</span><span class="sep">/</span><span class="value">3.3 ms</span></td>
+          </tr>
+          <tr>
+            <th scope="row">1,000,000 <span class="math">(10<sup>6</sup>)</span></th>
+            <td><span class="value">4 MB</span><span class="sep">/</span><span class="value">10 μs</span></td>
+            <td><span class="value">4 TB</span><span class="sep">/</span><span class="value">10 s</span></td>
+            <td><span class="value">4 EB</span><span class="sep">/</span><span class="value">116 days</span></td>
+            <td class="chol"><span class="value">4 TB</span><span class="sep">/</span><span class="value">38.6 days</span></td>
+          </tr>
+          <tr>
+            <th scope="row">1,000,000,000 <span class="math">(10<sup>9</sup>)</span></th>
+            <td><span class="value">4 GB</span><span class="sep">/</span><span class="value">10 ms</span></td>
+            <td><span class="value">4 EB</span><span class="sep">/</span><span class="value">116 days</span></td>
+            <td><span class="value">4 × 10<sup>27</sup> B</span><span class="sep">/</span><span class="value">317 million years</span></td>
+            <td class="chol"><span class="value">4 EB</span><span class="sep">/</span><span class="value">106 million years</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p id="units" class="note">kB = 10<sup>3</sup> bytes; MB = 10<sup>6</sup>; GB = 10<sup>9</sup>; TB = 10<sup>12</sup>; EB = 10<sup>18</sup>. One year = 365.25 days. Times are rounded.</p>
+    <p id="interpretation" class="note"><strong>The first three columns pair a hypothetical count of stored numbers with the same count of operations.</strong> They are scaling models, not the memory requirements of a particular algorithm. The Cholesky column counts one full matrix reused in place, before extra workspace; its arithmetic cost is approximately d³/3.</p>
+    <p class="note">Time = operation count / 10<sup>11</sup>. Actual runtime also depends on memory bandwidth, overhead, and implementation. Large cases presume enough memory to hold the matrix; the tiny times omit overhead. At 1 TFLOP/s, divide the arithmetic times by 10.</p>
+    <p class="takeaway">Cholesky uses quadratic memory and cubic arithmetic work.</p>
+  </main>
+</body>
+</html>
