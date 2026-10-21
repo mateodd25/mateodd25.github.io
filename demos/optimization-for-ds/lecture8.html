@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Interactive experiments for Lecture 8: Gauss–Newton, unstable full steps, local quadratic convergence, and Levenberg–Morrison–Marquardt damping.">
+<title>Gauss–Newton and damping · Optimization for Data Science</title>
+<style>
+
+    :root { color-scheme: light dark; --bg:#f7f6f2; --surface:#ffffff; --text:#23262b; --muted:#616771; --line:#deded8; --grid:#eaeae5; --axis:#a5a8a9; --soft:#f0efe9; --focus:#146eaa;
+      --gd:#14796e; --hb:#9c3455; --agd:#426db3; --rst:#a36400; --band:rgba(156,52,85,.11); --region:rgba(66,109,179,.08); }
+    @media (prefers-color-scheme:dark) { :root { --bg:#181b20; --surface:#20242a; --text:#eeeef0; --muted:#b2b7c0; --line:#3f444b; --grid:#30353d; --axis:#717985; --soft:#2b3037; --focus:#82c9fa;
+      --gd:#69cbb9; --hb:#f494af; --agd:#91b8ff; --rst:#eac17a; --band:rgba(244,148,175,.13); --region:rgba(145,184,255,.10); } }
+    * { box-sizing:border-box; }
+    [hidden] { display:none !important; }
+    body { margin:0; background:var(--bg); color:var(--text); font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    main { max-width:1180px; margin:0 auto; padding:34px 28px 48px; }
+    .eyebrow { margin:0 0 9px; font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); font-weight:650; }
+    h1 { margin:0; font-size:clamp(25px,3.4vw,38px); line-height:1.2; font-weight:650; letter-spacing:-.035em; }
+    .intro { margin:11px 0 22px; max-width:860px; color:var(--muted); }
+    .math { font-family:Georgia,"Times New Roman",serif; }
+    details.stage { margin:0 0 16px; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+    details.stage > summary { list-style:none; cursor:pointer; padding:18px 22px; display:flex; align-items:center; gap:14px; font-size:19px; font-weight:620; letter-spacing:-.015em; }
+    details.stage > summary::-webkit-details-marker { display:none; }
+    details.stage > summary::after { content:"Show"; margin-left:auto; font-size:12px; font-weight:550; color:var(--muted); border:1px solid var(--line); border-radius:20px; padding:2px 11px; }
+    details.stage[open] > summary::after { content:"Hide"; }
+    .num { flex:0 0 auto; width:30px; height:30px; border-radius:50%; display:grid; place-items:center; background:var(--text); color:var(--surface); font-size:14px; font-weight:650; }
+    .stage-body { padding:0 22px 22px; }
+    .lede { margin:0 0 16px; max-width:900px; }
+    .controls { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:16px 34px; align-items:end; padding:16px 18px; border:1px solid var(--line); background:var(--soft); border-radius:12px; }
+    .control-label { display:flex; justify-content:space-between; align-items:baseline; gap:12px; font-size:14px; font-weight:600; }
+    .control-label output { font-weight:600; font-variant-numeric:tabular-nums; }
+    input,select,button { font:inherit; color:inherit; }
+    select { border:1px solid var(--line); background:var(--surface); border-radius:6px; padding:5px 8px; min-height:36px; }
+    input[type=range] { width:100%; margin:9px 0 0; accent-color:var(--text); cursor:pointer; min-height:20px; }
+    .range-ticks { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); }
+    .presets { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+    button { border:1px solid var(--line); background:var(--surface); border-radius:7px; padding:7px 12px; cursor:pointer; font-size:14px; font-weight:550; min-height:38px; }
+    button.primary { background:var(--text); color:var(--surface); border-color:var(--text); min-width:92px; }
+    button.small { font-size:12px; padding:4px 10px; min-height:30px; }
+    button[aria-pressed=true] { border-color:var(--text); box-shadow:inset 0 0 0 1px var(--text); }
+    button:hover { filter:brightness(.94); }
+    :focus-visible { outline:3px solid var(--focus); outline-offset:3px; }
+    .transport { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .speed-label { display:flex; align-items:center; gap:6px; margin-left:auto; font-size:12px; color:var(--muted); }
+    .timeline { grid-column:1/-1; }
+    .timeline-label { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; }
+    .timeline-label b { color:var(--text); font-size:14px; }
+    .panels { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:16px; }
+    .panel { min-width:0; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--surface); }
+    .panel h3 { margin:0; padding:13px 16px 0; font-size:15px; font-weight:600; }
+    .panel .sub { margin:2px 16px 0; font-size:12px; color:var(--muted); }
+    canvas { display:block; width:100%; }
+    canvas.land { aspect-ratio:1.2; cursor:crosshair; touch-action:manipulation; }
+    canvas.chart { aspect-ratio:1.2; }
+    .legend { display:flex; flex-wrap:wrap; gap:6px 16px; font-size:12px; color:var(--muted); padding:8px 16px 12px; }
+    .legend label, .legend span { display:inline-flex; align-items:center; gap:6px; }
+    .legend label { cursor:pointer; }
+    .legend input { margin:0; accent-color:var(--text); }
+    .sw { display:inline-block; width:20px; height:0; border-top:2.5px solid; }
+    .sw.dash { border-top-style:dashed; border-top-width:2px; }
+    .sw.gd { border-color:var(--gd); } .sw.hb { border-color:var(--hb); } .sw.agd { border-color:var(--agd); } .sw.rst { border-color:var(--rst); }
+    .readout { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px 18px; margin-top:14px; padding:12px 16px; border:1px solid var(--line); border-radius:12px; font-size:12px; color:var(--muted); }
+    .readout strong { display:block; font-size:18px; font-weight:620; color:var(--text); font-variant-numeric:tabular-nums; }
+    .try { margin:16px 0 0; font-size:14px; }
+    .try ol { margin:6px 0 0; padding-left:20px; }
+    .try li { margin:3px 0; }
+    details.setup { margin-top:14px; border-top:1px solid var(--line); padding-top:10px; font-size:14px; }
+    details.setup summary { cursor:pointer; font-weight:600; font-size:13px; color:var(--muted); }
+    details.setup p { margin:8px 0 0; }
+    .eq { font-family:Georgia,"Times New Roman",serif; font-size:17px; }
+    .strip-wrap { margin-top:8px; }
+    canvas.strip { height:16px; border-radius:4px; }
+    .strip-note { font-size:11px; color:var(--muted); margin-top:3px; }
+    .note { font-size:12px; color:var(--muted); margin:10px 2px 0; }
+    noscript { display:block; padding:20px; color:var(--hb); }
+    @media(max-width:760px) { main { padding:24px 16px; } .stage-body { padding:0 14px 16px; } details.stage > summary { padding:15px 14px; font-size:17px; } .panels { grid-template-columns:1fr; } }
+    @media(max-width:520px) { .speed-label { margin-left:0; } button,select { min-height:44px; } }
+
+    :root { --pgd:#426db3; --nt:#9c3455; --model:#a36400; }
+    @media (prefers-color-scheme:dark) { :root { --pgd:#91b8ff; --nt:#f494af; --model:#eac17a; } }
+    .sw.pgd { border-color:var(--pgd); } .sw.nt { border-color:var(--nt); } .sw.model { border-color:var(--model); }
+    .ring { display:inline-block; width:11px; height:11px; border-radius:50%; border:1.6px solid var(--text); }
+    .ring.nt { border-color:var(--nt); } .ring.gd { border-color:var(--gd); }
+    .blk { display:inline-block; width:12px; height:10px; border-radius:2px; }
+    canvas.wide { aspect-ratio:2.6; }
+    canvas.fractal { aspect-ratio:1.6; cursor:crosshair; }
+    .panel.full { grid-column:1/-1; }
+    label.check { display:flex; gap:8px; align-items:center; margin-top:12px; font-size:14px; cursor:pointer; }
+    label.check input { margin:0; accent-color:var(--text); }
+    #s3-plot { cursor:crosshair; } #s3-strip { height:18px; cursor:pointer; }
+    .panel.full canvas.wide { max-height:420px; }
+  
+:root { --gn:#9c3455; --fixed:#426db3; --residual:#14796e; --actual:#23262b; }
+@media(prefers-color-scheme:dark) { :root { --gn:#f494af; --fixed:#91b8ff; --residual:#69cbb9; --actual:#eeeef0; } }
+.controls { grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px 22px; }
+.transport { grid-column:1/-1; }
+.sw.gn { border-color:var(--gn); } .sw.fixed { border-color:var(--fixed); } .sw.residual { border-color:var(--residual); }
+.sw.actual { border-color:var(--actual); }
+.formula { font:18px/1.65 Georgia,"Times New Roman",serif; padding:13px 17px; background:var(--soft); border-radius:8px; margin:12px 0 18px; overflow-wrap:anywhere; }
+.formula small { font-size:15px; }
+.check { display:flex; align-items:center; gap:8px; font-size:13px; margin-top:8px; }
+.plot { height:310px; width:100%; }
+.wideplot { height:330px; }
+.full { grid-column:1/-1; }
+.status { padding:11px 14px; background:var(--soft); border-radius:8px; font-size:14px; margin:14px 0 0; }
+.table-wrap { overflow-x:auto; margin-top:14px; border:1px solid var(--line); border-radius:10px; }
+table { border-collapse:collapse; width:100%; font-size:13px; font-variant-numeric:tabular-nums; white-space:nowrap; }
+th,td { text-align:right; padding:10px 13px; border-bottom:1px solid var(--line); }
+th { font-size:12px; font-weight:550; color:var(--muted); background:var(--soft); }
+th:first-child,td:first-child { text-align:left; }
+tr:last-child td { border-bottom:0; }
+td .method { font-weight:650; }
+.hint { font-size:13px; color:var(--muted); margin:10px 0 0; }
+.readout { grid-template-columns:repeat(4,minmax(0,1fr)); }
+.readout strong { font-size:18px; }
+.method-legend { padding-left:0; margin:10px 0 0; }
+footer { font-size:12px; color:var(--muted); margin-top:26px; }
+button:disabled { opacity:.4; cursor:default; }
+input[type=checkbox] { accent-color:var(--text); }
+.fit-controls label,.control-label { font-size:13px; }
+.axis-control { margin:10px 16px 0; font-size:12px; color:var(--muted); display:flex; align-items:center; gap:8px; }
+.notes p { max-width:950px; }
+@media(max-width:800px) { .controls { grid-template-columns:1fr 1fr; } .readout { grid-template-columns:1fr 1fr; } }
+@media(max-width:520px) { .controls { grid-template-columns:1fr; } .plot { height:295px; } .wideplot { height:310px; } .readout { gap:10px; } .table-wrap { margin-left:-3px; margin-right:-3px; } }
+</style>
+</head>
+<body>
+<main>
+<header>
+<p class="eyebrow">Optimization for Data Science · Lecture 8</p>
+<h1>Gauss–Newton and damping</h1>
+<p class="intro">Linearize the residual, then solve a least-squares problem. See why this can be extremely fast near a solution, why a full step can fail, and how Levenberg–Morrison–Marquardt (LMM) controls the step.</p>
+</header>
+<noscript>Enable JavaScript to use this demo. It works offline without external libraries.</noscript>
+
+<details class="stage" id="model" open>
+<summary><span class="num">1</span>When the linear model asks for too much</summary>
+<div class="stage-body">
+<p class="lede">Use the example from the notes: <span class="math">r(w) = w² − 1</span>. Near zero, its derivative is tiny. Canceling the linearized residual can require an enormous step, even though the two solutions are close by.</p>
+<div class="formula">f(w) = ½(w² − 1)², &nbsp; J(w) = 2w<br><small>p<sub>GN</sub> = −r(w)/J(w), &nbsp; p<sub>LMM</sub> = −J(w)r(w)/(J(w)² + λ).</small></div>
+<div class="controls">
+<div><label class="control-label" for="model-w">Current point w <output id="model-w-out"></output></label><input id="model-w" type="range" min="-2" max="2" step=".01" value=".1"><div class="presets"><button class="small" data-model-start=".01">Almost singular</button><button class="small" data-model-start=".1">w = 0.1</button><button class="small" data-model-start="1.4">Near a solution</button><button class="small" data-model-start="0">Exactly zero</button></div></div>
+<div><label class="control-label" for="model-lambda">Damping λ <output id="model-lambda-out"></output></label><input id="model-lambda" type="range" min="-3" max="2" step=".1" value="0"><div class="range-ticks"><span>0.001</span><span>1</span><span>100</span></div></div>
+<div><label class="check"><input id="model-fit" type="checkbox">Include both proposed steps in the view</label><p class="hint">The default view stays near the roots. Arrows mark proposals outside the plot.</p></div>
+</div>
+<div class="panels">
+<div class="panel"><h3>Linearize the residual</h3><p class="sub">The tangent is r(w) + J(w)(z − w). GN finds its zero.</p><canvas class="plot" id="model-residual" role="img" aria-label="Residual parabola and its tangent with proposed Gauss–Newton and damped steps"></canvas><div class="legend"><span><i class="sw actual"></i>r(z)</span><span><i class="sw dash" style="border-color:var(--model)"></i>Linearized residual</span><span><i class="sw gn"></i>GN proposal</span><span><i class="sw fixed"></i>LMM proposal</span></div></div>
+<div class="panel"><h3>Minimize the local model</h3><p class="sub">The local models match f at w. They need not bound f from above.</p><canvas class="plot" id="model-objective" role="img" aria-label="Actual objective, Gauss–Newton model and damped quadratic model"></canvas><div class="legend"><span><i class="sw actual"></i>f(z)</span><span><i class="sw gn dash"></i>½[r + J(z − w)]²</span><span><i class="sw fixed dash"></i>Model + ½λ(z − w)²</span></div></div>
+</div>
+<div class="readout" id="model-curvature"></div>
+<div class="table-wrap"><table><thead><tr><th>Method</th><th>Proposed z = w + p</th><th>Step p</th><th>Actual f(z)</th><th>f(z) / f(w)</th></tr></thead><tbody id="model-table"></tbody></table></div>
+<p class="status" id="model-message" role="status"></p>
+<details class="setup"><summary>The curvature we keep and the curvature we drop</summary><p>The full Hessian is f″(w) = 6w² − 2. Gauss–Newton retains J(w)² = 4w² and drops r(w)r″(w) = 2(w² − 1). The dropped term vanishes at w = ±1. At w = 0, the true objective has negative curvature, but its GN model is flat. The inverse formula is undefined there; the minimum-norm convention would choose a zero step. Positive damping also gives a zero step, so damping alone does not escape this local maximum.</p></details>
+<div class="try"><b>Try this</b><ol><li>At w = 0.1, compare the predicted steps with their actual objective values.</li><li>Select <i>Almost singular</i>, then include both steps in the view.</li><li>Select <i>Near a solution</i> and decrease λ. The damped step approaches the GN step.</li></ol></div>
+</div></details>
+
+<details class="stage" id="rates">
+<summary><span class="num">2</span>Fast local convergence, and the cost of damping</summary>
+<div class="stage-body">
+<p class="lede">Start all three methods at the same point on <span class="math">f(w) = ½(w² − 1)²</span>. Fixed damping leaves a linear error term. Damping proportional to the residual vanishes near a root and recovers quadratic convergence.</p>
+<div class="controls">
+<div><label class="control-label" for="rates-w">Initial point w₀ <output id="rates-w-out"></output></label><input id="rates-w" type="range" min="-2" max="2" step=".01" value="1.4"><div class="presets"><button class="small" data-rate-start="1.4">Near a root</button><button class="small" data-rate-start=".1">Near singularity</button><button class="small" data-rate-start="0">Exactly zero</button></div></div>
+<div><label class="control-label" for="rates-lambda">Fixed damping λ <output id="rates-lambda-out"></output></label><input id="rates-lambda" type="range" min="-2" max="2" step=".1" value="0"></div>
+<div><label class="control-label" for="rates-c">Residual multiplier c <output id="rates-c-out"></output></label><input id="rates-c" type="range" min=".1" max="3" step=".1" value=".5"><p class="hint">Residual LMM uses λₖ = c |wₖ² − 1|.</p></div>
+<div class="transport" data-transport="rates"></div>
+<div class="timeline"><div class="timeline-label"><span>Inspect an iteration</span><b id="rates-k">k = 0</b></div><input id="rates-time" type="range" min="0" max="80" value="0" step="1" aria-label="Local convergence displayed iteration"></div>
+</div>
+<div class="panel" style="margin-top:16px"><h3>Distance to the limiting root</h3><p class="sub">Linear iteration axis · logarithmic error axis · no fitted convergence curves</p><canvas class="plot wideplot" id="rates-chart" role="img" aria-label="Parameter error against iterations for Gauss–Newton, fixed damping and residual damping"></canvas><div class="legend"><span><i class="sw gn"></i>Gauss–Newton</span><span><i class="sw fixed"></i>Fixed LMM</span><span><i class="sw residual"></i>Residual LMM</span></div></div>
+<div class="table-wrap"><table><thead><tr><th>At the displayed iterate</th><th>wₖ</th><th>eₖ = |wₖ − w⋆|</th><th>Next λₖ</th><th>eₖ₊₁ / eₖ</th><th>eₖ₊₁ / eₖ²</th><th>Status</th></tr></thead><tbody id="rates-table"></tbody></table></div>
+<p class="hint">For a positive start, w⋆ = 1; for a negative start, w⋆ = −1. At zero the distance to either root is 1. Ratios use the next computed iterate; they are hidden when eₖ &lt; 10⁻⁷ or the next error &lt; 10⁻¹³. Values below 10⁻¹⁴ lie on the chart floor.</p>
+<p class="status" id="rates-message" role="status"></p>
+<details class="setup"><summary>Connect the curves to the theorem</summary>
+<p>For w &gt; 0, set e = w − 1. The exact GN recursion is e₊ = e²/(2w). Thus e₊/e² tends to ½. For LMM, e₊ = [λe + 2we²]/(4w² + λ). A fixed λ &gt; 0 gives an asymptotic error ratio λ/(4 + λ).</p>
+<p>With λ = c |r(w)| and r(w) = (w − 1)(w + 1), damping is of the same order as the parameter error near a root. Both terms in the LMM recursion are then quadratic. The default c = 0.5 avoids an accidental higher-order cancellation that occurs for c = 1 when approaching 1 from below.</p>
+<p>All methods take full steps with no line search. This is a local convergence illustration: a distant starting point can give a large increase in the objective. The computation stops at a parameter error of 10⁻¹⁴ or after 80 steps; numerical and singularity stops are reported explicitly.</p>
+</details>
+</div></details>
+
+<details class="stage" id="fitting">
+<summary><span class="num">3</span>Fit a nonlinear prediction model</summary>
+<div class="stage-body">
+<p class="lede">Fit an exponential decay model with two parameters. The observations are synthetic, so we can turn noise on and off. Compare the predicted curves, the parameter paths, and the optimization progress.</p>
+<div class="formula">F<sub>a,b</sub>(t) = a e<sup>−bt</sup>, &nbsp; f(a,b) = (1/2n) ∑ᵢ (a e<sup>−btᵢ</sup> − yᵢ)².<br><small>n = 31 observations, d = 2 parameters. The residual and Jacobian include the normalization 1/√n.</small></div>
+<div class="controls fit-controls">
+<div><label class="control-label" for="fit-a">Initial amplitude a₀ <output id="fit-a-out"></output></label><input id="fit-a" type="range" min="0" max="4" step=".05" value="1"><label class="control-label" for="fit-b">Initial decay b₀ <output id="fit-b-out"></output></label><input id="fit-b" type="range" min="-.5" max="3" step=".05" value="1.3"></div>
+<div><label class="control-label" for="fit-lambda">Fixed damping λ <output id="fit-lambda-out"></output></label><input id="fit-lambda" type="range" min="-3" max="0" step=".1" value="-1"><label class="control-label" for="fit-c">Residual multiplier c <output id="fit-c-out"></output></label><input id="fit-c" type="range" min=".05" max="1" step=".05" value=".5"></div>
+<div><label class="control-label" for="fit-noise">Noise amplitude <output id="fit-noise-out"></output></label><input id="fit-noise" type="range" min="0" max=".3" step=".01" value="0"><div class="presets"><button class="small" id="fit-default">Default start</button><button class="small" id="fit-poor">Difficult start</button><button class="small" id="fit-zero">Zero amplitude</button></div><label class="check"><input type="checkbox" id="fit-truth">Show the generating curve</label></div>
+<div class="transport" data-transport="fit"></div>
+<div class="timeline"><div class="timeline-label"><span>Inspect an iteration</span><b id="fit-k">k = 0</b></div><input id="fit-time" type="range" min="0" max="80" value="0" step="1" aria-label="Nonlinear fitting displayed iteration"></div>
+</div>
+<div class="panels">
+<div class="panel"><h3>The fitted curves</h3><p class="sub">Points are observations. Colored curves use the current parameters.</p><canvas class="plot" id="fit-data" role="img" aria-label="Synthetic observations and exponential curves fitted by each method"></canvas><div class="legend"><span><i class="sw gn"></i>Gauss–Newton</span><span><i class="sw fixed"></i>Fixed LMM</span><span><i class="sw residual"></i>Residual LMM</span></div></div>
+<div class="panel"><h3>The same paths in parameter space</h3><p class="sub">Contours of f(a,b). Click to choose a start; sliders are the keyboard alternative.</p><canvas class="plot land" id="fit-land" role="img" aria-label="Loss contours and optimization paths in amplitude and decay parameters"></canvas><div class="legend"><span>Horizontal: amplitude a</span><span>Vertical: decay b</span></div></div>
+<div class="panel full"><h3>Optimization progress</h3><label class="axis-control">Vertical axis <select id="fit-metric" aria-label="Fitting convergence metric"><option value="f">Objective f(wₖ)</option><option value="residual">Residual norm ‖r(wₖ)‖</option><option value="gradientNorm">Gradient norm ‖∇f(wₖ)‖</option><option value="lambda">Damping λₖ</option></select><span>Logarithmic vertical scale; linear iteration axis</span></label><canvas class="plot wideplot" id="fit-chart" role="img" aria-label="Nonlinear fitting convergence against iteration"></canvas><div class="legend"><span><i class="sw gn"></i>Gauss–Newton</span><span><i class="sw fixed"></i>Fixed LMM</span><span><i class="sw residual"></i>Residual LMM</span></div></div>
+</div>
+<div class="table-wrap"><table><thead><tr><th>At the displayed iterate</th><th>aₖ</th><th>bₖ</th><th>f(wₖ)</th><th>‖rₖ‖</th><th>‖∇f(wₖ)‖</th><th>Next λₖ</th><th>Status</th></tr></thead><tbody id="fit-table"></tbody></table></div>
+<p class="status" id="fit-message" role="status"></p>
+<p class="hint" id="fit-viewport"></p>
+<div class="try"><b>Try this</b><ol><li>Step once from the default start. Compare the actual objective increases with the fit suggested by each local model.</li><li>Turn on noise and inspect the <i>Damping</i> plot. Residual-based damping need not go to zero when the best fit has a nonzero residual.</li><li>Choose <i>Difficult start</i>, then compare the terminal statuses. Full steps can fail; damping is helpful, but it is not a global convergence guarantee.</li></ol></div>
+<details class="setup"><summary>Data, algorithms, and what this experiment does not assume</summary>
+<p>The data are generated from yᵢ = 2e<sup>−0.8tᵢ</sup> + noiseᵢ at 31 evenly spaced tᵢ in [0,4]. A fixed seed gives bounded, centered noise; the slider sets its maximum absolute value. These are synthetic observations, not measurements from an external dataset. With noise, the generating parameters need not minimize the sample loss.</p>
+<p>All methods use the same residuals and starting point. GN solves (JᵀJ)p = −Jᵀr; fixed LMM adds λI; residual LMM uses λₖ = c‖rₖ‖. We take the full step wₖ₊₁ = wₖ + p. There is no hidden line search, step clipping, positivity constraint, or retry with increased damping. The parameter sliders restrict only the starting point.</p>
+<p>The small linear systems are solved in double precision. Stop when ‖r‖ ≤ 10⁻¹², ‖∇f‖ ≤ 10⁻¹⁰, or after 80 full steps. A singular or numerically ill-conditioned system, stagnation, or an unsafe numerical evaluation is reported separately. Small gradient alone is not a certificate of a global minimum. Fixed plot windows can clip a curve or path; the numerical table retains the actual iterate. Noisy problems are not covered by the zero-residual quadratic convergence theorem.</p>
+</details>
+</div></details>
+<footer>Self-contained and offline · Nothing autoplays · All iteration axes are linear · CSV downloads contain the complete computed traces.</footer>
+</main>
+<script id="gn-core">
+/* Pure numerical core for the Lecture 8 Gauss–Newton / LM demo.
+ * All methods take full steps: there is no line search or hidden clipping.
+ * points[k].lambda and .p describe the NEXT trial from points[k].w.
+ * Terminal points can have p=null. A failed trial is never added as an iterate.
+ */
+const GNCore = (() => {
+  'use strict';
+  const MAX_SCALAR = 1e12;
+  const MAX_PARAMETER = 1e8;
+  const MAX_EXPONENT = 300;
+  const RANK_TOL = 64 * Number.EPSILON;
+  function finite(x, name) {
+    if (!Number.isFinite(x)) throw new RangeError(`${name} must be finite.`);
+  }
+  function options(method, lambda, c, K) {
+    if (!['gn', 'fixed', 'residual'].includes(method)) throw new RangeError('Unknown method.');
+    finite(lambda, 'Damping'); finite(c, 'Residual coefficient');
+    if (lambda < 0 || c < 0) throw new RangeError('Damping parameters must be nonnegative.');
+    if (!Number.isInteger(K) || K < 0 || K > 10000) throw new RangeError('Iteration budget must be an integer between 0 and 10000.');
+  }
+  function damping(method, lambda, c, residual) {
+    const v = method === 'gn' ? 0 : method === 'fixed' ? lambda : c * residual;
+    finite(v, 'Effective damping'); return v;
+  }
+  function finish(points, status, detail = '') {
+    return {points, status, detail, iterations: Math.max(0, points.length - 1)};
+  }
+  function scalar(w) {
+    finite(w, 'Scalar parameter');
+    const r = w*w - 1, j = 2*w, f = .5*r*r;
+    if (![r, j, f].every(Number.isFinite)) throw new RangeError('Scalar evaluation overflowed.');
+    return {r, j, f};
+  }
+  function scalarTrace(w0, method, lambda = .1, c = .5, K = 40) {
+    options(method, lambda, c, K); finite(w0, 'Initial parameter');
+    const points = [], root = w0 < 0 ? -1 : 1;
+    let w = w0;
+    for (let k = 0; k <= K; k++) {
+      let e, lam;
+      try { e = scalar(w); lam = damping(method, lambda, c, Math.abs(e.r)); }
+      catch (err) { return finish(points, 'numerical limit', err.message); }
+      const point = {w, f:e.f, residual:Math.abs(e.r), error:Math.abs(w-root), lambda:lam, p:null, gradient:e.j*e.r};
+      if (!Number.isFinite(point.gradient)) return finish(points, 'numerical limit', 'Gradient evaluation overflowed.');
+      if (point.error <= 1e-14) { points.push(point); return finish(points, 'converged', 'Distance to the limiting root is at most 1e-14.'); }
+      const denom = e.j*e.j + lam;
+      if (!(denom > 0)) { points.push(point); return finish(points, 'singular Jacobian', 'The undamped scalar normal equation is singular; no inverse step was taken.'); }
+      point.p = -point.gradient / denom;
+      if (!Number.isFinite(point.p)) { point.p = null; points.push(point); return finish(points, 'numerical limit', 'The proposed step was not finite.'); }
+      points.push(point);
+      if (e.j === 0) return finish(points, 'stationary nonminimum', 'The gradient vanishes at w=0, but the residual is nonzero.');
+      if (k === K) return finish(points, 'iteration limit', `Stopped after ${K} full steps.`);
+      const trial = w + point.p;
+      if (!Number.isFinite(trial) || Math.abs(trial) > MAX_SCALAR) return finish(points, 'numerical limit', `The full trial exceeded the numerical guard |w| <= ${MAX_SCALAR}; it was not clipped or accepted.`);
+      if (trial === w) return finish(points, 'numerical stagnation', 'The full step cannot change the parameter in floating-point arithmetic.');
+      w = trial;
+    }
+  }
+  function fitData(noise = 0) {
+    finite(noise, 'Noise level'); if (noise < 0) throw new RangeError('Noise level must be nonnegative.');
+    let seed = 0x8a3c91f2;
+    function random() {
+      seed = (seed + 0x6D2B79F5) | 0;
+      let z = seed; z = Math.imul(z ^ (z >>> 15), z | 1);
+      z ^= z + Math.imul(z ^ (z >>> 7), z | 61);
+      return ((z ^ (z >>> 14)) >>> 0) / 4294967296;
+    }
+    const raw = Array.from({length:31}, () => 2*random()-1);
+    const mean = raw.reduce((a,b) => a+b, 0) / raw.length;
+    const centered = raw.map(x => x-mean), max = Math.max(...centered.map(Math.abs));
+    return centered.map((z,i) => {
+      const t = 4*i/30;
+      const y = 2*Math.exp(-.8*t) + noise*z/max;
+      finite(y, 'Observation'); return {t,y};
+    });
+  }
+  function fitEval(w, data) {
+    if (!Array.isArray(w) || w.length !== 2 || !w.every(Number.isFinite)) throw new RangeError('Fit parameters must be two finite numbers.');
+    if (!Array.isArray(data) || !data.length) throw new RangeError('Fit data must be a nonempty array.');
+    const [a,b] = w, scale = 1/Math.sqrt(data.length), r = [], J = [];
+    let f = 0, g0 = 0, g1 = 0, A00 = 0, A01 = 0, A11 = 0;
+    for (const row of data) {
+      if (!row || !Number.isFinite(row.t) || !Number.isFinite(row.y)) throw new RangeError('Every observation must have finite t and y.');
+      const exponent = -b*row.t;
+      if (!Number.isFinite(exponent) || exponent > MAX_EXPONENT) throw new RangeError(`The model exponent exceeded ${MAX_EXPONENT}; the trial was not clipped or accepted.`);
+      const q = Math.exp(exponent), ri = (a*q-row.y)*scale, j0 = q*scale, j1 = -a*row.t*q*scale;
+      r.push(ri); J.push([j0,j1]);
+      f += .5*ri*ri; g0 += j0*ri; g1 += j1*ri;
+      A00 += j0*j0; A01 += j0*j1; A11 += j1*j1;
+    }
+    const residual = Math.sqrt(2*f);
+    if (![f,residual,g0,g1,A00,A01,A11].every(Number.isFinite)) throw new RangeError('Model evaluation overflowed; the trial was not accepted.');
+    return {f, residual, gradient:[g0,g1], A:[[A00,A01],[A01,A11]], r, J};
+  }
+  // Relative-eigenvalue test on a scaled symmetric 2x2 matrix, followed by
+  // an exact 2x2 solve to floating-point precision. Never add hidden damping.
+  function solve2(A, rhs) {
+    const scale = Math.max(A[0][0], A[1][1]);
+    if (!(scale > 0)) return {p:null, reason:'rank'};
+    if (!Number.isFinite(scale)) return {p:null, reason:'overflow'};
+    const a = A[0][0]/scale, b = A[0][1]/scale, d = A[1][1]/scale;
+    const det = a*d-b*b;
+    const top = .5*(a+d+Math.hypot(a-d,2*b));
+    const bottom = det/top;
+    if (!(bottom > RANK_TOL*top)) return {p:null, reason:'rank'};
+    const u = rhs[0]/scale, v = rhs[1]/scale;
+    const p = [(d*u-b*v)/det, (a*v-b*u)/det];
+    return p.every(Number.isFinite) ? {p,reason:null} : {p:null,reason:'overflow'};
+  }
+  function fitTrace(w0, data, method, lambda = .1, c = .5, K = 50) {
+    options(method, lambda, c, K);
+    if (!Array.isArray(w0) || w0.length !== 2 || !w0.every(Number.isFinite)) throw new RangeError('Initial parameters must be two finite numbers.');
+    const points = []; let w = [...w0];
+    for (let k = 0; k <= K; k++) {
+      let e, lam;
+      try { e = fitEval(w,data); lam = damping(method,lambda,c,e.residual); }
+      catch(err) { return finish(points, 'numerical limit', err.message); }
+      const gradientNorm = Math.hypot(...e.gradient);
+      if (!Number.isFinite(gradientNorm)) return finish(points, 'numerical limit', 'The gradient norm overflowed.');
+      const point = {w:[...w], f:e.f, residual:e.residual, gradientNorm, lambda:lam, p:null};
+      if (e.residual <= 1e-12) { points.push(point); return finish(points, 'zero residual', 'The normalized residual norm is at most 1e-12.'); }
+      if (gradientNorm <= 1e-10) { points.push(point); return finish(points, 'stationary', 'The gradient norm is at most 1e-10; this alone does not certify a minimizer.'); }
+      const B = [[e.A[0][0]+lam,e.A[0][1]], [e.A[1][0],e.A[1][1]+lam]];
+      const solve = solve2(B,e.gradient.map(x=>-x));
+      point.p = solve.p;
+      points.push(point);
+      if (solve.reason === 'overflow') return finish(points, 'numerical limit', 'The normal-equation solve overflowed; the trial was not accepted.');
+      if (!point.p) return finish(points, lam === 0 ? 'singular Jacobian' : 'ill-conditioned system', 'The 2x2 normal matrix failed the relative numerical-rank test; no hidden damping or inverse was used.');
+      if (k === K) return finish(points, 'iteration limit', `Stopped after ${K} full steps.`);
+      const trial = [w[0]+point.p[0],w[1]+point.p[1]];
+      if (!trial.every(Number.isFinite) || Math.max(...trial.map(Math.abs)) > MAX_PARAMETER) return finish(points, 'numerical limit', `The full trial exceeded the guard |parameter| <= ${MAX_PARAMETER}; it was not clipped or accepted.`);
+      try { fitEval(trial,data); }
+      catch(err) { return finish(points, 'numerical limit', err.message); }
+      if (trial.every((v,i)=>v===w[i])) return finish(points, 'numerical stagnation', 'The full step cannot change the parameters in floating-point arithmetic.');
+      w = trial;
+    }
+  }
+  return {scalar,scalarTrace,fitData,fitEval,fitTrace};
+})();
+
+</script>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const METHODS = [
+  {key:'gn',name:'Gauss–Newton',color:'--gn',dash:[]},
+  {key:'fixed',name:'Fixed LMM',color:'--fixed',dash:[8,4]},
+  {key:'residual',name:'Residual LMM',color:'--residual',dash:[2,4]}
+];
+const fmt = x => x === null || x === undefined || !Number.isFinite(x) ? '—' : x === 0 ? '0' : Math.abs(x)<.0001 || Math.abs(x)>=10000 ? x.toExponential(3) : Number(x.toPrecision(5)).toString();
+const value = id => Number($(id).value);
+const clamp = (x,a,b) => Math.max(a,Math.min(b,x));
+function output(id,x) { $(id+'-out').textContent=fmt(x); }
+function marker(ctx,x,y,color,r=4) { ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,r,0,2*Math.PI);ctx.fill(); }
+function fitCanvas(canvas) {
+  const box=canvas.getBoundingClientRect(), dpr=Math.min(window.devicePixelRatio||1,2);
+  const w=Math.max(1,box.width),h=Math.max(1,box.height);
+  if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr)){canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);}
+  const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);ctx.fillStyle=css('--surface');ctx.fillRect(0,0,w,h);
+  return {ctx,w,h};
+}
+function ticks(a,b,n=5) {
+  const step0=(b-a)/n,pow=10**Math.floor(Math.log10(step0)),r=step0/pow;
+  const step=(r<=1?1:r<=2?2:r<=5?5:10)*pow,out=[];
+  for(let v=Math.ceil(a/step)*step;v<=b+step*1e-8;v+=step) out.push(Math.abs(v)<step*1e-8?0:v);
+  return out;
+}
+function frame(canvas,bounds,options={}) {
+  const F=fitCanvas(canvas),{ctx,w,h}=F;
+  const left=options.log?70:57,right=22,top=25,bottom=46;
+  const [x0,x1,y0,y1]=bounds,log=!!options.log;
+  const tx=x=>(x-x0)/(x1-x0),ty=y=>log?(Math.log10(Math.max(y,10**y0))-y0)/(y1-y0):(y-y0)/(y1-y0);
+  const X=x=>left+tx(x)*(w-left-right),Y=y=>h-bottom-ty(y)*(h-top-bottom);
+  ctx.font='11px system-ui';ctx.fillStyle=css('--muted');ctx.strokeStyle=css('--grid');ctx.lineWidth=1;
+  const xt=options.iterations?ticks(x0,x1,Math.max(3,Math.floor(w/110))).filter(Number.isInteger):ticks(x0,x1);
+  for(const x of xt){ctx.beginPath();ctx.moveTo(X(x),top);ctx.lineTo(X(x),h-bottom);ctx.stroke();ctx.textAlign='center';ctx.fillText(fmt(x),X(x),h-bottom+19);}
+  let yt=log?ticks(y0,y1,5).filter(Number.isInteger):ticks(y0,y1);
+  for(const y of yt){const py=log?Y(10**y):Y(y);ctx.beginPath();ctx.moveTo(left,py);ctx.lineTo(w-right,py);ctx.stroke();ctx.textAlign='right';ctx.fillText(log?'10'+superScript(y):fmt(y),left-9,py+4);}
+  ctx.strokeStyle=css('--axis');ctx.strokeRect(left,top,w-left-right,h-top-bottom);
+  if(!log&&y0<0&&y1>0){ctx.beginPath();ctx.moveTo(left,Y(0));ctx.lineTo(w-right,Y(0));ctx.stroke();}
+  ctx.fillStyle=css('--muted');ctx.textAlign='center';ctx.fillText(options.xlabel||'',(left+w-right)/2,h-7);
+  ctx.textAlign='left';ctx.fillText(options.ylabel||'',left,13);
+  return {...F,X,Y,left,right,top,bottom,bounds,clip:()=>{ctx.save();ctx.beginPath();ctx.rect(left,top,w-left-right,h-top-bottom);ctx.clip();}};
+}
+function superScript(n) {const map={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};return String(n).split('').map(c=>map[c]||c).join('');}
+function line(F,pts,color,dash=[],width=2.2) {
+  const {ctx,X,Y}=F;F.clip();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.beginPath();let begun=false;
+  for(const [x,y] of pts){if(!Number.isFinite(x)||!Number.isFinite(y)){begun=false;continue;}const px=X(x),py=Y(y);if(!Number.isFinite(px)||!Number.isFinite(py)){begun=false;continue;}if(!begun){ctx.moveTo(px,py);begun=true;}else ctx.lineTo(px,py);}
+  ctx.stroke();ctx.restore();
+}
+function sample(fn,a,b,n=400){return Array.from({length:n+1},(_,i)=>{const x=a+(b-a)*i/n;return[x,fn(x)];});}
+function dot(F,x,y,color,r=4) {F.clip();marker(F.ctx,F.X(x),F.Y(y),color,r);F.ctx.restore();}
+function vertical(F,x,color,label,row=0) {
+  const {ctx,X,top,h,bottom,left,w,right,bounds}=F;
+  const off=x<bounds[0]||x>bounds[1],px=clamp(X(x),left+6,w-right-6);
+  ctx.save();ctx.strokeStyle=color;ctx.fillStyle=color;ctx.font='11px system-ui';
+  if(off){const py=h-bottom-15-row*20,s=x>bounds[1]?1:-1;ctx.beginPath();ctx.moveTo(px-s*10,py-5);ctx.lineTo(px,py);ctx.lineTo(px-s*10,py+5);ctx.stroke();ctx.textAlign=s>0?'right':'left';ctx.fillText(label+' '+fmt(x),px-s*14,py+4);}
+  else{ctx.setLineDash([3,4]);ctx.beginPath();ctx.moveTo(px,top);ctx.lineTo(px,h-bottom);ctx.stroke();ctx.setLineDash([]);ctx.textAlign='left';ctx.fillText(label,clamp(px+5,left+5,w-right-65),top+15+row*15);}
+  ctx.restore();
+}
+function legendName(m){return '<span class="method" style="color:'+css(m.color)+'">'+m.name+'</span>';}
+function drawModel() {
+  if(!$('model').open)return;
+  const w=value('model-w'),lambda=10**value('model-lambda'),s=GNCore.scalar(w);
+  output('model-w',w);output('model-lambda',lambda);
+  const pgn=s.j===0?null:-s.r/s.j,plm=-s.j*s.r/(s.j*s.j+lambda);
+  const gn=pgn===null?null:w+pgn,lm=w+plm;
+  let lo=-1.65,hi=1.65;
+  if($('model-fit').checked){lo=Math.min(lo,w,gn??w,lm);hi=Math.max(hi,w,gn??w,lm);const d=(hi-lo)*.09;lo-=d;hi+=d;}
+  else {lo=Math.min(lo,w-.2);hi=Math.max(hi,w+.2);}
+  const tangent=z=>s.r+s.j*(z-w),q=z=>.5*tangent(z)**2,ql=z=>q(z)+lambda*.5*(z-w)**2;
+  const rv=sample(z=>z*z-1,lo,hi),tv=sample(tangent,lo,hi);
+  const ymin=Math.min(-1.3,...rv.map(p=>p[1]),...tv.map(p=>p[1])),ymax=Math.max(1,...rv.map(p=>p[1]),...tv.map(p=>p[1])),pad=(ymax-ymin)*.08;
+  const R=frame($('model-residual'),[lo,hi,ymin-pad,ymax+pad],{xlabel:'trial parameter z',ylabel:'residual'});
+  line(R,rv,css('--actual'));line(R,tv,css('--model'),[7,4]);
+  dot(R,w,s.r,css('--actual'),5);dot(R,-1,0,css('--actual'));dot(R,1,0,css('--actual'));
+  if(gn!==null){vertical(R,gn,css('--gn'),'GN',0);dot(R,gn,0,css('--gn'),5);}
+  vertical(R,lm,css('--fixed'),'LMM',1);dot(R,lm,tangent(lm),css('--fixed'),5);
+  const fv=sample(z=>GNCore.scalar(z).f,lo,hi),qv=sample(q,lo,hi),lv=sample(ql,lo,hi);
+  const max=Math.max(1,...fv.map(p=>p[1]),...qv.map(p=>p[1]),...lv.map(p=>p[1]))*1.06;
+  const O=frame($('model-objective'),[lo,hi,0,max],{xlabel:'trial parameter z',ylabel:'objective / model'});
+  line(O,fv,css('--actual'));line(O,qv,css('--gn'),[8,4]);line(O,lv,css('--fixed'),[3,4]);
+  dot(O,w,s.f,css('--actual'),5);if(gn!==null){vertical(O,gn,css('--gn'),'GN',0);dot(O,gn,GNCore.scalar(gn).f,css('--gn'),5);}
+  vertical(O,lm,css('--fixed'),'LMM',1);dot(O,lm,GNCore.scalar(lm).f,css('--fixed'),5);
+  $('model-curvature').innerHTML=[['Residual r(w)',s.r],['GN curvature J²',s.j*s.j],['Dropped term r r″',2*s.r],['True curvature f″',6*w*w-2]].map(p=>'<div>'+p[0]+'<strong>'+fmt(p[1])+'</strong></div>').join('');
+  $('model-table').innerHTML=[{m:METHODS[0],z:gn,p:pgn},{m:METHODS[1],z:lm,p:plm}].map(o=>{const f=o.z===null?null:GNCore.scalar(o.z).f;return '<tr><td>'+legendName(o.m)+'</td><td>'+fmt(o.z)+'</td><td>'+fmt(o.p)+'</td><td>'+fmt(f)+'</td><td>'+fmt(s.f>0&&f!==null?f/s.f:null)+'</td></tr>';}).join('');
+  $('model-message').textContent=w===0?'At w = 0, GN’s inverse formula is undefined. Positive damping gives p = 0, at a local maximum with f = ½.':s.f===0?'The residual is already zero. Both steps vanish.':'GN proposes w + p = '+fmt(gn)+', changing f from '+fmt(s.f)+' to '+fmt(GNCore.scalar(gn).f)+'. With λ = '+fmt(lambda)+', LMM proposes '+fmt(lm)+' and gives f = '+fmt(GNCore.scalar(lm).f)+'.';
+}
+
+class Playback {
+  constructor(prefix,stage,paint) {
+    this.prefix=prefix;this.stage=$(stage);this.paint=paint;this.k=0;this.N=0;this.running=false;this.last=null;this.credit=0;this.raf=0;
+    const node=document.querySelector('[data-transport="'+prefix+'"]');
+    node.innerHTML='<button class="primary" data-action="run">Run</button><button data-action="step">Step</button><button data-action="restart">Restart</button><button data-action="finish">Show result</button><button data-action="csv">Download CSV</button><label class="speed-label">Speed <select aria-label="'+prefix+' playback speed"><option value="2">Slow</option><option value="6" selected>Medium</option><option value="20">Fast</option></select></label>';
+    this.node=node;this.runButton=node.querySelector('[data-action="run"]');this.slider=$(prefix+'-time');
+    node.querySelector('[data-action="run"]').onclick=()=>{if(this.running)this.pause();else{if(this.k>=this.N)this.k=0;this.running=true;this.last=null;this.credit=0;this.sync();this.paint();this.raf=requestAnimationFrame(t=>this.tick(t));}};
+    node.querySelector('[data-action="step"]').onclick=()=>{this.pause();this.k=Math.min(this.N,this.k+1);this.sync();this.paint();};
+    node.querySelector('[data-action="restart"]').onclick=()=>{this.pause();this.k=0;this.sync();this.paint();};
+    node.querySelector('[data-action="finish"]').onclick=()=>{this.pause();this.k=this.N;this.sync();this.paint();};
+    this.slider.oninput=()=>{const next=clamp(Number(this.slider.value),0,this.N);this.pause();this.k=next;this.sync();this.paint();};
+    this.stage.addEventListener('toggle',()=>{if(!this.stage.open)this.pause();else this.paint();});
+    node.querySelector('select').onchange=()=>{this.last=null;this.credit=0;};
+  }
+  pause(){this.running=false;this.last=null;this.credit=0;cancelAnimationFrame(this.raf);this.sync();}
+  reset(n){this.pause();this.N=Math.max(0,n);this.k=0;this.slider.max=String(this.N);this.sync();}
+  sync(){this.runButton.textContent=this.running?'Pause':'Run';this.slider.value=String(this.k);$(this.prefix+'-k').textContent='k = '+this.k;this.node.querySelector('[data-action="step"]').disabled=this.k>=this.N;this.runButton.disabled=this.N===0;this.node.querySelector('[data-action="finish"]').disabled=this.k>=this.N;this.slider.disabled=this.N===0;}
+  tick(t){if(!this.running)return;if(this.last!==null)this.credit+=Math.min(250,Math.max(0,t-this.last))/1000*Number(this.node.querySelector('select').value);this.last=t;const advance=Math.floor(this.credit);this.credit-=advance;if(advance){this.k=Math.min(this.N,this.k+advance);this.sync();this.paint();}if(this.k>=this.N){this.pause();return;}this.raf=requestAnimationFrame(z=>this.tick(z));}
+}
+let rateTraces=[],fitTraces=[],data=[],contours=[];
+let ratePlayer,fitPlayer;
+function current(trace,k){return trace.points[Math.min(k,trace.points.length-1)];}
+function statusAt(trace,k){return k>=trace.points.length-1?trace.status:'Running';}
+function traceChart(canvas,traces,k,N,metric,floor,label) {
+  const all=traces.flatMap(t=>t.points.map(p=>p[metric])).filter(v=>Number.isFinite(v)&&v>0);
+  const top=Math.max(floor+2,Math.ceil(Math.log10(Math.max(...all,10**(floor+2))))+.3);
+  const F=frame(canvas,[0,Math.max(N,4),floor,top],{log:true,iterations:true,xlabel:'iteration k',ylabel:label});
+  traces.forEach((t,i)=>{const n=Math.min(k+1,t.points.length),pts=t.points.slice(0,n).map((p,j)=>[j,Math.max(10**floor,p[metric])]);line(F,pts,css(METHODS[i].color),METHODS[i].dash);for(const p of pts)dot(F,p[0],p[1],css(METHODS[i].color),n>40?1.8:3);});
+}
+function updateRates() {
+  const w=value('rates-w'),lambda=10**value('rates-lambda'),c=value('rates-c');
+  output('rates-w',w);output('rates-lambda',lambda);output('rates-c',c);
+  rateTraces=METHODS.map(m=>GNCore.scalarTrace(w,m.key,lambda,c,80));ratePlayer.reset(Math.max(...rateTraces.map(t=>t.iterations)));drawRates();
+}
+function drawRates() {
+  if(!$('rates').open||!rateTraces.length)return;
+  const k=ratePlayer.k;
+  traceChart($('rates-chart'),rateTraces,k,ratePlayer.N,'error',-14,'parameter error');
+  $('rates-table').innerHTML=rateTraces.map((t,i)=>{const j=Math.min(k,t.points.length-1),p=t.points[j],next=t.points[j+1],safe=next&&p.error>=1e-7&&next.error>=1e-13;return '<tr><td>'+legendName(METHODS[i])+(j<k?' · k = '+j:'')+'</td><td>'+fmt(p.w)+'</td><td>'+fmt(p.error)+'</td><td>'+fmt(p.lambda)+'</td><td>'+fmt(safe?next.error/p.error:null)+'</td><td>'+fmt(safe?next.error/(p.error*p.error):null)+'</td><td>'+statusAt(t,k)+'</td></tr>';}).join('');
+  const w=value('rates-w'),l=10**value('rates-lambda');
+  $('rates-message').textContent=w===0?'All starts are at a local maximum. GN’s inverse step is undefined; both damped methods stay there. A zero gradient is not enough.':'For fixed λ = '+fmt(l)+', the asymptotic linear factor is λ/(4 + λ) = '+fmt(l/(4+l))+'. GN and residual LMM remove this persistent linear term. Finished methods remain at their last computed iterate.';
+}
+function fitObjective(a,b){let s=0;for(const row of data){const v=a*Math.exp(-b*row.t)-row.y;s+=v*v;}return s/(2*data.length);}
+const landBounds=[0,4,-.5,3];
+function computeContours() {
+  const nx=80,ny=64,[xmin,xmax,ymin,ymax]=landBounds;
+  const grid=Array.from({length:ny+1},(_,j)=>Array.from({length:nx+1},(_,i)=>Math.log10(fitObjective(xmin+(xmax-xmin)*i/nx,ymin+(ymax-ymin)*j/ny)+1e-12)));
+  const levels=[-5,-4,-3,-2.5,-2,-1.5,-1,-.5,0,.5],out=[];
+  for(const level of levels) {
+    const segments=[];
+    for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){
+      const p=[[i,j],[i+1,j],[i+1,j+1],[i,j+1]];
+      for(const tri of [[0,1,2],[0,2,3]]) {
+        const hit=[];
+        for(let k=0;k<3;k++){const a=p[tri[k]],b=p[tri[(k+1)%3]],va=grid[a[1]][a[0]],vb=grid[b[1]][b[0]];
+          if((va<level&&vb>=level)||(vb<level&&va>=level)){const q=(level-va)/(vb-va),x=a[0]+q*(b[0]-a[0]),y=a[1]+q*(b[1]-a[1]);hit.push([xmin+x*(xmax-xmin)/nx,ymin+y*(ymax-ymin)/ny]);}}
+        if(hit.length===2)segments.push(hit);
+      }
+    }
+    out.push({level,segments});
+  }
+  return out;
+}
+function updateFit() {
+  const w=[value('fit-a'),value('fit-b')],lambda=10**value('fit-lambda'),c=value('fit-c'),noise=value('fit-noise');
+  output('fit-a',w[0]);output('fit-b',w[1]);output('fit-lambda',lambda);output('fit-c',c);output('fit-noise',noise);
+  data=GNCore.fitData(noise);fitTraces=METHODS.map(m=>GNCore.fitTrace(w,data,m.key,lambda,c,80));contours=computeContours();
+  fitPlayer.reset(Math.max(...fitTraces.map(t=>t.iterations)));drawFit();
+}
+let lastLand=null;
+function drawFit() {
+  if(!$('fitting').open||!fitTraces.length)return;
+  const k=fitPlayer.k;
+  const D=frame($('fit-data'),[0,4,-.35,2.65],{xlabel:'input t',ylabel:'observation / prediction'});
+  if($('fit-truth').checked)line(D,sample(t=>2*Math.exp(-.8*t),0,4),css('--muted'),[8,6],1.5);
+  for(const row of data)dot(D,row.t,row.y,css('--actual'),3.1);
+  fitTraces.forEach((tr,i)=>{const w=current(tr,k).w;line(D,sample(t=>w[0]*Math.exp(-w[1]*t),0,4),css(METHODS[i].color),METHODS[i].dash);});
+  const L=frame($('fit-land'),landBounds,{xlabel:'amplitude a',ylabel:'decay b'});lastLand=L;
+  L.clip();L.ctx.strokeStyle=css('--axis');L.ctx.lineWidth=.8;L.ctx.globalAlpha=.8;L.ctx.beginPath();
+  for(const level of contours)for(const seg of level.segments){L.ctx.moveTo(L.X(seg[0][0]),L.Y(seg[0][1]));L.ctx.lineTo(L.X(seg[1][0]),L.Y(seg[1][1]));}L.ctx.stroke();L.ctx.restore();
+  const outside=[];
+  fitTraces.forEach((tr,i)=>{const pts=tr.points.slice(0,Math.min(k+1,tr.points.length)).map(p=>p.w);line(L,pts,css(METHODS[i].color),METHODS[i].dash,2.3);for(const p of pts)dot(L,p[0],p[1],css(METHODS[i].color),2);
+    const w=current(tr,k).w;if(w[0]<landBounds[0]||w[0]>landBounds[1]||w[1]<landBounds[2]||w[1]>landBounds[3])outside.push(METHODS[i].name);
+    else dot(L,w[0],w[1],css(METHODS[i].color),5);
+  });
+  const start=[value('fit-a'),value('fit-b')];L.ctx.strokeStyle=css('--actual');L.ctx.lineWidth=2;L.ctx.beginPath();L.ctx.arc(L.X(start[0]),L.Y(start[1]),7,0,2*Math.PI);L.ctx.stroke();
+  const metric=$('fit-metric').value;
+  const labels={f:'objective f(w_k)',residual:'residual norm',gradientNorm:'gradient norm',lambda:'damping lambda_k'};
+  traceChart($('fit-chart'),fitTraces,k,fitPlayer.N,metric,metric==='f'?-20:metric==='lambda'?-10:-12,labels[metric]);
+  $('fit-table').innerHTML=fitTraces.map((t,i)=>{const j=Math.min(k,t.points.length-1),p=t.points[j];return '<tr><td>'+legendName(METHODS[i])+(j<k?' · k = '+j:'')+'</td><td>'+fmt(p.w[0])+'</td><td>'+fmt(p.w[1])+'</td><td>'+fmt(p.f)+'</td><td>'+fmt(p.residual)+'</td><td>'+fmt(p.gradientNorm)+'</td><td>'+fmt(p.lambda)+'</td><td title="'+t.detail+'">'+statusAt(t,k)+'</td></tr>';}).join('');
+  const failures=fitTraces.map((t,i)=>k>=t.iterations&&!['zero residual','stationary','iteration limit'].includes(t.status)?METHODS[i].name+': '+t.detail:'').filter(Boolean);
+  let message=value('fit-noise')>0?'With noise, a positive residual generally remains. Then λₖ = c‖rₖ‖ does not vanish, and the zero-residual quadratic theorem does not apply.':'Without noise, (a,b) = (2,0.8) interpolates all observations. Watch the residual-based damping disappear as the fit becomes exact.';
+  if(failures.length)message+=' '+failures.join(' ');
+  $('fit-message').textContent=message;
+  $('fit-viewport').textContent=(outside.length?'Currently outside the parameter view: '+outside.join(', ')+'. ':'')+'Plot windows are fixed; off-plot paths and predictions are clipped visually only. The table shows actual parameters. Values below the convergence chart floor, including zero, lie on its bottom edge.';
+}
+function exportCSV(name,traces) {
+  const rows=[['method','k','w1','w2','objective','residual_norm','parameter_error','gradient_norm','lambda_for_next_step','final_status']];
+  traces.forEach((t,i)=>t.points.forEach((p,k)=>rows.push([METHODS[i].name,k,Array.isArray(p.w)?p.w[0]:p.w,Array.isArray(p.w)?p.w[1]:'',p.f,p.residual,p.error??'',p.gradientNorm??Math.abs(p.gradient),p.lambda,t.status])));
+  const csv=rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download=name+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+ratePlayer=new Playback('rates','rates',drawRates);
+fitPlayer=new Playback('fit','fitting',drawFit);
+document.querySelector('[data-transport="rates"] [data-action="csv"]').onclick=()=>exportCSV('lecture8-local-convergence',rateTraces);
+document.querySelector('[data-transport="fit"] [data-action="csv"]').onclick=()=>exportCSV('lecture8-nonlinear-fit',fitTraces);
+for(const id of ['model-w','model-lambda','model-fit'])$(id).addEventListener('input',drawModel);
+$('model').addEventListener('toggle',drawModel);
+for(const b of document.querySelectorAll('[data-model-start]'))b.onclick=()=>{$('model-w').value=b.dataset.modelStart;drawModel();};
+for(const id of ['rates-w','rates-lambda','rates-c'])$(id).addEventListener('input',updateRates);
+for(const b of document.querySelectorAll('[data-rate-start]'))b.onclick=()=>{$('rates-w').value=b.dataset.rateStart;updateRates();};
+for(const id of ['fit-a','fit-b','fit-lambda','fit-c','fit-noise'])$(id).addEventListener('input',updateFit);
+for(const id of ['fit-truth','fit-metric'])$(id).addEventListener('change',drawFit);
+function fitStart(a,b){$('fit-a').value=a;$('fit-b').value=b;updateFit();}
+$('fit-default').onclick=()=>fitStart(1,1.3);
+$('fit-poor').onclick=()=>fitStart(.1,3);
+$('fit-zero').onclick=()=>fitStart(0,1.3);
+$('fit-land').addEventListener('click',event=>{
+  if(!lastLand)return;const box=$('fit-land').getBoundingClientRect(),x=event.clientX-box.left,y=event.clientY-box.top,F=lastLand;
+  if(x<F.left||x>F.w-F.right||y<F.top||y>F.h-F.bottom)return;
+  const a=landBounds[0]+(landBounds[1]-landBounds[0])*(x-F.left)/(F.w-F.left-F.right),b=landBounds[2]+(landBounds[3]-landBounds[2])*(F.h-F.bottom-y)/(F.h-F.top-F.bottom);
+  fitStart(Math.round(a*20)/20,Math.round(b*20)/20);
+});
+let resizeFrame=0;
+function redraw(){cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(()=>{drawModel();drawRates();drawFit();});}
+window.addEventListener('resize',redraw);
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',redraw);
+document.addEventListener('visibilitychange',()=>{if(document.hidden){ratePlayer.pause();fitPlayer.pause();}});
+if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){ratePlayer.node.querySelector('select').value='2';fitPlayer.node.querySelector('select').value='2';}
+drawModel();updateRates();updateFit();
+</script>
+</body>
+</html>
