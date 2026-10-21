@@ -119,7 +119,11 @@ footer { font-size:12px; color:var(--muted); margin-top:26px; }
 button:disabled { opacity:.4; cursor:default; }
 input[type=checkbox] { accent-color:var(--text); }
 .fit-controls label,.control-label { font-size:13px; }
-.axis-control { margin:10px 16px 0; font-size:12px; color:var(--muted); display:flex; align-items:center; gap:8px; }
+.axis-control { margin:10px 16px 0; font-size:12px; color:var(--muted); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.fit-selector { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:16px; font-size:14px; font-weight:600; }
+:root { --land-low:#9ebbd2; --land-high:#f8ebd3; }
+@media(prefers-color-scheme:dark) { :root { --land-low:#344f69; --land-high:#514736; } }
+.heat-key { display:inline-block; width:45px; height:10px; background:linear-gradient(to right,var(--land-low),var(--land-high)); border-radius:3px; }
 .notes p { max-width:950px; }
 @media(max-width:800px) { .controls { grid-template-columns:1fr 1fr; } .readout { grid-template-columns:1fr 1fr; } }
 @media(max-width:520px) { .controls { grid-template-columns:1fr; } .plot { height:295px; } .wideplot { height:310px; } .readout { gap:10px; } .table-wrap { margin-left:-3px; margin-right:-3px; } }
@@ -177,31 +181,34 @@ input[type=checkbox] { accent-color:var(--text); }
 </details>
 </div></details>
 
-<details class="stage" id="fitting">
-<summary><span class="num">3</span>Fit a nonlinear prediction model</summary>
+<details class="stage" id="fitting" open>
+<summary><span class="num">3</span>Fit a signal with many local minima</summary>
 <div class="stage-body">
-<p class="lede">Fit an exponential decay model with two parameters. The observations are synthetic, so we can turn noise on and off. Compare the predicted curves, the parameter paths, and the optimization progress.</p>
-<div class="formula">F<sub>a,b</sub>(t) = a e<sup>−bt</sup>, &nbsp; f(a,b) = (1/2n) ∑ᵢ (a e<sup>−btᵢ</sup> − yᵢ)².<br><small>n = 31 observations, d = 2 parameters. The residual and Jacobian include the normalization 1/√n.</small></div>
+<label class="fit-selector" for="fit-problem">Prediction model <select id="fit-problem"><option value="oscillatory" selected>Oscillatory signal: frequency and phase</option><option value="exponential">Exponential decay</option></select></label>
+<p class="lede" id="fit-lede">Fit the frequency and phase of a sinusoidal signal. The loss has many valleys: a curve can look plausible and still have the wrong frequency. Compare how the three methods behave from the same starting point.</p>
+<div class="formula" id="fit-formula">F<sub>ω,φ</sub>(t) = sin(ωt + φ), &nbsp; f(ω,φ) = (1/2n) ∑ᵢ (sin(ωtᵢ + φ) − yᵢ)².<br><small>n = 81 observations, d = 2 parameters. Residuals and Jacobians include the normalization 1/√n.</small></div>
 <div class="controls fit-controls">
-<div><label class="control-label" for="fit-a">Initial amplitude a₀ <output id="fit-a-out"></output></label><input id="fit-a" type="range" min="0" max="4" step=".05" value="1"><label class="control-label" for="fit-b">Initial decay b₀ <output id="fit-b-out"></output></label><input id="fit-b" type="range" min="-.5" max="3" step=".05" value="1.3"></div>
+<div><label class="control-label" for="fit-a"><span id="fit-a-label">Initial frequency ω₀</span> <output id="fit-a-out"></output></label><input id="fit-a" type="range" min=".5" max="6" step=".01" value="2.2"><label class="control-label" for="fit-b"><span id="fit-b-label">Initial phase φ₀</span> <output id="fit-b-out"></output></label><input id="fit-b" type="range" min="-3.14" max="3.14" step=".01" value="-1.2"></div>
 <div><label class="control-label" for="fit-lambda">Fixed damping λ <output id="fit-lambda-out"></output></label><input id="fit-lambda" type="range" min="-3" max="0" step=".1" value="-1"><label class="control-label" for="fit-c">Residual multiplier c <output id="fit-c-out"></output></label><input id="fit-c" type="range" min=".05" max="1" step=".05" value=".5"></div>
-<div><label class="control-label" for="fit-noise">Noise amplitude <output id="fit-noise-out"></output></label><input id="fit-noise" type="range" min="0" max=".3" step=".01" value="0"><div class="presets"><button class="small" id="fit-default">Default start</button><button class="small" id="fit-poor">Difficult start</button><button class="small" id="fit-zero">Zero amplitude</button></div><label class="check"><input type="checkbox" id="fit-truth">Show the generating curve</label></div>
+<div><label class="control-label" for="fit-noise">Noise amplitude <output id="fit-noise-out"></output></label><input id="fit-noise" type="range" min="0" max=".3" step=".01" value="0"><div class="presets"><button class="small" id="fit-default">Near the solution</button><button class="small" id="fit-poor">Wrong frequency</button><button class="small" id="fit-zero">Different basins</button></div><p class="hint">Presets reset noise to 0, λ to 0.1, and c to 0.5.</p><label class="check"><input type="checkbox" id="fit-truth">Show the generating curve and parameters</label></div>
 <div class="transport" data-transport="fit"></div>
-<div class="timeline"><div class="timeline-label"><span>Inspect an iteration</span><b id="fit-k">k = 0</b></div><input id="fit-time" type="range" min="0" max="80" value="0" step="1" aria-label="Nonlinear fitting displayed iteration"></div>
+<div class="timeline"><div class="timeline-label"><span>Inspect an iteration</span><b id="fit-k">k = 0</b></div><input id="fit-time" type="range" min="0" max="200" value="0" step="1" aria-label="Nonlinear fitting displayed iteration"></div>
 </div>
 <div class="panels">
-<div class="panel"><h3>The fitted curves</h3><p class="sub">Points are observations. Colored curves use the current parameters.</p><canvas class="plot" id="fit-data" role="img" aria-label="Synthetic observations and exponential curves fitted by each method"></canvas><div class="legend"><span><i class="sw gn"></i>Gauss–Newton</span><span><i class="sw fixed"></i>Fixed LMM</span><span><i class="sw residual"></i>Residual LMM</span></div></div>
-<div class="panel"><h3>The same paths in parameter space</h3><p class="sub">Contours of f(a,b). Click to choose a start; sliders are the keyboard alternative.</p><canvas class="plot land" id="fit-land" role="img" aria-label="Loss contours and optimization paths in amplitude and decay parameters"></canvas><div class="legend"><span>Horizontal: amplitude a</span><span>Vertical: decay b</span></div></div>
-<div class="panel full"><h3>Optimization progress</h3><label class="axis-control">Vertical axis <select id="fit-metric" aria-label="Fitting convergence metric"><option value="f">Objective f(wₖ)</option><option value="residual">Residual norm ‖r(wₖ)‖</option><option value="gradientNorm">Gradient norm ‖∇f(wₖ)‖</option><option value="lambda">Damping λₖ</option></select><span>Logarithmic vertical scale; linear iteration axis</span></label><canvas class="plot wideplot" id="fit-chart" role="img" aria-label="Nonlinear fitting convergence against iteration"></canvas><div class="legend"><span><i class="sw gn"></i>Gauss–Newton</span><span><i class="sw fixed"></i>Fixed LMM</span><span><i class="sw residual"></i>Residual LMM</span></div></div>
+<div class="panel"><h3>The fitted curves</h3><p class="sub">Points are observations. Colored curves use the current parameters.</p><canvas class="plot" id="fit-data" role="img" aria-label="Synthetic observations and prediction curves fitted by each method"></canvas><div class="legend"><span><i class="sw gn"></i>Gauss–Newton</span><span><i class="sw fixed"></i>Fixed LMM</span><span><i class="sw residual"></i>Residual LMM</span></div></div>
+<div class="panel"><h3>The loss landscape</h3><p class="sub" id="fit-land-caption">Click the loss contours to choose a start; sliders are the keyboard alternative. The phase is periodic.</p><canvas class="plot land" id="fit-land" role="img" aria-label="Loss contours and optimization paths in frequency and phase parameters"></canvas><div class="legend"><span id="fit-horizontal">Horizontal: frequency ω</span><span id="fit-vertical">Vertical: phase φ</span><span><i class="heat-key"></i>Low → high loss</span><span>○ Start</span></div></div>
+<div class="panel full"><h3>Optimization progress</h3><div class="axis-control"><label for="fit-metric">Vertical axis</label><select id="fit-metric"><option value="f">Objective f(wₖ)</option><option value="residual">Residual norm ‖r(wₖ)‖</option><option value="gradientNorm">Gradient norm ‖∇f(wₖ)‖</option><option value="lambda">Damping λₖ</option></select><label for="fit-scale">Scale</label><select id="fit-scale"><option value="linear" selected>Linear</option><option value="log">Logarithmic</option></select><span>Linear iteration axis</span></div><canvas class="plot wideplot" id="fit-chart" role="img" aria-label="Nonlinear fitting convergence against iteration"></canvas><div class="legend"><span><i class="sw gn"></i>Gauss–Newton</span><span><i class="sw fixed"></i>Fixed LMM</span><span><i class="sw residual"></i>Residual LMM</span></div></div>
 </div>
-<div class="table-wrap"><table><thead><tr><th>At the displayed iterate</th><th>aₖ</th><th>bₖ</th><th>f(wₖ)</th><th>‖rₖ‖</th><th>‖∇f(wₖ)‖</th><th>Next λₖ</th><th>Status</th></tr></thead><tbody id="fit-table"></tbody></table></div>
+<div class="table-wrap"><table><thead><tr><th>At the displayed iterate</th><th id="fit-head-a">ωₖ</th><th id="fit-head-b">φₖ</th><th>f(wₖ)</th><th>‖rₖ‖</th><th>‖∇f(wₖ)‖</th><th>Next λₖ</th><th>Status</th></tr></thead><tbody id="fit-table"></tbody></table></div>
 <p class="status" id="fit-message" role="status"></p>
 <p class="hint" id="fit-viewport"></p>
-<div class="try"><b>Try this</b><ol><li>Step once from the default start. Compare the actual objective increases with the fit suggested by each local model.</li><li>Turn on noise and inspect the <i>Damping</i> plot. Residual-based damping need not go to zero when the best fit has a nonzero residual.</li><li>Choose <i>Difficult start</i>, then compare the terminal statuses. Full steps can fail; damping is helpful, but it is not a global convergence guarantee.</li></ol></div>
-<details class="setup"><summary>Data, algorithms, and what this experiment does not assume</summary>
-<p>The data are generated from yᵢ = 2e<sup>−0.8tᵢ</sup> + noiseᵢ at 31 evenly spaced tᵢ in [0,4]. A fixed seed gives bounded, centered noise; the slider sets its maximum absolute value. These are synthetic observations, not measurements from an external dataset. With noise, the generating parameters need not minimize the sample loss.</p>
-<p>All methods use the same residuals and starting point. GN solves (JᵀJ)p = −Jᵀr; fixed LMM adds λI; residual LMM uses λₖ = c‖rₖ‖. We take the full step wₖ₊₁ = wₖ + p. There is no hidden line search, step clipping, positivity constraint, or retry with increased damping. The parameter sliders restrict only the starting point.</p>
-<p>The small linear systems are solved in double precision. Stop when ‖r‖ ≤ 10⁻¹², ‖∇f‖ ≤ 10⁻¹⁰, or after 80 full steps. A singular or numerically ill-conditioned system, stagnation, or an unsafe numerical evaluation is reported separately. Small gradient alone is not a certificate of a global minimum. Fixed plot windows can clip a curve or path; the numerical table retains the actual iterate. Noisy problems are not covered by the zero-residual quadratic convergence theorem.</p>
+<div class="try"><b>Try this</b><ol id="fit-try"><li>Select <i>Different basins</i> and run: GN finds the wrong frequency; both damped methods recover the signal.</li><li>Select <i>Wrong frequency</i>: all three approach a bad local minimum, even with noise turned off.</li><li>Select <i>Near the solution</i> and switch the vertical scale to logarithmic to see fast local convergence.</li></ol></div>
+<details class="setup"><summary>Data, algorithms, and local minima</summary>
+<p id="fit-data-description">The 81 observations are generated from yᵢ = sin(2.4tᵢ + 0.4) + noiseᵢ at evenly spaced tᵢ in [0,10].</p>
+<p>A fixed seed gives bounded, centered noise; the slider sets its maximum absolute value. These are synthetic observations. With noise, the generating parameters need not minimize the sample loss.</p>
+<p id="fit-basin-description">In the noiseless sinusoidal problem, the best loss is zero. The wrong-frequency preset approaches a positive-loss local minimum near (3.2591, −0.7311), with f ≈ 0.39856. Its full Hessian has positive eigenvalues, approximately 0.0644 and 7.1577. Thus the plateau is a bad local minimum, not just slow progress. The different-basins preset sends GN to another local minimum with f ≈ 0.37155. These outcomes use the preset damping values; changing them can change the destination.</p>
+<p>All methods use the same residuals and starting point. GN solves (JᵀJ)p = −Jᵀr; fixed LMM adds λI; residual LMM uses λₖ = c‖rₖ‖. We take the full step wₖ₊₁ = wₖ + p. There is no hidden line search, step clipping, constraint, or retry with increased damping. The parameter sliders restrict only the starting point. Damping can stabilize steps, but does not guarantee finding the best basin.</p>
+<p>The small linear systems are solved in double precision. Stop when ‖r‖ ≤ 10⁻¹², ‖∇f‖ ≤ 10⁻¹⁰, or after <span id="fit-budget">200</span> full steps. A singular or numerically ill-conditioned system, stagnation, or an unsafe numerical evaluation is reported separately. Small gradient alone is not a certificate of a global minimum. The numerical table and CSV retain the actual iterates. Noisy fits and positive-loss local minima are not covered by the zero-residual quadratic convergence theorem.</p>
 </details>
 </div></details>
 <footer>Self-contained and offline · Nothing autoplays · All iteration axes are linear · CSV downloads contain the complete computed traces.</footer>
@@ -315,13 +322,13 @@ const GNCore = (() => {
     const p = [(d*u-b*v)/det, (a*v-b*u)/det];
     return p.every(Number.isFinite) ? {p,reason:null} : {p:null,reason:'overflow'};
   }
-  function fitTrace(w0, data, method, lambda = .1, c = .5, K = 50) {
+  function fitTrace(w0, data, method, lambda = .1, c = .5, K = 50, evaluator = fitEval) {
     options(method, lambda, c, K);
     if (!Array.isArray(w0) || w0.length !== 2 || !w0.every(Number.isFinite)) throw new RangeError('Initial parameters must be two finite numbers.');
     const points = []; let w = [...w0];
     for (let k = 0; k <= K; k++) {
       let e, lam;
-      try { e = fitEval(w,data); lam = damping(method,lambda,c,e.residual); }
+      try { e = evaluator(w,data); lam = damping(method,lambda,c,e.residual); }
       catch(err) { return finish(points, 'numerical limit', err.message); }
       const gradientNorm = Math.hypot(...e.gradient);
       if (!Number.isFinite(gradientNorm)) return finish(points, 'numerical limit', 'The gradient norm overflowed.');
@@ -337,13 +344,57 @@ const GNCore = (() => {
       if (k === K) return finish(points, 'iteration limit', `Stopped after ${K} full steps.`);
       const trial = [w[0]+point.p[0],w[1]+point.p[1]];
       if (!trial.every(Number.isFinite) || Math.max(...trial.map(Math.abs)) > MAX_PARAMETER) return finish(points, 'numerical limit', `The full trial exceeded the guard |parameter| <= ${MAX_PARAMETER}; it was not clipped or accepted.`);
-      try { fitEval(trial,data); }
+      try { evaluator(trial,data); }
       catch(err) { return finish(points, 'numerical limit', err.message); }
       if (trial.every((v,i)=>v===w[i])) return finish(points, 'numerical stagnation', 'The full step cannot change the parameters in floating-point arithmetic.');
       w = trial;
     }
   }
-  return {scalar,scalarTrace,fitData,fitEval,fitTrace};
+  // Sinusoidal regression uses the same full-step solver as the exponential
+  // example, through fitTrace's optional evaluator argument. Phases are never
+  // wrapped: w[1] is the actual real-valued optimization variable.
+  function oscData(noise = 0) {
+    finite(noise, 'Noise level');
+    if (noise < 0) throw new RangeError('Noise level must be nonnegative.');
+    let seed = 0x57109abc;
+    function random() {
+      seed = (seed + 0x6D2B79F5) | 0;
+      let z = seed; z = Math.imul(z ^ (z >>> 15), z | 1);
+      z ^= z + Math.imul(z ^ (z >>> 7), z | 61);
+      return ((z ^ (z >>> 14)) >>> 0) / 4294967296;
+    }
+    const raw = Array.from({length:81}, () => 2*random()-1);
+    const mean = raw.reduce((a,b) => a+b, 0) / raw.length;
+    const centered = raw.map(x => x-mean), max = Math.max(...centered.map(Math.abs));
+    return centered.map((z,i) => {
+      const t = 10*i/80;
+      const y = Math.sin(2.4*t+.4) + noise*z/max;
+      finite(y, 'Observation'); return {t,y};
+    });
+  }
+  function oscEval(w, data) {
+    if (!Array.isArray(w) || w.length !== 2 || !w.every(Number.isFinite)) throw new RangeError('Oscillation parameters must be two finite numbers.');
+    if (!Array.isArray(data) || !data.length) throw new RangeError('Oscillation data must be a nonempty array.');
+    const [omega,phi] = w, scale = 1/Math.sqrt(data.length), r = [], J = [];
+    let f = 0, g0 = 0, g1 = 0, A00 = 0, A01 = 0, A11 = 0;
+    for (const row of data) {
+      if (!row || !Number.isFinite(row.t) || !Number.isFinite(row.y)) throw new RangeError('Every observation must have finite t and y.');
+      const theta = omega*row.t + phi;
+      if (!Number.isFinite(theta) || Math.abs(theta) > 1e9) throw new RangeError('The phase argument exceeded the numerical guard |omega*t + phi| <= 1e9; the trial was not wrapped, clipped, or accepted.');
+      const cosine = Math.cos(theta), ri = (Math.sin(theta)-row.y)*scale;
+      const j0 = row.t*cosine*scale, j1 = cosine*scale;
+      r.push(ri); J.push([j0,j1]);
+      f += .5*ri*ri; g0 += j0*ri; g1 += j1*ri;
+      A00 += j0*j0; A01 += j0*j1; A11 += j1*j1;
+    }
+    const residual = Math.sqrt(2*f);
+    if (![f,residual,g0,g1,A00,A01,A11].every(Number.isFinite)) throw new RangeError('Oscillation model evaluation overflowed; the trial was not accepted.');
+    return {f, residual, gradient:[g0,g1], A:[[A00,A01],[A01,A11]], r, J};
+  }
+  function oscTrace(w0, data, method, lambda = .1, c = .5, K = 200) {
+    return fitTrace(w0,data,method,lambda,c,K,oscEval);
+  }
+  return {scalar,scalarTrace,fitData,fitEval,fitTrace,oscData,oscEval,oscTrace};
 })();
 
 </script>
@@ -459,11 +510,11 @@ let rateTraces=[],fitTraces=[],data=[],contours=[];
 let ratePlayer,fitPlayer;
 function current(trace,k){return trace.points[Math.min(k,trace.points.length-1)];}
 function statusAt(trace,k){return k>=trace.points.length-1?trace.status:'Running';}
-function traceChart(canvas,traces,k,N,metric,floor,label) {
+function traceChart(canvas,traces,k,N,metric,floor,label,log=true) {
   const all=traces.flatMap(t=>t.points.map(p=>p[metric])).filter(v=>Number.isFinite(v)&&v>0);
   const top=Math.max(floor+2,Math.ceil(Math.log10(Math.max(...all,10**(floor+2))))+.3);
-  const F=frame(canvas,[0,Math.max(N,4),floor,top],{log:true,iterations:true,xlabel:'iteration k',ylabel:label});
-  traces.forEach((t,i)=>{const n=Math.min(k+1,t.points.length),pts=t.points.slice(0,n).map((p,j)=>[j,Math.max(10**floor,p[metric])]);line(F,pts,css(METHODS[i].color),METHODS[i].dash);for(const p of pts)dot(F,p[0],p[1],css(METHODS[i].color),n>40?1.8:3);});
+  const F=frame(canvas,[0,Math.max(N,4),log?floor:0,log?top:Math.max(1e-12,...all)*1.07],{log,iterations:true,xlabel:'iteration k',ylabel:label});
+  traces.forEach((t,i)=>{const n=Math.min(k+1,t.points.length),pts=t.points.slice(0,n).map((p,j)=>[j,log?Math.max(10**floor,p[metric]):p[metric]]);line(F,pts,css(METHODS[i].color),METHODS[i].dash);for(const p of pts)dot(F,p[0],p[1],css(METHODS[i].color),n>40?1.8:3);});
 }
 function updateRates() {
   const w=value('rates-w'),lambda=10**value('rates-lambda'),c=value('rates-c');
@@ -478,12 +529,60 @@ function drawRates() {
   const w=value('rates-w'),l=10**value('rates-lambda');
   $('rates-message').textContent=w===0?'All starts are at a local maximum. GN’s inverse step is undefined; both damped methods stay there. A zero gradient is not enough.':'For fixed λ = '+fmt(l)+', the asymptotic linear factor is λ/(4 + λ) = '+fmt(l/(4+l))+'. GN and residual LMM remove this persistent linear term. Finished methods remain at their last computed iterate.';
 }
-function fitObjective(a,b){let s=0;for(const row of data){const v=a*Math.exp(-b*row.t)-row.y;s+=v*v;}return s/(2*data.length);}
-const landBounds=[0,4,-.5,3];
+const FIT_MODELS={
+  oscillatory:{
+    ranges:[[.5,6,.01],[-3.14,3.14,.01]],bounds:[.5,6,-Math.PI,Math.PI],view:[0,10,-1.4,1.4],truth:[2.4,.4],budget:200,
+    labels:['Initial frequency ω₀','Initial phase φ₀'],axes:['frequency ω','phase φ (mod 2π)'],heads:['ωₖ','φₖ'],
+    presets:['Near the solution','Wrong frequency','Different basins'],starts:[[2.3,.3],[3,0],[2.2,-1.2]],initial:2,
+    predict:(w,t)=>Math.sin(w[0]*t+w[1]),makeData:GNCore.oscData,trace:GNCore.oscTrace,
+    lede:'Fit the frequency and phase of a sinusoidal signal. The loss has many valleys: a curve can look plausible and still have the wrong frequency. Compare how the three methods behave from the same starting point.',
+    formula:'F<sub>ω,φ</sub>(t) = sin(ωt + φ), &nbsp; f(ω,φ) = (1/2n) ∑ᵢ (sin(ωtᵢ + φ) − yᵢ)².<br><small>n = 81 observations, d = 2 parameters. Residuals and Jacobians include the normalization 1/√n.</small>',
+    description:'The 81 observations are generated from yᵢ = sin(2.4tᵢ + 0.4) + noiseᵢ at evenly spaced tᵢ in [0,10].',
+    tries:'<li>Select <i>Different basins</i> and run: GN finds the wrong frequency; both damped methods recover the signal.</li><li>Select <i>Wrong frequency</i>: all three approach a bad local minimum, even with noise turned off.</li><li>Select <i>Near the solution</i> and switch the vertical scale to logarithmic to see fast local convergence.</li>'
+  },
+  exponential:{
+    ranges:[[0,4,.05],[-.5,3,.05]],bounds:[0,4,-.5,3],view:[0,4,-.35,2.65],truth:[2,.8],budget:80,
+    labels:['Initial amplitude a₀','Initial decay b₀'],axes:['amplitude a','decay b'],heads:['aₖ','bₖ'],
+    presets:['Default start','Difficult start','Zero amplitude'],starts:[[1,1.3],[.1,3],[0,1.3]],initial:0,
+    predict:(w,t)=>w[0]*Math.exp(-w[1]*t),makeData:GNCore.fitData,trace:GNCore.fitTrace,
+    lede:'Fit an exponential decay model with two parameters. Compare the fitted curves, the parameter paths, and the optimization progress. This simpler example highlights unstable full steps.',
+    formula:'F<sub>a,b</sub>(t) = a e<sup>−bt</sup>, &nbsp; f(a,b) = (1/2n) ∑ᵢ (a e<sup>−btᵢ</sup> − yᵢ)².<br><small>n = 31 observations, d = 2 parameters. Residuals and Jacobians include the normalization 1/√n.</small>',
+    description:'The 31 observations are generated from yᵢ = 2e^(−0.8tᵢ) + noiseᵢ at evenly spaced tᵢ in [0,4].',
+    tries:'<li>Step once from the default start and compare the actual objective increases.</li><li>Turn on noise and inspect the <i>Damping</i> plot. Residual damping need not vanish.</li><li>Choose <i>Difficult start</i> and compare the terminal statuses. A full step can fail even with damping.</li>'
+  }
+};
+let fitFamily='oscillatory',landBounds=[...FIT_MODELS.oscillatory.bounds],lossGrid=null,landKey='';
+function configureFit(){
+  fitFamily=$('fit-problem').value;const C=FIT_MODELS[fitFamily];landBounds=[...C.bounds];
+  ['fit-a','fit-b'].forEach((id,i)=>{const input=$(id);[input.min,input.max,input.step]=C.ranges[i].map(String);$(id+'-label').textContent=C.labels[i];});
+  $('fit-lede').textContent=C.lede;$('fit-formula').innerHTML=C.formula;$('fit-data-description').textContent=C.description;$('fit-try').innerHTML=C.tries;
+  $('fit-horizontal').textContent='Horizontal: '+C.axes[0];$('fit-vertical').textContent='Vertical: '+C.axes[1];
+  $('fit-head-a').textContent=C.heads[0];$('fit-head-b').textContent=C.heads[1];$('fit-budget').textContent=C.budget;
+  $('fit-basin-description').hidden=fitFamily!=='oscillatory';
+  $('fit-land-caption').textContent='Click the loss contours to choose a start; sliders are the keyboard alternative.'+(fitFamily==='oscillatory'?' Phase is periodic; top and bottom edges represent the same phase.':'');
+  $('fit-land').setAttribute('aria-label','Loss contours and optimization paths in '+C.axes.join(' and '));
+  ['fit-default','fit-poor','fit-zero'].forEach((id,i)=>$(id).textContent=C.presets[i]);
+  $('fit-scale').value=fitFamily==='oscillatory'?'linear':'log';$('fit-metric').value='f';
+  fitPreset(C.initial);
+}
+function fitPreset(i){
+  $('fit-lambda').value='-1';$('fit-c').value='.5';$('fit-noise').value='0';
+  fitStart(...FIT_MODELS[fitFamily].starts[i]);
+}
+function fitObjective(a,b){let s=0;const predict=FIT_MODELS[fitFamily].predict;for(const row of data){const v=predict([a,b],row.t)-row.y;s+=v*v;}return s/(2*data.length);}
+function wrapPhase(phi){return ((phi+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;}
+function landPoint(w){return fitFamily==='oscillatory'?[w[0],wrapPhase(w[1])]:[...w];}
+function landPath(points){
+  const out=[];let previous=null;
+  for(const p of points){const w=landPoint(p.w);if(previous&&fitFamily==='oscillatory'&&Math.abs(w[1]-previous[1])>Math.PI)out.push([NaN,NaN]);out.push(w);previous=w;}
+  return out;
+}
 function computeContours() {
-  const nx=80,ny=64,[xmin,xmax,ymin,ymax]=landBounds;
-  const grid=Array.from({length:ny+1},(_,j)=>Array.from({length:nx+1},(_,i)=>Math.log10(fitObjective(xmin+(xmax-xmin)*i/nx,ymin+(ymax-ymin)*j/ny)+1e-12)));
-  const levels=[-5,-4,-3,-2.5,-2,-1.5,-1,-.5,0,.5],out=[];
+  const nx=128,ny=80,[xmin,xmax,ymin,ymax]=landBounds,osc=fitFamily==='oscillatory';
+  const raw=Array.from({length:ny+1},(_,j)=>Array.from({length:nx+1},(_,i)=>fitObjective(xmin+(xmax-xmin)*i/nx,ymin+(ymax-ymin)*j/ny)));
+  lossGrid={nx,ny,raw};
+  const grid=osc?raw:raw.map(row=>row.map(f=>Math.log10(f+1e-12)));
+  const levels=osc?[.02,.05,.1,.2,.3,.37,.4,.45,.5,.55,.65,.8]:[-5,-4,-3,-2.5,-2,-1.5,-1,-.5,0,.5],out=[];
   for(const level of levels) {
     const segments=[];
     for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){
@@ -499,38 +598,57 @@ function computeContours() {
   }
   return out;
 }
+function drawLossMap(F){
+  if(!lossGrid)return;
+  const {nx,ny,raw}=lossGrid,[xmin,xmax,ymin,ymax]=landBounds;
+  const rgb=name=>css(name).slice(1).match(/../g).map(x=>parseInt(x,16));
+  const low=rgb('--land-low'),high=rgb('--land-high'),dx=(xmax-xmin)/nx,dy=(ymax-ymin)/ny;
+  F.clip();
+  for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){
+    const f=(raw[j][i]+raw[j+1][i]+raw[j][i+1]+raw[j+1][i+1])/4;
+    const q=clamp(fitFamily==='oscillatory'?f/.85:(Math.log10(f+1e-5)+5)/7,0,1);
+    F.ctx.fillStyle='rgb('+low.map((v,k)=>Math.round(v+q*(high[k]-v))).join(',')+')';
+    F.ctx.fillRect(F.X(xmin+i*dx),F.Y(ymin+(j+1)*dy),(F.w-F.left-F.right)/nx+.5,(F.h-F.top-F.bottom)/ny+.5);
+  }
+  F.ctx.strokeStyle=css('--muted');F.ctx.lineWidth=.65;F.ctx.globalAlpha=.55;F.ctx.beginPath();
+  for(const level of contours)for(const seg of level.segments){F.ctx.moveTo(F.X(seg[0][0]),F.Y(seg[0][1]));F.ctx.lineTo(F.X(seg[1][0]),F.Y(seg[1][1]));}F.ctx.stroke();F.ctx.restore();
+}
 function updateFit() {
-  const w=[value('fit-a'),value('fit-b')],lambda=10**value('fit-lambda'),c=value('fit-c'),noise=value('fit-noise');
+  const C=FIT_MODELS[fitFamily],w=[value('fit-a'),value('fit-b')],lambda=10**value('fit-lambda'),c=value('fit-c'),noise=value('fit-noise');
   output('fit-a',w[0]);output('fit-b',w[1]);output('fit-lambda',lambda);output('fit-c',c);output('fit-noise',noise);
-  data=GNCore.fitData(noise);fitTraces=METHODS.map(m=>GNCore.fitTrace(w,data,m.key,lambda,c,80));contours=computeContours();
+  data=C.makeData(noise);fitTraces=METHODS.map(m=>C.trace(w,data,m.key,lambda,c,C.budget));
+  const key=fitFamily+':'+noise;if(key!==landKey){contours=computeContours();landKey=key;}
   fitPlayer.reset(Math.max(...fitTraces.map(t=>t.iterations)));drawFit();
 }
 let lastLand=null;
 function drawFit() {
   if(!$('fitting').open||!fitTraces.length)return;
-  const k=fitPlayer.k;
-  const D=frame($('fit-data'),[0,4,-.35,2.65],{xlabel:'input t',ylabel:'observation / prediction'});
-  if($('fit-truth').checked)line(D,sample(t=>2*Math.exp(-.8*t),0,4),css('--muted'),[8,6],1.5);
-  for(const row of data)dot(D,row.t,row.y,css('--actual'),3.1);
-  fitTraces.forEach((tr,i)=>{const w=current(tr,k).w;line(D,sample(t=>w[0]*Math.exp(-w[1]*t),0,4),css(METHODS[i].color),METHODS[i].dash);});
-  const L=frame($('fit-land'),landBounds,{xlabel:'amplitude a',ylabel:'decay b'});lastLand=L;
-  L.clip();L.ctx.strokeStyle=css('--axis');L.ctx.lineWidth=.8;L.ctx.globalAlpha=.8;L.ctx.beginPath();
-  for(const level of contours)for(const seg of level.segments){L.ctx.moveTo(L.X(seg[0][0]),L.Y(seg[0][1]));L.ctx.lineTo(L.X(seg[1][0]),L.Y(seg[1][1]));}L.ctx.stroke();L.ctx.restore();
+  const k=fitPlayer.k,C=FIT_MODELS[fitFamily],osc=fitFamily==='oscillatory';
+  const D=frame($('fit-data'),C.view,{xlabel:'input t',ylabel:'observation / prediction'});
+  if($('fit-truth').checked)line(D,sample(t=>C.predict(C.truth,t),C.view[0],C.view[1],600),css('--muted'),[8,6],1.5);
+  for(const row of data)dot(D,row.t,row.y,css('--actual'),3);
+  const unresolved=[];
+  fitTraces.forEach((tr,i)=>{const w=current(tr,k).w,n=osc?Math.max(600,Math.ceil(20*Math.abs(w[0])*C.view[1]/(2*Math.PI))):500;
+    if(n>12000){unresolved.push(METHODS[i].name);return;}
+    line(D,sample(t=>C.predict(w,t),C.view[0],C.view[1],n),css(METHODS[i].color),METHODS[i].dash);
+  });
+  const L=frame($('fit-land'),landBounds,{xlabel:C.axes[0],ylabel:C.axes[1]});lastLand=L;drawLossMap(L);
   const outside=[];
-  fitTraces.forEach((tr,i)=>{const pts=tr.points.slice(0,Math.min(k+1,tr.points.length)).map(p=>p.w);line(L,pts,css(METHODS[i].color),METHODS[i].dash,2.3);for(const p of pts)dot(L,p[0],p[1],css(METHODS[i].color),2);
-    const w=current(tr,k).w;if(w[0]<landBounds[0]||w[0]>landBounds[1]||w[1]<landBounds[2]||w[1]>landBounds[3])outside.push(METHODS[i].name);
+  fitTraces.forEach((tr,i)=>{const pts=landPath(tr.points.slice(0,Math.min(k+1,tr.points.length)));line(L,pts,css(METHODS[i].color),METHODS[i].dash,2.3);for(const p of pts)if(p.every(Number.isFinite))dot(L,p[0],p[1],css(METHODS[i].color),1.8);
+    const w=landPoint(current(tr,k).w);if(w[0]<landBounds[0]||w[0]>landBounds[1]||w[1]<landBounds[2]||w[1]>landBounds[3])outside.push(METHODS[i].name);
     else dot(L,w[0],w[1],css(METHODS[i].color),5);
   });
   const start=[value('fit-a'),value('fit-b')];L.ctx.strokeStyle=css('--actual');L.ctx.lineWidth=2;L.ctx.beginPath();L.ctx.arc(L.X(start[0]),L.Y(start[1]),7,0,2*Math.PI);L.ctx.stroke();
-  const metric=$('fit-metric').value;
+  if($('fit-truth').checked){const [a,b]=C.truth;L.ctx.strokeStyle=css('--actual');L.ctx.lineWidth=2;L.ctx.beginPath();L.ctx.moveTo(L.X(a)-5,L.Y(b));L.ctx.lineTo(L.X(a)+5,L.Y(b));L.ctx.moveTo(L.X(a),L.Y(b)-5);L.ctx.lineTo(L.X(a),L.Y(b)+5);L.ctx.stroke();L.ctx.fillStyle=css('--actual');L.ctx.font='11px system-ui';L.ctx.textAlign='left';L.ctx.fillText('generating parameters',L.X(a)+8,L.Y(b)-8);}
+  const metric=$('fit-metric').value,log=$('fit-scale').value==='log';
   const labels={f:'objective f(w_k)',residual:'residual norm',gradientNorm:'gradient norm',lambda:'damping lambda_k'};
-  traceChart($('fit-chart'),fitTraces,k,fitPlayer.N,metric,metric==='f'?-20:metric==='lambda'?-10:-12,labels[metric]);
+  traceChart($('fit-chart'),fitTraces,k,fitPlayer.N,metric,metric==='f'?-20:metric==='lambda'?-10:-12,labels[metric],log);
   $('fit-table').innerHTML=fitTraces.map((t,i)=>{const j=Math.min(k,t.points.length-1),p=t.points[j];return '<tr><td>'+legendName(METHODS[i])+(j<k?' · k = '+j:'')+'</td><td>'+fmt(p.w[0])+'</td><td>'+fmt(p.w[1])+'</td><td>'+fmt(p.f)+'</td><td>'+fmt(p.residual)+'</td><td>'+fmt(p.gradientNorm)+'</td><td>'+fmt(p.lambda)+'</td><td title="'+t.detail+'">'+statusAt(t,k)+'</td></tr>';}).join('');
   const failures=fitTraces.map((t,i)=>k>=t.iterations&&!['zero residual','stationary','iteration limit'].includes(t.status)?METHODS[i].name+': '+t.detail:'').filter(Boolean);
-  let message=value('fit-noise')>0?'With noise, a positive residual generally remains. Then λₖ = c‖rₖ‖ does not vanish, and the zero-residual quadratic theorem does not apply.':'Without noise, (a,b) = (2,0.8) interpolates all observations. Watch the residual-based damping disappear as the fit becomes exact.';
+  let message=value('fit-noise')>0?'With noise, a positive residual generally remains. Residual damping need not vanish, and the zero-residual quadratic theorem does not apply.':osc?'The best possible loss is zero at (ω,φ) = (2.4,0.4). A small gradient with a positive loss can mean a bad local minimum. Fast local convergence does not guarantee the correct frequency.':'Without noise, (a,b) = (2,0.8) interpolates all observations. Watch the residual-based damping disappear as the fit becomes exact.';
   if(failures.length)message+=' '+failures.join(' ');
   $('fit-message').textContent=message;
-  $('fit-viewport').textContent=(outside.length?'Currently outside the parameter view: '+outside.join(', ')+'. ':'')+'Plot windows are fixed; off-plot paths and predictions are clipped visually only. The table shows actual parameters. Values below the convergence chart floor, including zero, lie on its bottom edge.';
+  $('fit-viewport').textContent=(outside.length?'Currently outside the parameter view: '+outside.join(', ')+'. ':'')+(unresolved.length?'Frequencies too high to draw accurately: '+unresolved.join(', ')+'. ':'')+(osc?'Only the landscape display wraps phase into [−π,π); paths break at that boundary. The table and CSV show the actual, unwrapped phase. ':'')+'Plot windows clip visually only; optimization steps are unchanged.'+(log?' Values below the chart floor, including zero, lie on its bottom edge.':'');
 }
 function exportCSV(name,traces) {
   const rows=[['method','k','w1','w2','objective','residual_norm','parameter_error','gradient_norm','lambda_for_next_step','final_status']];
@@ -548,16 +666,19 @@ for(const b of document.querySelectorAll('[data-model-start]'))b.onclick=()=>{$(
 for(const id of ['rates-w','rates-lambda','rates-c'])$(id).addEventListener('input',updateRates);
 for(const b of document.querySelectorAll('[data-rate-start]'))b.onclick=()=>{$('rates-w').value=b.dataset.rateStart;updateRates();};
 for(const id of ['fit-a','fit-b','fit-lambda','fit-c','fit-noise'])$(id).addEventListener('input',updateFit);
-for(const id of ['fit-truth','fit-metric'])$(id).addEventListener('change',drawFit);
+$('fit-problem').addEventListener('change',configureFit);
+for(const id of ['fit-truth','fit-metric','fit-scale'])$(id).addEventListener('change',drawFit);
 function fitStart(a,b){$('fit-a').value=a;$('fit-b').value=b;updateFit();}
-$('fit-default').onclick=()=>fitStart(1,1.3);
-$('fit-poor').onclick=()=>fitStart(.1,3);
-$('fit-zero').onclick=()=>fitStart(0,1.3);
+$('fit-default').onclick=()=>fitPreset(0);
+$('fit-poor').onclick=()=>fitPreset(1);
+$('fit-zero').onclick=()=>fitPreset(2);
 $('fit-land').addEventListener('click',event=>{
   if(!lastLand)return;const box=$('fit-land').getBoundingClientRect(),x=event.clientX-box.left,y=event.clientY-box.top,F=lastLand;
   if(x<F.left||x>F.w-F.right||y<F.top||y>F.h-F.bottom)return;
   const a=landBounds[0]+(landBounds[1]-landBounds[0])*(x-F.left)/(F.w-F.left-F.right),b=landBounds[2]+(landBounds[3]-landBounds[2])*(F.h-F.bottom-y)/(F.h-F.top-F.bottom);
-  fitStart(Math.round(a*20)/20,Math.round(b*20)/20);
+  const ranges=FIT_MODELS[fitFamily].ranges;
+  const snap=(v,r)=>clamp(Math.round(v/r[2])*r[2],r[0],r[1]);
+  fitStart(snap(a,ranges[0]),snap(b,ranges[1]));
 });
 let resizeFrame=0;
 function redraw(){cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(()=>{drawModel();drawRates();drawFit();});}
@@ -565,7 +686,7 @@ window.addEventListener('resize',redraw);
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',redraw);
 document.addEventListener('visibilitychange',()=>{if(document.hidden){ratePlayer.pause();fitPlayer.pause();}});
 if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){ratePlayer.node.querySelector('select').value='2';fitPlayer.node.querySelector('select').value='2';}
-drawModel();updateRates();updateFit();
+drawModel();updateRates();configureFit();
 </script>
 </body>
 </html>
