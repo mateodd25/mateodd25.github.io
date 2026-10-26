@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gradient descent avoids strict saddles · Optimization for Data Science</title>
+<style>
+:root{color-scheme:light dark;--bg:#f7f6f2;--surface:#fff;--text:#23262b;--muted:#616771;--line:#deded8;--grid:#eaeae5;--soft:#f0efe9;--axis:#a5a8a9;--blue:#426db3;--teal:#14796e;--rose:#a63159;--gold:#9c6b15;--focus:#146eaa}
+@media(prefers-color-scheme:dark){:root{--bg:#181b20;--surface:#20242a;--text:#eeeef0;--muted:#b2b7c0;--line:#3f444b;--grid:#30353d;--soft:#2b3037;--axis:#717985;--blue:#91b8ff;--teal:#69cbb9;--rose:#f494af;--gold:#edc274;--focus:#82c9fa}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{max-width:1240px;margin:auto;padding:32px 28px 56px}.eyebrow{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}h1{font-size:clamp(28px,4vw,40px);font-weight:650;letter-spacing:-.035em;line-height:1.12;margin:0 0 14px}h2,h3,p{margin-top:0}.intro{max-width:850px;color:var(--muted);font-size:17px}.theorem{border-left:3px solid var(--teal);background:var(--surface);padding:15px 20px;margin:22px 0 28px;max-width:1000px}.math{font:19px/1.65 Georgia,"Times New Roman",serif}.formula{overflow-x:auto;padding:5px 0}.stage{border:1px solid var(--line);border-radius:14px;background:var(--surface);margin:20px 0;overflow:hidden}.stage>summary{cursor:pointer;display:flex;gap:12px;align-items:center;padding:20px 22px;font-size:20px;font-weight:650;list-style:none}.stage>summary::-webkit-details-marker{display:none}.stage>summary::after{content:'Show';margin-left:auto;color:var(--muted);font-size:12px;font-weight:500}.stage[open]>summary::after{content:'Hide'}.number{border:1px solid var(--line);border-radius:50%;width:30px;height:30px;display:grid;place-items:center;flex-shrink:0;font-size:13px;font-variant-numeric:tabular-nums}.stage-body{padding:0 22px 22px}.lead{color:var(--muted);max-width:950px}.controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 24px;background:var(--soft);padding:16px;border-radius:9px;margin:15px 0}.control label{display:flex;justify-content:space-between;gap:12px;font-size:13px;margin-bottom:6px}.control output{font-variant-numeric:tabular-nums;font-weight:650}input[type=range]{width:100%;accent-color:var(--teal)}input[type=number]{width:90px}button,select,input[type=number]{font:inherit;font-size:13px;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:8px 10px;min-height:38px}button{cursor:pointer}button:hover{border-color:var(--muted)}button:disabled{opacity:.4;cursor:default}.primary{background:var(--text);color:var(--surface);border-color:var(--text)}:focus-visible{outline:3px solid var(--focus);outline-offset:3px}.transport,.toolbar,.legend{display:flex;gap:10px 15px;align-items:center;flex-wrap:wrap}.transport{margin-top:16px}.speed-label{margin-left:auto;font-size:12px;display:flex;align-items:center;gap:8px}.toolbar{margin:12px 0;font-size:13px}.toolbar label{display:flex;align-items:center;gap:7px}.toolbar input[type=checkbox]{accent-color:var(--teal)}.timeline{display:flex;gap:15px;align-items:center;margin:13px 0 18px}.timeline label{font-size:13px;min-width:65px;font-variant-numeric:tabular-nums}.timeline input{flex:1}.panels{display:grid;grid-template-columns:1fr 1fr;gap:18px}.panel{border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}.panel h3{font-size:15px;margin-bottom:3px}.sub{font-size:12px;color:var(--muted);margin-bottom:9px;min-height:36px}.panel canvas{display:block;width:100%;aspect-ratio:1.12}.panel canvas.land{cursor:crosshair;touch-action:manipulation}.panel canvas.surface{cursor:grab;touch-action:none}.panel canvas.surface:active{cursor:grabbing}.legend{font-size:11px;color:var(--muted);margin-top:10px;gap:7px 14px}.legend span{display:flex;align-items:center;gap:5px}.sw{display:inline-block;width:15px;height:3px;background:currentColor}.sw.dash{height:0;background:none;border-top:2px dashed currentColor}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}.stat{background:var(--soft);padding:11px 14px;border-radius:8px;font-size:12px;color:var(--muted)}.stat strong{display:block;font-size:20px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;margin-top:4px}.message{font-size:13px;border-left:3px solid var(--rose);padding:10px 14px;background:var(--soft);margin:14px 0 0}.setup{margin-top:17px;font-size:14px}.setup>summary{cursor:pointer;color:var(--muted);font-size:13px}.setup p{margin:10px 0}.setup .math{font-size:17px}.caption{font-size:12px;color:var(--muted);margin-top:12px}footer{font-size:12px;color:var(--muted);margin-top:28px;max-width:980px}a{color:var(--blue)}.two-columns{display:grid;grid-template-columns:1fr 1fr;gap:20px}.small{font-size:12px;color:var(--muted)}.coordinate-inputs{display:flex;gap:14px;align-items:center;flex-wrap:wrap}.camera{display:flex;flex-wrap:wrap;gap:12px;align-items:center;font-size:12px;color:var(--muted);margin-top:10px}.camera input{max-width:180px}.highlight{color:var(--rose)}
+@media(max-width:850px){.panels{grid-template-columns:1fr}.panel canvas{aspect-ratio:1.3}.controls{grid-template-columns:1fr 1fr}.two-columns{grid-template-columns:1fr}.sub{min-height:0}}
+@media(max-width:540px){main{padding:22px 12px 40px}.stage>summary{padding:17px 14px;font-size:17px}.stage-body{padding:0 13px 17px}.controls{grid-template-columns:1fr;gap:14px}.panel{padding:10px}.panel canvas{aspect-ratio:1}.stats{grid-template-columns:1fr}.stat{display:flex;align-items:center;justify-content:space-between;gap:14px}.stat strong{margin:0;font-size:17px}.transport{gap:8px}.speed-label{margin-left:0}button{min-height:42px}.math{font-size:17px}}
+</style>
+</head>
+<body><main>
+<p class="eyebrow">Optimization for Data Science · Lecture 9</p>
+<h1>Gradient descent avoids strict saddles</h1>
+<p class="intro">A strict saddle repels along at least one direction; it may attract along others. Explore the exceptional starting points, the separation that drives the proof, and what can fail when the step is too large.</p>
+<div class="theorem"><strong>The result.</strong> If <span class="math">f ∈ C²</span> has an <span class="math">L</span>-Lipschitz gradient, <span class="math">0 &lt; η &lt; 1/L</span>, and the initialization has a density, GD converges to any fixed strict saddle with probability zero. This does not assert that the iterates converge or give a uniform escape time.</div>
+
+<details class="stage" id="quadratic" open><summary><span class="number">1</span> The quadratic saddle from the lecture</summary><div class="stage-body">
+<p class="lead">Consider the two-dimensional function from the notes. The negative-curvature direction pushes away from the origin, while the positive-curvature direction pulls toward it. Only a “small” set gets trapped at zero.</p>
+<div class="formula math">f(w, z) = −<span style="white-space:nowrap">(α/2)w²</span> + <span style="white-space:nowrap">(β/2)z²</span>, &nbsp; α, β &gt; 0.</div>
+<div class="formula math">w<sub>k+1</sub> = (1 + ηα)w<sub>k</sub>, &nbsp; z<sub>k+1</sub> = (1 − ηβ)z<sub>k</sub>.</div>
+<div class="controls">
+<div class="control"><label for="quad-alpha">Negative-curvature magnitude α <output id="quad-alpha-out"></output></label><input id="quad-alpha" type="range" min="0.2" max="2" step="0.1" value="1"></div>
+<div class="control"><label for="quad-beta">Positive curvature β <output id="quad-beta-out"></output></label><input id="quad-beta" type="range" min="0.2" max="2" step="0.1" value="1"></div>
+<div class="control"><label for="quad-fraction">Step size as a fraction of 1/L <output id="quad-fraction-out"></output></label><input id="quad-fraction" type="range" min="0.1" max="0.95" step="0.05" value="0.6"></div>
+</div>
+<p class="small" id="quad-step-caption"></p>
+<div class="toolbar"><label for="quad-w">Initial w <input id="quad-w" type="number" min="-2.2" max="2.2" step="any" value="0.04"></label><label for="quad-z">Initial z <input id="quad-z" type="number" min="-2.2" max="2.2" step="any" value="1.3"></label><button id="quad-stable">Start exactly on w = 0</button><button id="quad-perturb">Perturb by 0.001</button><label><input type="checkbox" id="quad-flow" checked>Show gradient-flow picture</label></div>
+<div class="transport" data-transport="quad"></div><div class="timeline"><label for="quad-time" id="quad-k">k = 0</label><input id="quad-time" type="range" min="0" max="60" value="0" aria-label="Quadratic saddle iteration"></div>
+<div class="panels">
+<div class="panel"><h3>The phase portrait from the notes</h3><p class="sub">Blue curves and arrows show continuous gradient flow. Colored dots show discrete GD. Click to choose an initial point.</p><canvas class="land" id="quad-phase" role="img" aria-label="Quadratic saddle phase portrait with expanding horizontal direction, contracting vertical direction, and gradient descent iterates"></canvas><div class="legend"><span style="color:var(--blue)"><i class="sw"></i>Gradient flow</span><span style="color:var(--rose)"><i class="dot"></i>Selected GD trajectory</span><span style="color:var(--gold)"><i class="sw"></i>GD from (0, z₀)</span><span>◆ Saddle at (0, 0)</span></div></div>
+<div class="panel"><h3>The quadratic in 3D</h3><p class="sub">The z direction curves upward; the w direction curves downward. Drag to rotate, or use the view control below.</p><canvas class="surface" id="quad-surface" role="img" aria-label="Three-dimensional quadratic saddle with stable and unstable directions and gradient descent paths"></canvas><p class="small" style="margin:8px 0 0">Height is rescaled to fit the current curvatures. Paths are overlaid for visibility.</p><div class="camera"><label for="quad-angle">View angle</label><input id="quad-angle" type="range" min="-180" max="180" value="-38" aria-label="Quadratic surface view angle"><button id="quad-camera-reset">Reset view</button></div></div>
+</div>
+<div class="stats"><div class="stat">Unstable multiplier 1 + ηα<strong id="quad-expand"></strong></div><div class="stat">Stable multiplier 1 − ηβ<strong id="quad-contract"></strong></div><div class="stat">Selected distance to the saddle<strong id="quad-distance"></strong></div></div>
+<p class="message" id="quad-message" role="status"></p>
+<details class="setup" open><summary>The calculation and the “small” exceptional set</summary><p>The gradient vanishes at (0, 0), and the Hessian is diag(−α, β). Thus the origin is a strict saddle, with an unstable horizontal direction and a stable vertical direction. Here L = max{α, β}; the controls keep 0 &lt; η &lt; 1/L.</p><p class="math">w<sub>k</sub> = (1 + ηα)<sup>k</sup>w₀, &nbsp; z<sub>k</sub> = (1 − ηβ)<sup>k</sup>z₀.</p><p>Since 1 + ηα &gt; 1 and 0 &lt; 1 − ηβ &lt; 1, GD converges to (0, 0) exactly when w₀ = 0. That stable line has area zero, so a random initialization with a density lands on it with probability zero.</p><p>The continuous-time picture in the notes follows the gradient flow:</p><p class="math">ẇ = αw, &nbsp; ż = −βz, &nbsp; w(t) = e<sup>αt</sup>w₀, &nbsp; z(t) = e<sup>−βt</sup>z₀.</p><p>The blue trajectories use these exact flow solutions; their arrows indicate direction. The colored dots use the GD recursions above. Both dynamics have the same stable line, although their trajectories generally differ.</p><p>This quadratic is unbounded below. Off the stable line, escape means |w<sub>k</sub>| → ∞ and f(w<sub>k</sub>, z<sub>k</sub>) → −∞; there is no minimum to reach. The next experiment shows a landscape with minima as well as saddles.</p></details>
+</div></details>
+
+<details class="stage" id="landscape" open><summary><span class="number">2</span> Many saddles, exceptional starts</summary><div class="stage-body">
+<p class="lead">Run a cloud of random initializations on the same surface. Then put the highlighted point exactly on a stable line: this deliberately chosen start can converge to a saddle.</p>
+<div class="formula math">f(x, y) = cos x + cos y, &nbsp; L = 1, &nbsp; (x<sub>k+1</sub>, y<sub>k+1</sub>) = (x<sub>k</sub> + η sin x<sub>k</sub>, y<sub>k</sub> + η sin y<sub>k</sub>).</div>
+<div class="controls">
+<div class="control"><label for="land-eta">Step size η <output id="land-eta-out"></output></label><input id="land-eta" type="range" min="0.1" max="0.95" step="0.05" value="0.6"></div>
+<div class="control"><label for="land-count">Random starts</label><select id="land-count"><option value="80">80 points</option><option value="160" selected>160 points</option><option value="320">320 points</option></select></div>
+<div class="control"><label>Highlighted start</label><div class="coordinate-inputs"><label for="land-x">x <input id="land-x" aria-label="Highlighted initial x" type="number" min="-4.2" max="4.2" step="any" value="0.08"></label><label for="land-y">y <input id="land-y" aria-label="Highlighted initial y" type="number" min="-4.2" max="4.2" step="any" value="1.2"></label></div></div>
+</div>
+<div class="toolbar"><button id="land-stable">Start exactly on x = 0</button><button id="land-perturb">Perturb by 0.001</button><button id="land-resample">Resample cloud</button><label><input type="checkbox" id="land-stable-lines" checked>Show stable sets</label><label><input type="checkbox" id="land-trails">Show all trails</label></div>
+<div class="transport" data-transport="land"></div><div class="timeline"><label for="land-time" id="land-k">k = 0</label><input id="land-time" type="range" min="0" max="100" value="0" aria-label="Landscape iteration"></div>
+<div class="panels">
+<div class="panel"><h3>Trajectories on the contours</h3><p class="sub">Click to choose the highlighted start. Coordinate fields provide the same control with a keyboard.</p><canvas class="land" id="land-contour" role="img" aria-label="Contours of cosine landscape, four saddles, four minima and gradient descent trajectories"></canvas><div class="legend"><span style="color:var(--blue)"><i class="dot"></i>Random starts</span><span style="color:var(--rose)"><i class="sw"></i>Highlighted path</span><span style="color:var(--gold)"><i class="sw dash"></i>Stable sets</span><span style="color:var(--teal)">● Minimum</span><span style="color:var(--rose)">◆ Saddle</span><span>× Maximum</span></div></div>
+<div class="panel"><h3>The same trajectories in 3D</h3><p class="sub">Height is f(x, y). Drag to rotate the surface, or use the view control below.</p><canvas class="surface" id="land-surface" role="img" aria-label="Three-dimensional cosine surface with current iterates and highlighted trajectory"></canvas><p class="small" style="margin:8px 0 0">Trajectories are overlaid for visibility.</p><div class="camera"><label for="land-angle">View angle</label><input id="land-angle" type="range" min="-180" max="180" value="-38" aria-label="Surface view angle"><button id="land-camera-reset">Reset view</button></div></div>
+</div>
+<div class="stats"><div class="stat">Random points within 0.001 of a minimum<strong id="land-min-count"></strong></div><div class="stat">Highlighted distance to nearest saddle<strong id="land-saddle-distance"></strong></div><div class="stat">Highlighted gradient norm<strong id="land-gradient"></strong></div></div>
+<p class="message" id="land-message" role="status"></p>
+<details class="setup"><summary>Why this example fits the theorem</summary><p>The Hessian is diag(−cos x, −cos y), so its operator norm is at most 1 everywhere. The four visible saddles are (0, ±π) and (±π, 0), with eigenvalues −1 and 1. The minima are (±π, ±π). The origin is a local maximum.</p><p>Within this window, the saddle basins are the two coordinate axes with the origin removed. Each is one-dimensional and has area zero. On x = 0, the x update stays exactly zero; for a nonzero x near zero, the update pushes it away. The maximum is also an unstable stationary point.</p><p>The random cloud is a finite simulation, not a proof of probability zero. The claim follows here from the explicit stable sets. The four saddle events form a finite union of null events.</p></details>
+</div></details>
+
+<details class="stage" id="separation" open><summary><span class="number">3</span> The mechanism behind the proof</summary><div class="stage-body">
+<p class="lead">Zoom in on the saddle (0, π). Start two trajectories with the same stable coordinate and a tiny difference in the unstable coordinate. They cannot both remain in a small neighborhood forever.</p>
+<div class="controls">
+<div class="control"><label for="local-eta">Step size η <output id="local-eta-out"></output></label><input id="local-eta" type="range" min="0.1" max="0.95" step="0.05" value="0.6"></div>
+<div class="control"><label for="local-delta">Perturbation δ <output id="local-delta-out"></output></label><input id="local-delta" type="range" min="-8" max="-1" step="1" value="-4"></div>
+<div class="control"><label for="local-v">Initial stable coordinate v₀ <output id="local-v-out"></output></label><input id="local-v" type="range" min="-0.45" max="0.45" step="0.05" value="-0.4"></div>
+</div>
+<div class="transport" data-transport="local"></div><div class="timeline"><label for="local-time" id="local-k">k = 0</label><input id="local-time" type="range" min="0" max="240" value="0" aria-label="Separation experiment iteration"></div>
+<div class="panels">
+<div class="panel"><h3>Stable and unstable directions</h3><p class="sub">Coordinates u = x and v = y − π. The circle has radius 0.6. The two trajectories have identical v coordinates.</p><canvas id="local-phase" role="img" aria-label="Local stable line and two trajectories, one approaching the saddle and the other escaping horizontally"></canvas><div class="legend"><span style="color:var(--gold)"><i class="sw"></i>Exact start: (0, v₀)</span><span style="color:var(--rose)"><i class="sw"></i>Perturbed: (δ, v₀)</span><span>Dashed circle: neighborhood</span></div></div>
+<div class="panel"><h3>Separation grows before escape</h3><p class="sub">Linear iteration axis · logarithmic separation axis. The dotted curve is the local linearization, shown until it reaches 0.6.</p><canvas id="local-chart" role="img" aria-label="Unstable-coordinate separation versus iteration and local linear approximation"></canvas><div class="legend"><span style="color:var(--rose)"><i class="sw"></i>Actual |uₖ|</span><span style="color:var(--muted)"><i class="sw dash"></i>δ(1 + η)ᵏ</span><span>Exact trajectory: uₖ = 0</span></div></div>
+</div>
+<div class="stats"><div class="stat">First exit from the radius-0.6 ball<strong id="local-exit"></strong></div><div class="stat">Current unstable separation |uₖ|<strong id="local-distance"></strong></div><div class="stat">Linearized expansion per step<strong id="local-factor"></strong></div></div>
+<p class="message" id="local-message" role="status"></p>
+<details class="setup"><summary>Connect the picture to the cone argument and Fubini</summary><p>At the saddle, the derivative of the GD map is diag(1 + η, 1 − η). Within the radius-0.6 ball, the Hessian differs from its value at the saddle by at most 1 − cos(0.6) &lt; 1/4. These are the constants used in the lecture proof.</p><p>For two points, write U = |Δu| and V = |Δv|. If U ≥ V, the cone argument gives U⁺ ≥ (1 + η/2)U and U⁺ ≥ V⁺, as long as both points stay in the ball. Here V is exactly zero at every step, so the separation is particularly easy to see.</p><p>Two distinct trapped points therefore cannot have the same stable coordinate v. In the general proof, this makes the trapped set a graph over a subset of the stable/center coordinates; its slices in the unstable directions contain at most one point. Fubini gives measure zero. The proof needs this geometry, not a full smooth manifold theorem.</p><p>For ηL &lt; 1, ‖T(a) − T(b)‖ ≥ (1 − ηL)‖a − b‖. Pulling the local null set back through any number of GD steps preserves measure zero. A convergent orbit eventually stays in the ball, so a countable union finishes the proof.</p><p>A smaller δ delays escape. The local approximation predicts about log(0.6/δ) / log(1 + η) iterations; this illustration supplies no uniform escape-time guarantee for the general theorem.</p></details>
+</div></details>
+
+<details class="stage" id="collapse"><summary><span class="number">4</span> A larger step can collapse an entire region</summary><div class="stage-body">
+<p class="lead">The step-size restriction protects the global part of the proof. Here the origin still repels locally, but at η = 1.5 an open set maps exactly onto its stable line in one step.</p>
+<div class="formula math">F(x, y) = φ(x) + y²/6, &nbsp; φ′(x) = 2x/3 − x(1 − |x|)<sub>+</sub>², &nbsp; L = 1.</div>
+<div class="controls">
+<div class="control"><label for="collapse-eta">Step size</label><select id="collapse-eta"><option value="0.75">η = 0.75 · within the theorem</option><option value="1.5" selected>η = 1.5 · exact collapse</option><option value="1.49">η = 1.49 · near, but not exact</option></select></div>
+<div class="control"><label for="collapse-count">Random starts in the shaded strips</label><select id="collapse-count"><option value="80">80 points</option><option value="160" selected>160 points</option><option value="320">320 points</option></select></div>
+<div class="control"><label>Choose a new cloud</label><button id="collapse-resample">Resample cloud</button></div>
+</div>
+<div class="transport" data-transport="collapse"></div><div class="timeline"><label for="collapse-time" id="collapse-k">k = 0</label><input id="collapse-time" type="range" min="0" max="90" value="0" aria-label="Collapse experiment iteration"></div>
+<div class="panels">
+<div class="panel"><h3>Positive area becomes a line</h3><p class="sub">Starts are uniform on 1.05 &lt; |x₀| &lt; 1.7, |y₀| &lt; 1.1. Shading marks |x| ≥ 1. Try one Step before Run.</p><canvas id="collapse-phase" role="img" aria-label="Random points from two strips collapse onto the vertical stable line or converge to minima depending on step size"></canvas><div class="legend"><span style="color:var(--blue)"><i class="dot"></i>Current iterates</span><span style="color:var(--gold)"><i class="sw dash"></i>Stable line x = 0</span><span style="color:var(--rose)">◆ Saddle</span><span style="color:var(--teal)">● Minima</span></div></div>
+<div class="panel"><h3>The one-dimensional GD map</h3><p class="sub">Outside [−1, 1], the map is flat at zero when η = 1.5. Close to zero its slope is 1 + η/3 &gt; 1.</p><canvas id="collapse-map" role="img" aria-label="Graph of the x coordinate gradient descent map, identity line and current selected iterate"></canvas><div class="legend"><span style="color:var(--rose)"><i class="sw"></i>x ↦ x − ηφ′(x)</span><span style="color:var(--muted)"><i class="sw dash"></i>Identity</span><span style="color:var(--blue)"><i class="dot"></i>One step from the highlighted point</span></div></div>
+</div>
+<div class="stats"><div class="stat">Points exactly on x = 0<strong id="collapse-zero"></strong></div><div class="stat">Largest distance to the saddle<strong id="collapse-distance"></strong></div><div class="stat">Mean objective F<strong id="collapse-objective"></strong></div></div>
+<p class="message" id="collapse-message" role="status"></p>
+<details class="setup"><summary>The function and the exact counterexample</summary><div class="two-columns"><div><p class="math">φ(x) = −x²/6 + 2|x|³/3 − x⁴/4 &nbsp; if |x| ≤ 1;<br>φ(x) = x²/3 − 1/12 &nbsp; if |x| ≥ 1.</p><p>The two pieces match through their second derivatives. Inside [−1, 1], φ″(x) = −1/3 + 4|x| − 3x²; outside, φ″ = 2/3. Thus |φ″| ≤ 1 and F has a globally 1-Lipschitz gradient. At the origin the Hessian is diag(−1/3, 1/3).</p></div><div><p class="math">η = 3/2 ⇒ T(x, y) = (3x(1 − |x|)<sub>+</sub>²/2, y/2).</p><p>For every |x₀| ≥ 1, x₁ = 0 exactly, and subsequent iterates tend to (0, 0). The minima are (±(1 − √(2/3)), 0). Even though η = 1.5 &lt; 2/L gives descent, it does not give saddle avoidance.</p><p>On these outer strips, det DT = 0: the map loses a dimension. This is precisely where the null-preimage argument fails. At η = 1.49 the outer strips do not collapse, and the sampled trajectories eventually reach the minima.</p></div></div><p class="small">The code evaluates the algebraically equivalent update x⁺ = (1 − 2η/3)x + ηx(1 − |x|)<sub>+</sub>². This preserves the exact zero at η = 1.5 without adding any snapping rule.</p></details>
+</div></details>
+<footer><p>All updates use gradients only. Hessians describe the landscape and explain the theorem; they are not inputs to the algorithm. Iteration axes are linear. Simulations use double-precision arithmetic and deterministic pseudorandom clouds; “Resample” changes the seed.</p><p>Reference: <a href="https://proceedings.mlr.press/v49/lee16.html">Lee, Simchowitz, Jordan, and Recht (2016), Gradient Descent Only Converges to Minimizers</a>, fixed-saddle theorem. The last experiment is an explicit counterexample derived for this demonstration. This page works offline and has no external dependencies.</p></footer>
+</main>
+<script id="saddle-core">
+'use strict';
+const SaddleCore = (() => {
+  const P=Math.PI;
+  const cosine=w=>Math.cos(w[0])+Math.cos(w[1]);
+  const gradient=w=>[-Math.sin(w[0]),-Math.sin(w[1])];
+  const cosineStep=(w,eta)=>w.map(z=>z+eta*Math.sin(z));
+  const quadratic=(p,alpha,beta)=>-.5*alpha*p[0]**2+.5*beta*p[1]**2;
+  const quadraticStep=(p,eta,alpha,beta)=>[(1+eta*alpha)*p[0],(1-eta*beta)*p[1]];
+  const quadraticFlow=(p,t,alpha,beta)=>[p[0]*Math.exp(alpha*t),p[1]*Math.exp(-beta*t)];
+  function phi(x){const a=Math.abs(x);return a<=1?-x*x/6+2*a*a*a/3-x*x*x*x/4:x*x/3-1/12;}
+  const phiPrime=x=>2*x/3-x*Math.max(0,1-Math.abs(x))**2;
+  const phiSecond=x=>Math.abs(x)<=1?-1/3+4*Math.abs(x)-3*x*x:2/3;
+  const counter=w=>phi(w[0])+w[1]*w[1]/6;
+  const counterStep=(w,eta)=>[(1-2*eta/3)*w[0]+eta*w[0]*Math.max(0,1-Math.abs(w[0]))**2,(1-eta/3)*w[1]];
+  function trace(w,eta,K,step=cosineStep){
+    if(w.length!==2||!w.every(Number.isFinite)||!(eta>0)||!Number.isInteger(K)||K<0)throw new RangeError('Invalid GD parameters');
+    const out=[w.slice()];for(let k=0;k<K;k++){w=step(w,eta);if(!w.every(Number.isFinite))throw new RangeError('Nonfinite iterate');out.push(w);}return out;
+  }
+  function random(seed){let a=seed>>>0;return()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;};}
+  function cloud(n,seed,outer=false){const r=random(seed);return Array.from({length:n},()=>outer?[(r()<.5?-1:1)*(1.05+.65*r()),2.2*r()-1.1]:[8*r()-4,8*r()-4]);}
+  const saddles=[[0,P],[0,-P],[P,0],[-P,0]];
+  const minima=[[-P,-P],[-P,P],[P,-P],[P,P]];
+  const near=(w,points)=>Math.min(...points.map(z=>Math.hypot(w[0]-z[0],w[1]-z[1])));
+  function local(eta,delta,v,K=240){
+    // Work directly in saddle-centered coordinates: sin(pi+v)=-sin(v).
+    // This avoids subtracting nearly equal numbers when the stable coordinate contracts.
+    const step=(w,e)=>[w[0]+e*Math.sin(w[0]),w[1]-e*Math.sin(w[1])];
+    const exact=trace([0,v],eta,K,step),perturbed=trace([delta,v],eta,K,step);
+    const exit=perturbed.findIndex(w=>Math.hypot(...w)>.6);
+    return{exact,perturbed,exit};
+  }
+  return{cosine,gradient,cosineStep,quadratic,quadraticStep,quadraticFlow,phi,phiPrime,phiSecond,counter,counterStep,trace,random,cloud,saddles,minima,near,local};
+})();
+</script>
+<!-- Rendering and controls are self-contained; the numerical core above is also tested separately. -->
+<script id="saddle-ui">
+'use strict';
+const $=id=>document.getElementById(id), C=SaddleCore;
+const css=name=>getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const value=id=>Number($(id).value);
+const fmt=x=>!Number.isFinite(x)?'—':x===0?'0':Math.abs(x)<.0001?x.toExponential(2):Number(x.toPrecision(5)).toString();
+const color={blue:()=>css('--blue'),rose:()=>css('--rose'),gold:()=>css('--gold'),teal:()=>css('--teal')};
+function fitCanvas(canvas){const b=canvas.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2),w=Math.max(1,b.width),h=Math.max(1,b.height);if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr)){canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);}const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);ctx.fillStyle=css('--surface');ctx.fillRect(0,0,w,h);return{ctx,w,h};}
+function ticks(a,b,n=5){const step0=(b-a)/n,pow=10**Math.floor(Math.log10(step0)),r=step0/pow,step=(r<=1?1:r<=2?2:r<=5?5:10)*pow,out=[];for(let v=Math.ceil(a/step)*step;v<=b+step*1e-8;v+=step)out.push(Math.abs(v)<step*1e-8?0:v);return out;}
+function frame(canvas,bounds,options={}){
+  const F=fitCanvas(canvas),{ctx,w,h}=F,left=options.log?56:43,right=14,top=22,bottom=38;
+  const [a,b,c,d]=bounds,X=x=>left+(x-a)/(b-a)*(w-left-right),Y=y=>h-bottom-((options.log?Math.log10(Math.max(y,10**c)):y)-c)/(d-c)*(h-top-bottom);
+  ctx.font='11px system-ui';ctx.strokeStyle=css('--grid');ctx.fillStyle=css('--muted');ctx.lineWidth=1;
+  for(const x of ticks(a,b,Math.max(3,Math.floor(w/100)))){ctx.beginPath();ctx.moveTo(X(x),top);ctx.lineTo(X(x),h-bottom);ctx.stroke();ctx.textAlign='center';ctx.fillText(fmt(x),X(x),h-bottom+17);}
+  const ys=options.log?ticks(c,d,5).filter(Number.isInteger):ticks(c,d,5);
+  for(const y of ys){const py=options.log?Y(10**y):Y(y);ctx.beginPath();ctx.moveTo(left,py);ctx.lineTo(w-right,py);ctx.stroke();ctx.textAlign='right';ctx.fillText(options.log?'10^'+y:fmt(y),left-7,py+4);}
+  ctx.strokeStyle=css('--axis');ctx.strokeRect(left,top,w-left-right,h-top-bottom);ctx.fillStyle=css('--muted');ctx.textAlign='center';ctx.fillText(options.xlabel||'x',(left+w-right)/2,h-5);ctx.textAlign='left';ctx.fillText(options.ylabel||'y',left,13);
+  return{...F,X,Y,left,right,top,bottom,bounds,clip(){ctx.save();ctx.beginPath();ctx.rect(left,top,w-left-right,h-top-bottom);ctx.clip();}};
+}
+function line(F,pts,col,dash=[],width=2){const{ctx,X,Y}=F;F.clip();ctx.strokeStyle=col;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(X(p[0]),Y(p[1])):ctx.moveTo(X(p[0]),Y(p[1])));ctx.stroke();ctx.restore();}
+function marker(ctx,x,y,col,r=4,shape='dot'){ctx.fillStyle=col;ctx.strokeStyle=col;ctx.lineWidth=1.6;ctx.beginPath();if(shape==='diamond'){ctx.moveTo(x,y-r);ctx.lineTo(x+r,y);ctx.lineTo(x,y+r);ctx.lineTo(x-r,y);ctx.closePath();ctx.fill();}else if(shape==='cross'){ctx.moveTo(x-r,y-r);ctx.lineTo(x+r,y+r);ctx.moveTo(x+r,y-r);ctx.lineTo(x-r,y+r);ctx.stroke();}else if(shape==='ring'){ctx.arc(x,y,r,0,2*Math.PI);ctx.stroke();}else{ctx.arc(x,y,r,0,2*Math.PI);ctx.fill();}}
+function dot(F,w,col,r=4,shape='dot'){F.clip();marker(F.ctx,F.X(w[0]),F.Y(w[1]),col,r,shape);F.ctx.restore();}
+function heat(t,alpha=1){const dark=matchMedia('(prefers-color-scheme: dark)').matches;return dark?`hsla(${204-170*t},30%,${23+19*t}%,${alpha})`:`hsla(${204-170*t},45%,${94-16*t}%,${alpha})`;}
+const contourCache=new Map();
+function landscapeBackground(F,key,fn,range){
+  // Cache the heatmap and level curves; animations only redraw paths and points.
+  const dark=matchMedia('(prefers-color-scheme: dark)').matches,cacheKey=[key,F.w,F.h,dark].join('|');let canvas=contourCache.get(cacheKey);
+  if(!canvas){canvas=document.createElement('canvas');canvas.width=Math.ceil(F.w*2);canvas.height=Math.ceil(F.h*2);const ctx=canvas.getContext('2d');ctx.scale(2,2);const n=90,[a,b,c,d]=F.bounds,vals=[];
+    for(let j=0;j<=n;j++){vals[j]=[];for(let i=0;i<=n;i++)vals[j][i]=fn([a+(b-a)*i/n,c+(d-c)*j/n]);}
+    for(let j=0;j<n;j++)for(let i=0;i<n;i++){const x=a+(b-a)*i/n,y=c+(d-c)*(j+1)/n;ctx.fillStyle=heat(clamp((vals[j][i]-range[0])/(range[1]-range[0]),0,1));ctx.fillRect(F.X(x),F.Y(y),(F.w-F.left-F.right)/n+.4,(F.h-F.top-F.bottom)/n+.4);}
+    ctx.strokeStyle=dark?'#ffffff32':'#31415125';ctx.lineWidth=.7;
+    for(let l=1;l<15;l++){const level=range[0]+(range[1]-range[0])*l/15;ctx.beginPath();for(let j=0;j<n;j++)for(let i=0;i<n;i++){
+      const corners=[[i,j],[i+1,j],[i+1,j+1],[i,j+1]],cross=[];
+      for(let e=0;e<4;e++){const p=corners[e],q=corners[(e+1)%4],vp=vals[p[1]][p[0]],vq=vals[q[1]][q[0]];if((vp<level)!==(vq<level)){const t=(level-vp)/(vq-vp);cross.push([F.X(a+(b-a)*(p[0]+t*(q[0]-p[0]))/n),F.Y(c+(d-c)*(p[1]+t*(q[1]-p[1]))/n)]);}}
+      for(let e=0;e+1<cross.length;e+=2){ctx.moveTo(...cross[e]);ctx.lineTo(...cross[e+1]);}}
+      ctx.stroke();}
+    if(contourCache.size>12)contourCache.clear();contourCache.set(cacheKey,canvas);
+  }F.clip();F.ctx.drawImage(canvas,0,0,F.w,F.h);F.ctx.restore();
+}
+function critical(F){for(const p of C.minima)dot(F,p,color.teal(),5);for(const p of C.saddles)dot(F,p,color.rose(),6,'diamond');dot(F,[0,0],css('--muted'),5,'cross');}
+
+/* PLAYBACK_START */
+class Playback {
+  constructor(prefix,stage,paint){
+    this.prefix=prefix;this.stage=$(stage);this.paint=paint;this.k=0;this.N=0;this.running=false;this.last=null;this.credit=0;this.raf=0;
+    const node=document.querySelector('[data-transport="'+prefix+'"]');
+    node.innerHTML='<button class="primary" data-action="run">Run</button><button data-action="step">Step</button><button data-action="restart">Restart</button><button data-action="finish">Show result</button><label class="speed-label">Speed <select aria-label="'+prefix+' playback speed"><option value="2">Slow</option><option value="6" selected>Medium</option><option value="20">Fast</option></select></label>';
+    this.node=node;this.runButton=node.querySelector('[data-action="run"]');this.slider=$(prefix+'-time');
+    node.querySelector('[data-action="run"]').onclick=()=>{if(this.running)this.pause();else{if(this.k>=this.N)this.k=0;this.running=true;this.last=null;this.credit=0;this.sync();this.paint();this.raf=requestAnimationFrame(t=>this.tick(t));}};
+    node.querySelector('[data-action="step"]').onclick=()=>{this.pause();this.k=Math.min(this.N,this.k+1);this.sync();this.paint();};
+    node.querySelector('[data-action="restart"]').onclick=()=>{this.pause();this.k=0;this.sync();this.paint();};
+    node.querySelector('[data-action="finish"]').onclick=()=>{this.pause();this.k=this.N;this.sync();this.paint();};
+    this.slider.oninput=()=>{const next=clamp(Math.round(Number(this.slider.value)),0,this.N);this.pause();this.k=next;this.sync();this.paint();};
+    this.stage.addEventListener('toggle',()=>{if(!this.stage.open)this.pause();else this.paint();});
+    node.querySelector('select').onchange=()=>{this.last=null;this.credit=0;};
+  }
+  pause(){this.running=false;this.last=null;this.credit=0;cancelAnimationFrame(this.raf);this.sync();}
+  reset(n){this.pause();this.N=Math.max(0,Math.floor(n));this.k=0;this.slider.max=String(this.N);this.sync();}
+  sync(){this.runButton.textContent=this.running?'Pause':'Run';this.slider.value=String(this.k);$(this.prefix+'-k').textContent='k = '+this.k;this.node.querySelector('[data-action="step"]').disabled=this.k>=this.N;this.runButton.disabled=this.N===0;this.node.querySelector('[data-action="finish"]').disabled=this.k>=this.N;this.slider.disabled=this.N===0;}
+  tick(t){if(!this.running)return;if(this.last!==null)this.credit+=Math.min(250,Math.max(0,t-this.last))/1000*Number(this.node.querySelector('select').value);this.last=t;const advance=Math.floor(this.credit);this.credit-=advance;if(advance){this.k=Math.min(this.N,this.k+advance);this.sync();this.paint();}if(this.k>=this.N){this.pause();return;}this.raf=requestAnimationFrame(z=>this.tick(z));}
+}
+/* PLAYBACK_END */
+
+let landSeed=17,collapseSeed=53,landTraces=[],selected=[],localTraces=null,collapseTraces=[],landFrame;
+let quadSelected=[],quadStable=[],quadFlows=[],quadFrame;
+let quadPlayer,landPlayer,localPlayer,collapsePlayer;
+const QUAD_RADIUS=2.4;
+function quadParameters(){const alpha=value('quad-alpha'),beta=value('quad-beta'),L=Math.max(alpha,beta);return{alpha,beta,L,eta:value('quad-fraction')/L};}
+function updateQuad(){
+  const {alpha,beta,L,eta}=quadParameters();
+  for(const id of ['quad-w','quad-z']){const x=value(id);$(id).value=String(clamp(Number.isFinite(x)?x:0,-2.2,2.2));}
+  $('quad-alpha-out').textContent=fmt(alpha);$('quad-beta-out').textContent=fmt(beta);$('quad-fraction-out').textContent=fmt(value('quad-fraction'));
+  $('quad-step-caption').textContent='L = max{α, β} = '+fmt(L)+'; η = '+fmt(eta)+'. Both GD trajectories use this same step size, with 0 < ηL < 1.';
+  const w0=value('quad-w'),z0=value('quad-z'),step=(p,e)=>C.quadraticStep(p,e,alpha,beta);
+  quadSelected=C.trace([w0,z0],eta,60,step);quadStable=C.trace([0,z0],eta,60,step);
+  quadFlows=[];
+  for(const sw of [-1,1])for(const sz of [-1,1])for(const a of [.08,.4,1.2]){
+    const start=[sw*a,sz*2.2],end=Math.log(QUAD_RADIUS/a)/alpha;
+    quadFlows.push(Array.from({length:101},(_,j)=>C.quadraticFlow(start,end*j/100,alpha,beta)));
+  }
+  quadPlayer.reset(60);drawQuad();
+}
+function screenArrow(ctx,x,y,dx,dy,col,length=12){const norm=Math.hypot(dx,dy);if(norm<1e-10)return;const ux=dx/norm,uy=dy/norm,x0=x-ux*length/2,y0=y-uy*length/2,x1=x+ux*length/2,y1=y+uy*length/2;ctx.strokeStyle=col;ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.moveTo(x1-4*ux+3*uy,y1-4*uy-3*ux);ctx.lineTo(x1,y1);ctx.lineTo(x1-4*ux-3*uy,y1-4*uy+3*ux);ctx.stroke();}
+function quadVisiblePath(trace,k){
+  // The GD iterates are never clipped. Only their plotted segments stop at the window.
+  const out=[trace[0]],R=QUAD_RADIUS;
+  for(let j=1;j<=k;j++){const p=trace[j-1],q=trace[j];if(Math.abs(q[0])<=R){out.push(q);continue;}const t=(Math.sign(q[0])*R-p[0])/(q[0]-p[0]);out.push([Math.sign(q[0])*R,p[1]+t*(q[1]-p[1])]);break;}
+  return out;
+}
+function drawQuad(){
+  if(!$('quadratic').open||!quadSelected.length)return;
+  const k=quadPlayer.k,{alpha,beta,eta}=quadParameters(),R=QUAD_RADIUS;
+  const F=frame($('quad-phase'),[-R,R,-R,R],{xlabel:'w · unstable direction',ylabel:'z · stable direction'});quadFrame=F;
+  landscapeBackground(F,'quadratic-'+alpha+'-'+beta,p=>C.quadratic(p,alpha,beta),[-alpha*R*R/2,beta*R*R/2]);
+  if($('quad-flow').checked){
+    F.ctx.globalAlpha=.55;for(const curve of quadFlows)line(F,curve,color.blue(),[],1.2);F.ctx.globalAlpha=1;
+    F.clip();for(let i=-3;i<=3;i++)for(let j=-3;j<=3;j++){
+      const w=i*.65,z=j*.65;if(i===0&&j===0)continue;
+      const dx=alpha*w*(F.w-F.left-F.right)/(2*R),dy=beta*z*(F.h-F.top-F.bottom)/(2*R);
+      screenArrow(F.ctx,F.X(w),F.Y(z),dx,dy,i===0?color.gold():color.blue(),i===0?16:12);
+    }F.ctx.restore();
+  }
+  line(F,[[0,-R],[0,R]],color.gold(),[4,4],1.8);line(F,[[-R,0],[R,0]],css('--axis'),[3,5],1);
+  const path=quadVisiblePath(quadSelected,k);
+  line(F,quadStable.slice(0,k+1),color.gold(),[],3);line(F,path,color.rose(),[],2.5);
+  for(const p of quadSelected.slice(0,k+1))if(Math.abs(p[0])<=R)dot(F,p,color.rose(),2.7);
+  dot(F,[0,0],css('--text'),5,'diamond');dot(F,quadStable[0],color.gold(),6,'ring');dot(F,quadSelected[0],color.rose(),4,'ring');dot(F,quadStable[k],color.gold(),5);
+  if(Math.abs(quadSelected[k][0])<=R)dot(F,quadSelected[k],color.rose(),5);
+  else{const end=path[path.length-1],right=end[0]>0;F.ctx.fillStyle=color.rose();F.ctx.font='12px system-ui';F.ctx.textAlign=right?'right':'left';F.ctx.fillText(right?'Leaves the window →':'← Leaves the window',right?F.w-F.right-6:F.left+6,F.Y(end[1])-14);}
+  const qfmt=x=>Math.abs(x)>=10000?x.toExponential(2):fmt(x);
+  $('quad-expand').textContent=fmt(1+eta*alpha)+' > 1';$('quad-contract').textContent=fmt(1-eta*beta)+' < 1';$('quad-distance').textContent=qfmt(Math.hypot(...quadSelected[k]));
+  $('quad-message').textContent=quadSelected[0][0]===0?'The selected start lies exactly on w = 0. Both GD trajectories coincide and converge to the saddle. Any nonzero horizontal perturbation eventually escapes.':'The stable coordinate shrinks while the unstable coordinate grows. '+(Math.abs(quadSelected[k][0])>R?'The selected trajectory has left the plotting window; it continues toward |w| = ∞.':'The selected trajectory is still in view; a tiny perturbation or weak negative curvature can make escape slow.')+' This quadratic has no minimum: its value decreases without bound off the stable line.';
+  drawQuadSurface();
+}
+function drawQuadSurface(){
+  if(!$('quadratic').open||!quadSelected.length)return;
+  const {ctx,w,h}=fitCanvas($('quad-surface')),{alpha,beta,L}=quadParameters(),R=QUAD_RADIUS,k=quadPlayer.k;
+  const angle=value('quad-angle')*Math.PI/180,co=Math.cos(angle),si=Math.sin(angle),sc=Math.min(w/8.8,h/8.2),heightScale=L*R*R/2;
+  const project=p=>[w*.5+sc*(co*p[0]-si*p[1]),h*.52+sc*(.45*(si*p[0]+co*p[1])-1.55*C.quadratic(p,alpha,beta)/heightScale)];
+  const n=32,cells=[];for(let i=0;i<n;i++)for(let j=0;j<n;j++){const x=-R+2*R*i/n,y=-R+2*R*j/n,d=2*R/n;cells.push({vertices:[[x,y],[x+d,y],[x+d,y+d],[x,y+d]],depth:si*(x+d/2)+co*(y+d/2),f:C.quadratic([x+d/2,y+d/2],alpha,beta)});}cells.sort((a,b)=>a.depth-b.depth);
+  const lo=-alpha*R*R/2,hi=beta*R*R/2;
+  for(const cell of cells){ctx.fillStyle=heat((cell.f-lo)/(hi-lo));ctx.strokeStyle=matchMedia('(prefers-color-scheme:dark)').matches?'#ffffff18':'#22334420';ctx.lineWidth=.5;ctx.beginPath();cell.vertices.forEach((p,i)=>i?ctx.lineTo(...project(p)):ctx.moveTo(...project(p)));ctx.closePath();ctx.fill();ctx.stroke();}
+  function lift(points,col,dash=[],width=2.4){ctx.strokeStyle=col;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.beginPath();ctx.moveTo(...project(points[0]));for(let i=1;i<points.length;i++){const p=points[i-1],q=points[i];for(let j=1;j<=10;j++)ctx.lineTo(...project([p[0]+j*(q[0]-p[0])/10,p[1]+j*(q[1]-p[1])/10]));}ctx.stroke();ctx.setLineDash([]);}
+  lift([[0,-R],[0,R]],color.gold(),[4,4],1.4);lift([[-R,0],[R,0]],css('--muted'),[3,5],1);
+  lift(quadStable.slice(0,k+1),color.gold());lift(quadVisiblePath(quadSelected,k),color.rose());
+  for(const p of quadSelected.slice(0,k+1))if(Math.abs(p[0])<=R)marker(ctx,...project(p),color.rose(),2.7);
+  marker(ctx,...project([0,0]),css('--text'),5,'diamond');marker(ctx,...project(quadStable[k]),color.gold(),5);if(Math.abs(quadSelected[k][0])<=R)marker(ctx,...project(quadSelected[k]),color.rose(),5);
+  ctx.fillStyle=css('--muted');ctx.strokeStyle=css('--axis');ctx.lineWidth=1.2;ctx.font='11px system-ui';ctx.textAlign='center';ctx.fillText('f(w, z)',w/2,17);
+  for(const [dx,dy,label] of [[28*co,12*si,'w'],[-28*si,12*co,'z'],[0,-28,'f']]){ctx.beginPath();ctx.moveTo(48,62);ctx.lineTo(48+dx,62+dy);ctx.stroke();ctx.fillText(label,48+1.35*dx,66+1.35*dy);}
+}
+function updateLand(){
+  const eta=value('land-eta');$('land-eta-out').textContent=fmt(eta)+' < 1/L';
+  for(const id of ['land-x','land-y']){const x=value(id);$(id).value=String(clamp(Number.isFinite(x)?x:0,-4.2,4.2));}
+  landTraces=C.cloud(value('land-count'),landSeed).map(w=>C.trace(w,eta,100));selected=C.trace([value('land-x'),value('land-y')],eta,100);landPlayer.reset(100);drawLand();
+}
+function drawLand(){
+  if(!$('landscape').open||!selected.length)return;const k=landPlayer.k,F=frame($('land-contour'),[-4.2,4.2,-4.2,4.2]);landFrame=F;landscapeBackground(F,'cos',C.cosine,[-2,2]);
+  if($('land-stable-lines').checked){line(F,[[0,-4.2],[0,4.2]],color.gold(),[5,4],1.8);line(F,[[-4.2,0],[4.2,0]],color.gold(),[5,4],1.8);}
+  if($('land-trails').checked)for(const t of landTraces){F.ctx.globalAlpha=.16;line(F,t.slice(0,k+1),color.blue(),[],1);F.ctx.globalAlpha=1;}
+  for(const t of landTraces)dot(F,t[k],color.blue(),2.5);critical(F);line(F,selected.slice(0,k+1),color.rose(),[],2.7);dot(F,selected[0],color.rose(),6,'ring');dot(F,selected[k],color.rose(),5);
+  const n=landTraces.filter(t=>C.near(t[k],C.minima)<.001).length;
+  $('land-min-count').textContent=n+' / '+landTraces.length;$('land-saddle-distance').textContent=fmt(C.near(selected[k],C.saddles));$('land-gradient').textContent=fmt(Math.hypot(...C.gradient(selected[k])));
+  const [x0,y0]=selected[0];$('land-message').textContent=x0===0&&y0===0?'This chosen start is the local maximum. Its gradient is exactly zero, so GD stays there. Random initialization avoids this single point.':x0===0||y0===0?'The highlighted start lies exactly on a stable axis. It converges to a saddle. This deliberately chosen initialization does not have a density; it is outside the random-initialization hypothesis.':'The highlighted start is off both stable axes. It ultimately reaches a minimum, even if it first passes close to a saddle. Try an exact stable start, then perturb it.';
+  drawSurface();
+}
+function drawSurface(){
+  if(!$('landscape').open||!selected.length)return;const{ctx,w,h}=fitCanvas($('land-surface')),angle=value('land-angle')*Math.PI/180,co=Math.cos(angle),si=Math.sin(angle),sc=Math.min(w/13.8,h/11.8),k=landPlayer.k;
+  const project=(x,y,z)=>[w*.5+sc*(co*x-si*y),h*.52+sc*(.43*(si*x+co*y)-1.4*z)];
+  const n=34,quads=[];for(let i=0;i<n;i++)for(let j=0;j<n;j++){const x=-4.2+8.4*i/n,y=-4.2+8.4*j/n,d=8.4/n,verts=[[x,y],[x+d,y],[x+d,y+d],[x,y+d]];quads.push({verts,depth:si*(x+d/2)+co*(y+d/2),z:C.cosine([x+d/2,y+d/2])});}quads.sort((a,b)=>a.depth-b.depth);
+  for(const q of quads){ctx.fillStyle=heat((q.z+2)/4);ctx.strokeStyle=matchMedia('(prefers-color-scheme:dark)').matches?'#ffffff18':'#22334420';ctx.lineWidth=.45;ctx.beginPath();q.verts.forEach((p,i)=>{const v=project(...p,C.cosine(p));i?ctx.lineTo(...v):ctx.moveTo(...v);});ctx.closePath();ctx.fill();ctx.stroke();}
+  // Paths are drawn as overlays so they remain legible on the surface.
+  ctx.globalAlpha=.75;for(const t of landTraces)marker(ctx,...project(...t[k],C.cosine(t[k])),color.blue(),2.2);ctx.globalAlpha=1;
+  ctx.strokeStyle=color.rose();ctx.lineWidth=2.5;ctx.beginPath();selected.slice(0,k+1).forEach((p,i)=>i?ctx.lineTo(...project(...p,C.cosine(p))):ctx.moveTo(...project(...p,C.cosine(p))));ctx.stroke();
+  for(const p of C.minima)marker(ctx,...project(...p,C.cosine(p)),color.teal(),4);for(const p of C.saddles)marker(ctx,...project(...p,0),color.rose(),5,'diamond');marker(ctx,...project(...selected[k],C.cosine(selected[k])),color.rose(),5);
+  ctx.fillStyle=css('--muted');ctx.strokeStyle=css('--axis');ctx.lineWidth=1.2;ctx.font='11px system-ui';ctx.textAlign='center';ctx.fillText('f(x, y)',w/2,17);
+  for(const [dx,dy,label] of [[28*co,12*si,'x'],[-28*si,12*co,'y'],[0,-28,'f']]){ctx.beginPath();ctx.moveTo(48,62);ctx.lineTo(48+dx,62+dy);ctx.stroke();ctx.fillText(label,48+1.35*dx,66+1.35*dy);}
+}
+function updateLocal(){const eta=value('local-eta'),delta=10**value('local-delta'),v=value('local-v');$('local-eta-out').textContent=fmt(eta);$('local-delta-out').textContent=fmt(delta);$('local-v-out').textContent=fmt(v);localTraces=C.local(eta,delta,v);const horizon=Math.min(240,Math.max(35,localTraces.exit+18));localPlayer.reset(horizon);drawLocal();}
+function drawLocal(){
+  if(!$('separation').open||!localTraces)return;const k=localPlayer.k,{exact,perturbed,exit}=localTraces,eta=value('local-eta'),delta=10**value('local-delta');
+  const F=frame($('local-phase'),[-.8,.8,-.8,.8],{xlabel:'unstable coordinate u',ylabel:'stable coordinate v'});landscapeBackground(F,'local',p=>Math.cos(p[0])-Math.cos(p[1]),[-.35,.35]);
+  const {ctx,X,Y}=F;F.clip();ctx.strokeStyle=css('--muted');ctx.setLineDash([4,4]);ctx.beginPath();ctx.ellipse(X(0),Y(0),Math.abs(X(.6)-X(0)),Math.abs(Y(.6)-Y(0)),0,0,2*Math.PI);ctx.stroke();ctx.setLineDash([]);ctx.restore();
+  line(F,[[0,-.8],[0,.8]],color.gold(),[4,4],1.5);line(F,[[-.8,0],[.8,0]],css('--axis'),[3,5],1);
+  line(F,exact.slice(0,k+1),color.gold(),[],3);line(F,perturbed.slice(0,k+1),color.rose(),[],2.5);line(F,[exact[k],perturbed[k]],color.rose(),[3,3],1.3);
+  dot(F,[0,0],css('--text'),5,'diamond');dot(F,exact[0],color.gold(),6,'ring');dot(F,perturbed[0],color.rose(),4,'ring');dot(F,exact[k],color.gold(),5);dot(F,perturbed[k],color.rose(),5);
+  if(perturbed[k][0]>.8){ctx.fillStyle=color.rose();ctx.font='12px system-ui';ctx.textAlign='right';ctx.fillText('Escaped →',F.w-F.right-7,Y(0)-16);}
+  const G=frame($('local-chart'),[0,localPlayer.N,value('local-delta')-.5,.65],{log:true,xlabel:'iteration k',ylabel:'separation |u_k|'});
+  const approx=[];for(let j=0;j<=Math.min(k,localPlayer.N);j++){const u=delta*(1+eta)**j;if(u<=.6)approx.push([j,u]);}line(G,approx,css('--muted'),[4,4],1.8);line(G,perturbed.slice(0,k+1).map((p,j)=>[j,Math.abs(p[0])]),color.rose(),[],2.6);dot(G,[k,Math.abs(perturbed[k][0])],color.rose(),4);
+  line(G,[[0,.6],[localPlayer.N,.6]],css('--axis'),[2,5],1);
+  $('local-exit').textContent=exit<0?'Beyond the horizon':'k = '+exit;$('local-distance').textContent=fmt(Math.abs(perturbed[k][0]));$('local-factor').textContent='1 + η = '+fmt(1+eta);
+  $('local-message').textContent=k<exit?'Both trajectories are still in the neighborhood. The exact start contracts toward the saddle; the perturbation grows in the unstable direction. Reduce δ to make this phase last longer.':'The perturbed orbit has left the neighborhood and heads toward a minimum. The exact orbit remains on u = 0 and converges to the saddle. This is the exceptional set the proof shows has measure zero.';
+}
+function updateCollapse(){const eta=value('collapse-eta');collapseTraces=C.cloud(value('collapse-count'),collapseSeed,true).map(w=>C.trace(w,eta,90,C.counterStep));collapsePlayer.reset(90);drawCollapse();}
+function drawCollapse(){
+  if(!$('collapse').open||!collapseTraces.length)return;const k=collapsePlayer.k,eta=value('collapse-eta'),F=frame($('collapse-phase'),[-1.8,1.8,-1.3,1.3]);landscapeBackground(F,'counter',C.counter,[-.002,1.3]);
+  F.clip();F.ctx.fillStyle=color.gold();F.ctx.globalAlpha=.13;F.ctx.fillRect(F.X(-1.8),F.top,F.X(-1)-F.X(-1.8),F.h-F.top-F.bottom);F.ctx.fillRect(F.X(1),F.top,F.X(1.8)-F.X(1),F.h-F.top-F.bottom);F.ctx.globalAlpha=1;F.ctx.restore();
+  line(F,[[0,-1.3],[0,1.3]],color.gold(),[5,4],1.5);
+  for(const t of collapseTraces){dot(F,t[0],css('--axis'),1.7,'ring');dot(F,t[k],color.blue(),2.6);}
+  const chosen=collapseTraces[0],p=chosen[k],q=C.counterStep(p,eta);line(F,chosen.slice(0,k+1),color.rose(),[],2);dot(F,p,color.rose(),5);dot(F,[0,0],color.rose(),6,'diamond');const m=1-Math.sqrt(2/3);dot(F,[-m,0],color.teal(),5);dot(F,[m,0],color.teal(),5);
+  const G=frame($('collapse-map'),[-1.8,1.8,-1.8,1.8],{xlabel:'current x',ylabel:'next x'}),samples=Array.from({length:401},(_,i)=>{const x=-1.8+3.6*i/400;return[x,C.counterStep([x,0],eta)[0]];});line(G,[[-1.8,-1.8],[1.8,1.8]],css('--muted'),[4,4],1.2);line(G,samples,color.rose(),[],2.6);dot(G,[p[0],q[0]],color.blue(),5);line(G,[[p[0],0],[p[0],q[0]],[0,q[0]]],color.blue(),[3,4],1);
+  $('collapse-zero').textContent=collapseTraces.filter(t=>t[k][0]===0).length+' / '+collapseTraces.length;$('collapse-distance').textContent=fmt(Math.max(...collapseTraces.map(t=>Math.hypot(...t[k]))));$('collapse-objective').textContent=fmt(collapseTraces.reduce((s,t)=>s+C.counter(t[k]),0)/collapseTraces.length);
+  $('collapse-message').textContent=eta===1.5?(k===0?'Press Step: every point in these two open strips will land on x = 0. Then the y coordinate halves at every iteration.':'All sampled points are now on the stable line exactly. They converge to the saddle even though F decreases. Local instability cannot undo the earlier collapse of a two-dimensional region.'):(eta===1.49?'A small change in η removes the exact collapse. The points may approach the saddle closely before escaping to the two minima.':'With η < 1/L, the GD map cannot collapse a region onto a line. These starts converge to the two minima.');
+}
+quadPlayer=new Playback('quad','quadratic',drawQuad);landPlayer=new Playback('land','landscape',drawLand);localPlayer=new Playback('local','separation',drawLocal);collapsePlayer=new Playback('collapse','collapse',drawCollapse);
+for(const id of ['quad-alpha','quad-beta','quad-fraction'])$(id).oninput=updateQuad;
+for(const id of ['quad-w','quad-z'])$(id).onchange=updateQuad;
+$('quad-stable').onclick=()=>{$('quad-w').value='0';updateQuad();};$('quad-perturb').onclick=()=>{$('quad-w').value='0.001';updateQuad();};$('quad-flow').onchange=drawQuad;
+$('quad-phase').addEventListener('click',event=>{if(!quadFrame)return;const b=event.currentTarget.getBoundingClientRect(),F=quadFrame,x=event.clientX-b.left,y=event.clientY-b.top;if(x<F.left||x>F.w-F.right||y<F.top||y>F.h-F.bottom)return;$('quad-w').value=clamp(-QUAD_RADIUS+2*QUAD_RADIUS*(x-F.left)/(F.w-F.left-F.right),-2.2,2.2).toFixed(4);$('quad-z').value=clamp(QUAD_RADIUS-2*QUAD_RADIUS*(y-F.top)/(F.h-F.top-F.bottom),-2.2,2.2).toFixed(4);updateQuad();});
+$('quad-angle').oninput=drawQuadSurface;$('quad-camera-reset').onclick=()=>{$('quad-angle').value='-38';drawQuadSurface();};
+let quadDrag=null;$('quad-surface').onpointerdown=e=>{quadDrag={x:e.clientX,a:value('quad-angle')};e.currentTarget.setPointerCapture(e.pointerId);};$('quad-surface').onpointermove=e=>{if(!quadDrag)return;const a=quadDrag.a+(e.clientX-quadDrag.x)*.5;$('quad-angle').value=String(((a+180)%360+360)%360-180);drawQuadSurface();};$('quad-surface').onpointerup=$('quad-surface').onpointercancel=()=>{quadDrag=null;};
+for(const id of ['land-eta','land-count'])$(id).addEventListener('input',updateLand);for(const id of ['land-x','land-y'])$(id).addEventListener('change',updateLand);
+$('land-stable').onclick=()=>{$('land-x').value='0';$('land-y').value='1.2';updateLand();};$('land-perturb').onclick=()=>{$('land-x').value='0.001';$('land-y').value='1.2';updateLand();};$('land-resample').onclick=()=>{landSeed++;updateLand();};for(const id of ['land-stable-lines','land-trails'])$(id).onchange=drawLand;
+$('land-contour').addEventListener('click',event=>{if(!landFrame)return;const b=event.currentTarget.getBoundingClientRect(),F=landFrame,x=event.clientX-b.left,y=event.clientY-b.top;if(x<F.left||x>F.w-F.right||y<F.top||y>F.h-F.bottom)return;$('land-x').value=(-4.2+8.4*(x-F.left)/(F.w-F.left-F.right)).toFixed(4);$('land-y').value=(4.2-8.4*(y-F.top)/(F.h-F.top-F.bottom)).toFixed(4);updateLand();});
+$('land-angle').oninput=drawSurface;$('land-camera-reset').onclick=()=>{$('land-angle').value='-38';drawSurface();};
+let drag=null;$('land-surface').onpointerdown=e=>{drag={x:e.clientX,a:value('land-angle')};e.currentTarget.setPointerCapture(e.pointerId);};$('land-surface').onpointermove=e=>{if(!drag)return;let a=drag.a+(e.clientX-drag.x)*.5;a=((a+180)%360+360)%360-180;$('land-angle').value=String(a);drawSurface();};$('land-surface').onpointerup=$('land-surface').onpointercancel=()=>{drag=null;};
+for(const id of ['local-eta','local-delta','local-v'])$(id).oninput=updateLocal;for(const id of ['collapse-eta','collapse-count'])$(id).onchange=updateCollapse;$('collapse-resample').onclick=()=>{collapseSeed++;updateCollapse();};
+let resizeFrame=0;function redraw(){cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(()=>{drawQuad();drawLand();drawLocal();drawCollapse();});}new ResizeObserver(redraw).observe(document.querySelector('main'));matchMedia('(prefers-color-scheme: dark)').addEventListener('change',redraw);document.addEventListener('visibilitychange',()=>{if(document.hidden){quadPlayer.pause();landPlayer.pause();localPlayer.pause();collapsePlayer.pause();}});
+updateQuad();updateLand();updateLocal();updateCollapse();
+</script>
+</body></html>
