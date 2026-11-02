@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Lecture 11: explore SGD stationarity, the PL convergence bound, and the variance calculation behind SVRG.">
+<title>SGD and variance reduction · Optimization for Data Science</title>
+<style>
+:root{color-scheme:light dark;--bg:#f7f6f2;--surface:#fff;--text:#23262b;--muted:#616771;--line:#deded8;--grid:#eaeae5;--soft:#f0efe9;--axis:#a5a8a9;--gd:#426db3;--sgd:#a63159;--svrg:#14796e;--decay:#7650a0;--gold:#9c6b15;--focus:#146eaa}
+@media(prefers-color-scheme:dark){:root{--bg:#181b20;--surface:#20242a;--text:#eeeef0;--muted:#b2b7c0;--line:#3f444b;--grid:#30353d;--soft:#2b3037;--axis:#717985;--gd:#91b8ff;--sgd:#f494af;--svrg:#69cbb9;--decay:#c7a4ee;--gold:#edc274;--focus:#82c9fa}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{max-width:1240px;margin:auto;padding:32px 28px 56px}.eyebrow{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}h1{font-size:clamp(28px,4vw,40px);font-weight:650;letter-spacing:-.035em;line-height:1.12;margin:0 0 14px}h2,h3,p{margin-top:0}.intro{max-width:900px;color:var(--muted);font-size:17px}.math{font:18px/1.7 Georgia,"Times New Roman",serif}.formula{overflow-x:auto;padding:12px 16px;background:var(--soft);border-radius:8px;margin:14px 0 18px}.stage{border:1px solid var(--line);border-radius:14px;background:var(--surface);margin:20px 0;overflow:hidden}.stage>summary{cursor:pointer;display:flex;gap:12px;align-items:center;padding:20px 22px;font-size:20px;font-weight:650;list-style:none}.stage>summary::-webkit-details-marker{display:none}.stage>summary::after{content:'Show';margin-left:auto;color:var(--muted);font-size:12px;font-weight:500}.stage[open]>summary::after{content:'Hide'}.number{border:1px solid var(--line);border-radius:50%;width:30px;height:30px;display:grid;place-items:center;flex-shrink:0;font-size:13px}.stage-body{padding:0 22px 22px}.lead{color:var(--muted);max-width:980px}.controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 24px;background:var(--soft);padding:16px;border-radius:9px;margin:15px 0}.control label{display:flex;justify-content:space-between;gap:12px;font-size:13px;margin-bottom:6px}.control output{font-variant-numeric:tabular-nums;font-weight:650}input[type=range]{width:100%;accent-color:var(--svrg)}button,select{font:inherit;font-size:13px;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:8px 10px;min-height:38px}select{max-width:100%}button{cursor:pointer}button:hover{border-color:var(--muted)}button:disabled{opacity:.4;cursor:default}.primary{background:var(--text);color:var(--surface);border-color:var(--text)}:focus-visible{outline:3px solid var(--focus);outline-offset:3px}.transport,.toolbar,.legend{display:flex;gap:10px 15px;align-items:center;flex-wrap:wrap}.transport{margin-top:16px}.speed-label{margin-left:auto;font-size:12px;display:flex;align-items:center;gap:8px}.toolbar{margin:12px 0;font-size:13px}.toolbar label{display:flex;align-items:center;gap:7px}.toolbar input[type=checkbox]{accent-color:var(--svrg)}.timeline{display:flex;gap:15px;align-items:center;margin:13px 0 18px}.timeline label{font-size:13px;min-width:105px;font-variant-numeric:tabular-nums}.timeline input{flex:1;min-width:0}.panels{display:grid;grid-template-columns:1fr 1fr;gap:18px}.panel{border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}.panel h3{font-size:15px;margin-bottom:3px}.sub{font-size:12px;color:var(--muted);margin-bottom:9px}.panel canvas{display:block;width:100%;height:300px}.legend{font-size:12px;color:var(--muted);margin:10px 0;gap:7px 16px}.legend span{display:flex;align-items:center;gap:6px}.sw{display:inline-block;width:18px;height:0;border-top:2.5px solid currentColor}.sw.dash{border-top-style:dashed}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}.stat{background:var(--soft);padding:11px 14px;border-radius:8px;font-size:12px;color:var(--muted)}.stat strong{display:block;font-size:20px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;margin-top:4px}.message{font-size:13px;border-left:3px solid var(--svrg);padding:10px 14px;background:var(--soft);margin:14px 0 0}.setup{margin-top:17px;font-size:14px}.setup>summary{cursor:pointer;color:var(--muted);font-size:13px}.setup p{margin:10px 0}.small{font-size:12px;color:var(--muted)}.table-wrap{overflow-x:auto;margin:16px 0;border:1px solid var(--line);border-radius:9px}table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}th,td{padding:10px 14px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}th{background:var(--soft);color:var(--muted);font-weight:550}td:first-child,th:first-child{text-align:left}tr:last-child td{border-bottom:0}.method{font-weight:650}footer{font-size:12px;color:var(--muted);margin-top:28px;max-width:980px}a{color:var(--gd)}noscript{display:block;padding:20px}
+@media(max-width:850px){.panels{grid-template-columns:1fr}.controls{grid-template-columns:1fr 1fr}.panel canvas{height:310px}}
+@media(max-width:540px){main{padding:22px 12px 40px}.stage>summary{padding:17px 14px;font-size:17px}.stage-body{padding:0 13px 17px}.controls{grid-template-columns:1fr;gap:14px}.panel{padding:10px}.panel canvas{height:275px}.stats{grid-template-columns:1fr}.stat{display:flex;align-items:center;justify-content:space-between;gap:14px}.stat strong{margin:0;font-size:17px}.transport{gap:8px}.speed-label{margin-left:0}button,select{min-height:44px}.math{font-size:17px}.timeline label{min-width:85px}}
+.noise-stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:850px){.noise-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:540px){.noise-stats{grid-template-columns:1fr}}
+[hidden]{display:none!important}
+.noise-stats{grid-template-columns:repeat(3,minmax(0,1fr))}.noise-stats.with-decay{grid-template-columns:repeat(4,minmax(0,1fr))}
+.variance-chain{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr);gap:12px;align-items:center;margin:12px 0}.variance-chain>b{font-size:24px;color:var(--muted)}.variance-chain .stat{height:100%;display:flex;flex-direction:column;justify-content:space-between}.variance-chain .math{display:block;font-size:16px}.variance-chain small{font-size:12px}.proof-label{font-size:15px;font-weight:600;margin-bottom:4px}
+.sample-build{padding:14px 16px;background:var(--soft);border-radius:8px;margin:16px 0}.sample-build p{margin-bottom:0}.sample-terms{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr);gap:12px;align-items:center;margin-top:12px}.sample-terms div{display:flex;flex-direction:column;gap:3px;font-size:12px}.sample-terms strong{font-size:20px;font-variant-numeric:tabular-nums}.sample-terms>b{font-size:22px;color:var(--muted)}
+@media(max-width:850px){.noise-stats,.noise-stats.with-decay{grid-template-columns:repeat(2,minmax(0,1fr))}.variance-chain{gap:7px}.variance-chain .stat{padding:9px}}
+@media(max-width:540px){.noise-stats,.noise-stats.with-decay{grid-template-columns:1fr}.variance-chain{grid-template-columns:1fr;gap:5px}.variance-chain>b{text-align:center;line-height:1}.variance-chain .stat{display:grid;grid-template-columns:1fr auto;gap:5px 14px}.variance-chain .stat .math{grid-row:2;grid-column:1}.variance-chain .stat strong{grid-column:2;grid-row:1 / span 2}.variance-chain small{grid-row:3}.sample-terms{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px}.sample-terms>b:nth-of-type(2){grid-column:1 / -1;text-align:center}}
+</style>
+</head>
+<body><main>
+<p class="eyebrow">Optimization for Data Science · Lecture 11</p>
+<h1>SGD: stationarity, PL, and variance reduction</h1>
+<p class="intro">Follow the lecture from approximate stationarity to fast convergence under PL, then build a gradient estimator whose variance shrinks near a snapshot.</p>
+<noscript>This demo needs JavaScript. The formulas and explanations below remain available.</noscript>
+
+<details class="stage" id="stationarity-stage" open><summary><span class="number">1</span> SGD reaches approximate stationarity</summary><div class="stage-body">
+<p class="lead">A smooth nonconvex objective, with an unbiased noisy gradient. Track an individual run and compare the average gradient size across 256 runs with the guarantee from the lecture.</p>
+<div class="formula math">f(w) = 1 − cos(w), &nbsp; g(w, s) = sin(w) + sσ, &nbsp; s ∈ {−1, +1} with equal probability.<br>L = 1, &nbsp; f⋆ = 0, &nbsp; Var(g) = σ². &nbsp; Choose η = 1/√T and keep it fixed during the run.</div>
+<div class="controls">
+<div class="control"><label for="stationarity-horizon">Run horizon T</label><select id="stationarity-horizon"><option value="100">100 updates</option><option value="400" selected>400 updates</option><option value="1600">1,600 updates</option></select></div>
+<div class="control"><label for="stationarity-sigma">Noise magnitude σ <output id="stationarity-sigma-out"></output></label><input id="stationarity-sigma" type="range" min="0" max="2" step="0.1" value="0.6"></div>
+<div class="control"><label for="stationarity-start">Initial point</label><select id="stationarity-start"><option value="2" selected>w₀ = 2</option><option value="1">w₀ = 1</option><option value="3">w₀ = 3: near a maximum</option><option value="0">w₀ = 0: at a minimum</option></select></div>
+</div>
+<div class="toolbar"><label for="stationarity-metric">Quantity <select id="stationarity-metric"><option value="squared">Average squared gradient</option><option value="norm">Average gradient norm</option></select></label><label><input type="checkbox" id="stationarity-log" checked>Logarithmic vertical axis</label><button id="stationarity-resample">New random draws</button></div>
+<div class="formula math" id="stationarity-formula">(1/k) Σ<sub>j=0</sub><sup>k−1</sup> E|f′(w<sub>j</sub>)|² ≤ 2(f(w₀) − f⋆)/(ηk) + ησ², &nbsp; k ≥ 1.</div>
+<div class="transport" data-player="stationarity"></div>
+<div class="timeline"><label id="stationarity-position" for="stationarity-time">k = 0</label><input id="stationarity-time" type="range" min="0" max="400" step="1" value="0" aria-label="Stationarity experiment iteration"></div>
+<div class="panels">
+<div class="panel"><h3>A noisy path on a nonconvex function</h3><p class="sub">The highlighted point is one run. Five faint points show other runs; the trail marks recent iterates.</p><canvas id="stationarity-landscape" role="img" aria-label="A noisy SGD iterate on the periodic nonconvex objective one minus cosine"></canvas><div class="legend"><span style="color:var(--gd)"><i class="sw"></i>f(w) = 1 − cos(w)</span><span style="color:var(--sgd)">● Selected SGD run</span><span style="color:var(--muted)">◇ Initial point</span></div></div>
+<div class="panel"><h3 id="stationarity-chart-title">Average squared gradient</h3><p class="sub">The empirical curve averages pre-update points w₀,…,w<sub>k−1</sub> and 256 independent runs. The dashed curve bounds the true expectation.</p><canvas id="stationarity-gap" role="img" aria-label="Empirical average gradient size and the theoretical stationarity bound versus iteration"></canvas><div class="legend"><span style="color:var(--sgd)"><i class="sw"></i>Empirical mean</span><span style="color:var(--gold)"><i class="sw dash"></i>Theoretical upper bound</span></div></div>
+</div>
+<div class="stats"><div class="stat">Fixed step η = 1/√T<strong id="stationarity-eta"></strong></div><div class="stat">Current empirical average<strong id="stationarity-current"></strong></div><div class="stat">Current theoretical bound<strong id="stationarity-bound"></strong></div></div>
+<p class="message" id="stationarity-message" role="status"></p>
+<details class="setup"><summary>What the theorem controls</summary><p>The objective has a 1-Lipschitz gradient and a finite infimum. Its noisy gradient has variance σ² at every point. It does not satisfy a global PL inequality: at w = π the gradient vanishes even though f(π) = 2 &gt; f⋆.</p><p>The plotted statistic is an average over past iterates, not the gradient at the latest point. An independent uniform choice among w₀,…,w<sub>k−1</sub> has the same expected statistic. A small gradient does not by itself establish global optimality.</p><p>Changing T starts a new run with a new fixed step. The step does not shrink as the animation advances. At the end of the run, the bound on the average gradient norm is √[2(f(w₀) − f⋆) + σ²] / T<sup>1/4</sup>. This is a worst-case upper bound; the empirical curve need not decay at exactly that rate.</p><p>The landscape uses the actual, unwrapped iterates. The chart has no average at k = 0. In logarithmic view, zero and values below 10<sup>−6</sup> appear at the plotting floor; the readout retains their actual values. All horizontal axes are linear.</p></details>
+</div></details>
+
+<details class="stage" id="noise-stage" open><summary><span class="number">2</span> PL: fast progress, persistent noise</summary><div class="stage-body">
+<p class="lead">Two losses pull toward different points. Their average satisfies PL, with L = μ = 1. Compare the theorem with the actual expected error, and change the step size to trade fast initial progress for a smaller noise neighborhood.</p>
+<div class="formula math">f<sub>±</sub>(w) = ½(w ± b)², &nbsp; f(w) = ½(w² + b²), &nbsp; w<sub>⋆</sub> = 0.<br>SGD: w<sub>k+1</sub> = (1 − η<sub>k</sub>)w<sub>k</sub> − η<sub>k</sub>s<sub>k</sub>b, &nbsp; s<sub>k</sub> ∈ {−1, +1} with equal probability.<br>Constant: η<sub>k</sub> = η.<span class="decay-item" hidden> &nbsp; Decreasing: η<sub>k</sub> = 1/(k + 1), &nbsp; k = 0, 1, 2, …</span></div>
+<div class="controls">
+<div class="control"><label for="noise-b">Noise magnitude b <output id="noise-b-out"></output></label><input id="noise-b" type="range" min="0" max="2" step="0.1" value="1"></div>
+<div class="control"><label for="noise-eta">Constant step η (GD / SGD) <output id="noise-eta-out"></output></label><input id="noise-eta" type="range" min="0.05" max="0.9" step="0.05" value="0.2"></div>
+<div class="control"><label for="noise-start">Initial point</label><select id="noise-start"><option value="2">w₀ = 2</option><option value="0">w₀ = 0: start at the solution</option></select></div>
+</div>
+<div class="toolbar"><button id="noise-resample">New random draws</button><label><input type="checkbox" id="noise-log" checked>Logarithmic objective axis</label><label><input type="checkbox" id="noise-pl" checked>Show PL upper bound</label><label><input type="checkbox" id="noise-decreasing">Show SGD with 1/(k + 1)</label></div>
+<div class="transport" data-player="noise"></div>
+<div class="timeline"><label id="noise-position" for="noise-time">k = 0</label><input id="noise-time" type="range" min="0" max="400" step="1" value="0" aria-label="Noise experiment iteration"></div>
+<div class="panels">
+<div class="panel"><h3>Parameters along individual runs</h3><p class="sub" id="noise-path-caption">The highlighted path shows one SGD run. Lighter paths show five more runs.</p><canvas id="noise-path" role="img" aria-label="Constant-step SGD fluctuates around zero, while decreasing-step SGD and gradient descent approach zero"></canvas><div class="legend"><span style="color:var(--sgd)"><i class="sw"></i>SGD, constant η</span><span class="decay-item" style="color:var(--decay)" hidden><i class="sw"></i>SGD, 1/(k + 1)</span><span style="color:var(--gd)"><i class="sw"></i>GD, constant η</span><span><i class="sw dash"></i>w⋆ = 0</span></div></div>
+<div class="panel"><h3>Expected objective error</h3><p class="sub">The SGD mean uses 128 independent runs. Black dashes show the exact expectation; teal dashes show the PL upper bound, not a prediction.</p><canvas id="noise-gap" role="img" aria-label="Constant-step SGD approaches a noise floor, decreasing-step SGD has expected objective gap b squared over 2k, and GD converges geometrically"></canvas><div class="legend"><span style="color:var(--sgd)"><i class="sw"></i>Constant-step SGD mean</span><span class="decay-item" style="color:var(--decay)" hidden><i class="sw"></i>Decreasing-step SGD mean</span><span style="color:var(--text)"><i class="sw dash"></i>Exact expectations</span><span style="color:var(--gd)"><i class="sw"></i>GD</span><span style="color:var(--gold)"><i class="sw dash"></i>Exact limiting gap</span><span class="pl-item" style="color:var(--svrg)"><i class="sw dash"></i>PL upper bound</span></div></div>
+</div>
+<div class="stats noise-stats"><div class="stat">Sampling variance σ²<strong id="noise-variance"></strong></div><div class="stat">Constant-step limiting gap<strong id="noise-floor"></strong></div><div class="stat">Constant-step empirical gap<strong id="noise-current"></strong></div><div class="stat decay-item" hidden>Decreasing-step empirical gap<strong id="noise-decreasing-current"></strong></div></div>
+<div class="formula math pl-item">PL theorem: E[f(w<sub>k</sub>) − f⋆] ≤ (1 − μη)<sup>k</sup>[f(w₀) − f⋆] + Lησ²/(2μ).<br>Here L = μ = 1, σ² = b², so the bound is (1 − η)<sup>k</sup>w₀²/2 + ηb²/2.</div><p class="message" id="noise-message">A larger step reduces the initial error faster but raises the limiting error. Start at the solution to see sampling noise move SGD away from it, or set b = 0 to recover deterministic GD.</p><p class="small decay-item" hidden>The decreasing schedule uses steps 1, ½, ⅓, …, independently of the constant-step slider. Its exact expected gap is b²/(2k) for k ≥ 1. The displayed PL bound applies only to constant-step SGD.</p>
+<details class="setup"><summary>The calculations for both step-size choices</summary><p>The oracle is g(w, s) = w + sb. Its variance is b² for every w, so this example satisfies the globally uniform variance assumption. The average objective has L = μ = 1.</p><p>For a constant step:</p><p class="math">E[f(w<sub>k</sub>) − f⋆] = ½(1 − η)<sup>2k</sup>w₀² + ηb²/[2(2 − η)] · [1 − (1 − η)<sup>2k</sup>].</p><p>The limiting gap is ηb²/[2(2 − η)]. The general PL theorem gives an upper bound on a noise neighborhood; this is the exact expectation for this example.</p><p>With η<sub>k</sub> = 1/(k + 1), the first update uses η₀ = 1. For k ≥ 1, the iterate is the negative average of the sampled offsets:</p><p class="math">w<sub>k</sub> = −(b/k) Σ<sub>j=0</sub><sup>k−1</sup> s<sub>j</sub>, &nbsp; E[f(w<sub>k</sub>) − f⋆] = b²/(2k).</p><p>The first update removes dependence on w₀ for this particular quadratic. At k = 0, all methods have gap w₀²/2; the 1/k formula applies only for k ≥ 1. The sampling variance stays b², but the smaller steps average its effect away. All horizontal axes in this demo are linear.</p></details>
+</div></details>
+
+<details class="stage" id="correction-stage" open><summary><span class="number">3</span> Why the corrected gradient has small variance</summary><div class="stage-body">
+<p class="lead">Now let the components have different curvatures. Compute the full gradient at a snapshot w̃. A sample estimates how much the gradient has changed since that reference point.</p>
+<div class="formula math">f<sub>s</sub>(w) = ½(1 + sr)w² + sbw, &nbsp; f(w) = ½w², &nbsp; s ∈ {−1, +1}.<br>v<sub>s</sub>(w; w̃) = f′<sub>s</sub>(w) − f′<sub>s</sub>(w̃) + f′(w̃) = w + sr(w − w̃).</div>
+<div class="controls">
+<div class="control"><label for="cv-w">Current point w <output id="cv-w-out"></output></label><input id="cv-w" type="range" min="-2.5" max="2.5" step="0.05" value="0.8"></div>
+<div class="control"><label for="cv-snapshot">Snapshot w̃ <output id="cv-snapshot-out"></output></label><input id="cv-snapshot" type="range" min="-2.5" max="2.5" step="0.05" value="1.1"></div>
+<div class="control"><label for="cv-r">Curvature variation r <output id="cv-r-out"></output></label><input id="cv-r" type="range" min="0" max="0.9" step="0.05" value="0.7"></div>
+<div class="control"><label for="cv-b">Component offset b <output id="cv-b-out"></output></label><input id="cv-b" type="range" min="0" max="2" step="0.1" value="1"></div>
+</div>
+<div class="toolbar"><button class="primary" id="cv-draw">Draw one sample</button><button id="cv-match">Set snapshot = current point</button><button id="cv-optimum">Both at the solution</button><button id="cv-stale">Try a stale snapshot</button></div>
+<div class="panels">
+<div class="panel"><h3>Raw component gradients</h3><p class="sub">The two possible sampled gradients can disagree at w⋆ = 0.</p><canvas id="cv-raw" role="img" aria-label="Two raw component-gradient lines and their average with the current point highlighted"></canvas></div>
+<div class="panel"><h3>Corrected gradients</h3><p class="sub">The two corrected lines meet the full gradient at the snapshot.</p><canvas id="cv-corrected" role="img" aria-label="Two SVRG gradient lines meet at the snapshot and the current estimator values are highlighted"></canvas></div>
+</div>
+<div class="legend"><span style="color:var(--gd)"><i class="sw"></i>Sample s = −1</span><span style="color:var(--gold)"><i class="sw"></i>Sample s = +1</span><span style="color:var(--text)"><i class="sw dash"></i>Full gradient f′(w) = w</span><span style="color:var(--sgd)"><i class="sw dash"></i>Current w</span><span style="color:var(--svrg)"><i class="sw dash"></i>Snapshot w̃</span></div>
+<div class="sample-build"><p id="cv-sample-label" class="small" aria-live="polite">Draw a sample to follow the same component through both gradient evaluations.</p><div class="sample-terms" id="cv-sample-terms" hidden>
+<div><span>Component at w</span><span class="math">f′<sub>i</sub>(w)</span><strong id="cv-sample-current"></strong></div><b>−</b>
+<div><span>Same component at w̃</span><span class="math">f′<sub>i</sub>(w̃)</span><strong id="cv-sample-reference"></strong></div><b>+</b>
+<div><span>Stored full gradient</span><span class="math">f′(w̃)</span><strong id="cv-sample-full"></strong></div><b>=</b>
+<div><span>Corrected sample</span><span class="math">v<sub>i</sub>(w; w̃)</span><strong id="cv-sample-result"></strong></div>
+</div></div>
+<p class="small">Raw sampling variance (rw + b)²: <strong id="cv-raw-var"></strong> · Corrected second moment w² + Var(v): <strong id="cv-moment"></strong></p>
+<p class="proof-label">The variance calculation, one inequality at a time</p>
+<div class="variance-chain">
+<div class="stat">Actual corrected variance<span class="math">Eᵢ|vᵢ − f′(w)|²</span><strong id="cv-corrected-var"></strong><small>r²(w − w̃)²</small></div><b>≤</b>
+<div class="stat">Mean squared gradient difference<span class="math">Eᵢ|f′ᵢ(w) − f′ᵢ(w̃)|²</span><strong id="cv-difference-moment"></strong><small>(1 + r²)(w − w̃)²</small></div><b>≤</b>
+<div class="stat">Smoothness upper bound<span class="math">L²|w − w̃|²</span><strong id="cv-smooth-bound"></strong><small>L = 1 + r</small></div>
+</div>
+<p class="small">Centering subtracts |EAᵢ|² from E|Aᵢ|², where Aᵢ = f′ᵢ(w) − f′ᵢ(w̃). Component smoothness gives the second inequality. These values average both possible samples exactly.</p>
+<p class="message" id="cv-message" role="status"></p>
+<details class="setup"><summary>Why sharing the sample matters</summary><p>The same s appears in both component gradients. Their linear offsets sb cancel exactly. Moving b changes the raw gradients but leaves the corrected gradients unchanged.</p><p>Both estimators have mean w. At w = w̃, SVRG has zero variance, even when the gradient w is nonzero. Its second moment there is w². A stale snapshot can increase variance; it must be refreshed as optimization progresses.</p><p>For r &gt; 0, raw variance grows with w and is not globally bounded. This experiment illustrates the control variate directly; the finite-sum analysis uses objective-dependent moment bounds instead of a uniform variance constant.</p></details>
+</div></details>
+
+<details class="stage" id="ridge-stage"><summary><span class="number">4</span> Next lecture: SVRG in action</summary><div class="stage-body">
+<p class="lead">Fit a synthetic regression dataset with 120 observations and two parameters. All methods start at the same point. SVRG pays for a full gradient at each snapshot, then reuses it for many corrected updates.</p>
+<div class="formula math">f(w) = (1/120) Σᵢ [½(aᵢᵀw − yᵢ)² + (λ/2)‖w‖²], &nbsp; λ = 0.03.</div>
+<div class="controls">
+<div class="control"><label for="ridge-step">SGD / SVRG step: ηL <output id="ridge-step-out"></output></label><input id="ridge-step" type="range" min="0.05" max="0.8" step="0.05" value="0.3"></div>
+<div class="control"><label for="ridge-epoch">SVRG updates per epoch m</label><select id="ridge-epoch"><option value="15">15</option><option value="60" selected>60</option><option value="200">200</option></select></div>
+<div class="control"><label for="ridge-axis">Horizontal axis (linear)</label><select id="ridge-axis"><option value="cost">Component-gradient evaluations</option><option value="k">Parameter updates k</option></select></div>
+</div>
+<div class="toolbar"><button id="ridge-resample">New sampling sequence</button><label><input type="checkbox" id="ridge-log" checked>Logarithmic objective axis</label><span class="small" id="ridge-constants"></span></div>
+<div class="transport" data-player="ridge"></div>
+<div class="timeline"><label id="ridge-position" for="ridge-time">Work = 0</label><input id="ridge-time" type="range" min="0" max="2400" step="1" value="0" aria-label="Ridge regression playback progress"></div>
+<div class="panels">
+<div class="panel"><h3>Paths on the quadratic</h3><p class="sub">Contours are objective-error levels. Diamonds mark the averaged SVRG snapshots.</p><canvas id="ridge-contour" role="img" aria-label="Contours of the two-parameter ridge objective with gradient descent, SGD, and SVRG paths"></canvas></div>
+<div class="panel"><h3>Objective convergence</h3><p class="sub" id="ridge-axis-caption">Full gradients and snapshot refreshes are charged to the work axis.</p><canvas id="ridge-gap" role="img" aria-label="Objective gap versus gradient-evaluation cost for GD, SGD, and SVRG"></canvas></div>
+</div>
+<div class="legend"><span style="color:var(--gd)"><i class="sw"></i>GD</span><span style="color:var(--sgd)"><i class="sw"></i>SGD</span><span style="color:var(--svrg)"><i class="sw"></i>SVRG</span><span>× Minimizer</span><span style="color:var(--svrg)">◇ Averaged snapshot</span></div>
+<div class="table-wrap"><table><caption class="small" style="padding:10px;text-align:left">Current iterate and exact sampling variance at that state</caption><thead><tr><th>Method</th><th>Updates</th><th>Gradient calls</th><th>Objective gap</th><th>Estimator variance</th></tr></thead><tbody id="ridge-table"></tbody></table></div>
+<p class="message" id="ridge-message" role="status"></p>
+<details class="setup"><summary>Algorithm, averaging, and comparison details</summary><p>GD uses η = 1/L<sub>f</sub>, where L<sub>f</sub> is the smoothness of the average. SGD and SVRG use the selected fraction of 1/L, where L = maxᵢ(‖aᵢ‖² + λ). The two constants can differ substantially.</p><p>One GD step costs 120 component gradients; one SGD step costs one. This implementation evaluates both component gradients on every SVRG inner update, including the first. An epoch therefore costs 120 + 2m calls. At the first step, those two evaluations could be saved because the direction equals the stored full gradient.</p><p>At the end of an epoch, SVRG averages the pre-update points w₀,…,w<sub>m−1</sub> and starts the next epoch at that average, as in the lecture algorithm. A snapshot can therefore change the current parameter without an additional gradient call. Diamond markers show these events.</p><p>The default axis compares equal computational work. Switching to updates compares equal numbers of parameter updates and hides their different costs. The trajectories are individual seeded runs, not expected-value guarantees. Selected parameters are for experimentation; Lecture 12 derives sufficient choices for the theorem.</p><p>Objective gaps, contours, and exact estimator variances are diagnostics calculated for visualization; their evaluations are excluded from the algorithm's gradient-call counts. The synthetic dataset is generated once and remains fixed when sampling is reset. No data or libraries are downloaded.</p></details>
+</div></details>
+<footer>Optimization for Data Science · Lecture 11. All horizontal axes are linear. Runs locally and works offline. The SVRG estimator is due to Johnson and Zhang (2013); its convergence proof follows in Lecture 12.</footer>
+</main>
+<script id="svrg-core">
+/* Numerical core for Lecture 11. No DOM, external dependencies, or network.
+   Variances are exact diagnostic averages; diagnostic work is excluded from
+   component-gradient counts. All optimization directions use exact gradients. */
+'use strict';
+globalThis.SVRGCore = (() => {
+  function rng(seed = 7) {
+    let a = seed >>> 0;
+    return () => {
+      a = (a + 0x6D2B79F5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function finite(x, name) {
+    if (!Number.isFinite(x)) throw new Error(name + ' must be finite.');
+    return x;
+  }
+  function integer(x, name, lo, hi) {
+    if (!Number.isInteger(x) || x < lo || x > hi) throw new Error(name + ' is out of range.');
+    return x;
+  }
+  function stationarityRuns(options = {}) {
+    const { T = 400, R = 256, sigma = 0.6, w0 = 2, seed = 83 } = options;
+    integer(T, 'T', 1, 10000); integer(R, 'R', 1, 1000);
+    finite(sigma, 'sigma'); finite(w0, 'w0'); finite(seed, 'seed');
+    if (sigma < 0 || sigma > 10) throw new Error('Require 0 ≤ sigma ≤ 10.');
+    const eta = 1 / Math.sqrt(T), gap0 = 1 - Math.cos(w0);
+    const meanSquared = Array(T + 1).fill(0), meanNorm = Array(T + 1).fill(0), paths = [];
+    let minW = w0, maxW = w0;
+    for (let run = 0; run < R; run++) {
+      const random = rng((seed + Math.imul(run, 2654435761)) >>> 0);
+      let w = w0;
+      const path = [];
+      for (let k = 0; k <= T; k++) {
+        const gradient = Math.sin(w);
+        meanSquared[k] += gradient * gradient / R;
+        meanNorm[k] += Math.abs(gradient) / R;
+        minW = Math.min(minW, w); maxW = Math.max(maxW, w);
+        if (run < 6) path.push(w);
+        if (k === T) break;
+        const sign = random() < 0.5 ? -1 : 1;
+        w -= eta * (gradient + sign * sigma);
+      }
+      if (run < 6) paths.push(path);
+    }
+    const averageSquared = [null], averageNorm = [null], boundSquared = [null], boundNorm = [null];
+    let squaredSum = 0, normSum = 0;
+    for (let k = 1; k <= T; k++) {
+      // The theorem averages pre-update points w_0,...,w_{k-1}.
+      squaredSum += meanSquared[k - 1]; normSum += meanNorm[k - 1];
+      averageSquared.push(squaredSum / k); averageNorm.push(normSum / k);
+      const bound = 2 * gap0 / (eta * k) + eta * sigma * sigma;
+      boundSquared.push(bound); boundNorm.push(Math.sqrt(bound));
+    }
+    return { T, R, sigma, w0, seed, eta, gap0, paths, samplePath: paths[0],
+      meanSquared, meanNorm, averageSquared, averageNorm, boundSquared, boundNorm,
+      range: [minW, maxW] };
+  }
+  function scalarStats(w, snapshot, r = 0.7, b = 1) {
+    [w, snapshot, r, b].forEach(x => finite(x, 'Scalar parameter'));
+    if (r < 0 || r > 0.9 || b < 0) throw new Error('Require 0 ≤ r ≤ 0.9 and b ≥ 0.');
+    const gradients = [-1, 1].map(s => (1 + s * r) * w + s * b);
+    const corrected = [-1, 1].map(s => w + s * r * (w - snapshot));
+    const rawVariance = (r * w + b) ** 2;
+    const correctedVariance = r ** 2 * (w - snapshot) ** 2;
+    return { gradients, raw: gradients, corrected, mean: w, rawVariance, correctedVariance,
+      secondMoment: w * w + correctedVariance,
+      rawSecondMoment: w * w + rawVariance,
+      referenceGradients: [-1, 1].map(s => (1 + s * r) * snapshot + s * b),
+      differences: [-1, 1].map(s => (1 + s * r) * (w - snapshot)),
+      differenceSecondMoment: (1 + r * r) * (w - snapshot) ** 2,
+      smoothnessBound: (1 + r) ** 2 * (w - snapshot) ** 2,
+      componentL: 1 + r };
+  }
+  function scalarRuns(options = {}) {
+    const { r = 0.7, b = 1, stepFraction = 0.5, m = 20,
+      K = 400, R = 128, seed = 17, w0 = 2 } = options;
+    scalarStats(w0, w0, r, b);
+    integer(K, 'K', 1, 10000); integer(R, 'R', 1, 1000); integer(m, 'm', 1, 10000);
+    if (!(stepFraction > 0 && stepFraction <= 1)) throw new Error('Require 0 < stepFraction ≤ 1.');
+    const eta = stepFraction / (1 + r);
+    const meanSGD = Array(K + 1).fill(0), meanSVRG = Array(K + 1).fill(0), meanDecreasing = Array(K + 1).fill(0);
+    const sampleSGD = [], sampleSVRG = [], pathsSGD = [], pathsSVRG = [], sampleDecreasing = [], pathsDecreasing = [];
+    for (let j = 0; j < R; j++) {
+      const random = rng((seed + Math.imul(j, 2654435761)) >>> 0);
+      let w = w0, u = w0, decreasing = w0, snapshot = w0, sum = 0, inner = 0;
+      const pathSGD = [], pathSVRG = [], pathDecreasing = [];
+      for (let k = 0; k <= K; k++) {
+        meanSGD[k] += w * w / (2 * R);
+        meanSVRG[k] += u * u / (2 * R);
+        meanDecreasing[k] += decreasing * decreasing / (2 * R);
+        if (j === 0) { sampleSGD.push(w); sampleSVRG.push(u); sampleDecreasing.push(decreasing); }
+        if (j < 6) { pathSGD.push(w); pathSVRG.push(u); pathDecreasing.push(decreasing); }
+        if (k === K) break;
+        const s = random() < 0.5 ? -1 : 1;
+        w -= eta * ((1 + s * r) * w + s * b);
+        // Updates 1, 2, 3, ... use steps 1, 1/2, 1/3, ... .
+        // Reuse the same sample as constant-step SGD for a paired comparison.
+        decreasing -= ((1 + s * r) * decreasing + s * b) / (k + 1);
+        sum += u; // Average the points BEFORE their respective updates.
+        u -= eta * (u + s * r * (u - snapshot));
+        inner++;
+        if (inner === m) { snapshot = sum / m; u = snapshot; inner = 0; sum = 0; }
+      }
+      if (j < 6) { pathsSGD.push(pathSGD); pathsSVRG.push(pathSVRG); pathsDecreasing.push(pathDecreasing); }
+    }
+    const exactSGD = [], gd = [], gdPath = [], exactMean = [], exactDecreasing = [];
+    let mean = w0, second = w0 * w0, decreasingMean = w0, decreasingSecond = w0 * w0;
+    const multiplier = (1 - eta) ** 2 + eta * eta * r * r;
+    for (let k = 0; k <= K; k++) {
+      exactSGD.push(second / 2); exactMean.push(mean);
+      exactDecreasing.push(decreasingSecond / 2);
+      gd.push(w0 * w0 * (1 - eta) ** (2 * k) / 2);
+      gdPath.push(w0 * (1 - eta) ** k);
+      second = multiplier * second + 2 * eta * eta * r * b * mean + eta * eta * b * b;
+      mean *= 1 - eta;
+      const h = 1 / (k + 1);
+      decreasingSecond = ((1 - h) ** 2 + h * h * r * r) * decreasingSecond
+        + 2 * h * h * r * b * decreasingMean + h * h * b * b;
+      decreasingMean *= 1 - h;
+    }
+    const limitingGap = eta * eta * b * b / (2 * (1 - multiplier));
+    // The uniform-noise PL theorem applies to the r=0 experiment only.
+    const plUpper = r === 0 ? Array.from({length: K + 1}, (_, k) =>
+      (1 - eta) ** k * w0 * w0 / 2 + eta * b * b / 2) : null;
+    return { r, b, eta, stepFraction, m, K, R, seed, w0,
+      meanSGD, meanSVRG, meanDecreasing, sampleSGD, sampleSVRG, sampleDecreasing,
+      pathsSGD, pathsSVRG, pathsDecreasing, exactSGD, exactMean, exactDecreasing, gd, gdPath, limitingGap, plUpper };
+  }
+  const mv = (Q, w) => [Q[0] * w[0] + Q[1] * w[1], Q[1] * w[0] + Q[2] * w[1]];
+  const sub = (a, b) => [a[0] - b[0], a[1] - b[1]];
+  const dot = (a, b) => a[0] * b[0] + a[1] * b[1];
+  function eigenvalues(Q) {
+    const middle = (Q[0] + Q[2]) / 2;
+    const radius = Math.hypot((Q[0] - Q[2]) / 2, Q[1]);
+    return [middle - radius, middle + radius];
+  }
+  function makeRidge(options = {}) {
+    const { n = 120, lambda = 0.03, anisotropy = 15, noise = 0.7, seed = 41 } = options;
+    integer(n, 'n', 4, 2000);
+    if (!(lambda > 0 && anisotropy >= 1 && anisotropy <= 1000 && noise >= 0))
+      throw new Error('Require λ > 0, anisotropy ≥ 1, and noise ≥ 0.');
+    [lambda, anisotropy, noise].forEach(x => finite(x, 'Ridge parameter'));
+    const random = rng(seed), angle = Math.PI / 6, c = Math.cos(angle), s = Math.sin(angle);
+    const truth = [1.4, -0.8], data = [], Q = [0, 0, 0], b = [0, 0];
+    let componentL = 0;
+    for (let i = 0; i < n; i++) {
+      // Equally spaced angular features give a reproducible, bounded design.
+      const theta = 2 * Math.PI * (i + 0.5) / n;
+      const u = Math.SQRT2 * Math.cos(theta), v = Math.sqrt(2 / anisotropy) * Math.sin(theta);
+      const a = [c * u - s * v, s * u + c * v];
+      const y = dot(a, truth) + noise * Math.sqrt(3) * (2 * random() - 1);
+      const Qi = [a[0] * a[0] + lambda, a[0] * a[1], a[1] * a[1] + lambda];
+      const bi = [a[0] * y, a[1] * y];
+      data.push({ a, y, Q: Qi, b: bi });
+      for (let j = 0; j < 3; j++) Q[j] += Qi[j] / n;
+      b[0] += bi[0] / n; b[1] += bi[1] / n;
+      componentL = Math.max(componentL, dot(a, a) + lambda);
+    }
+    const determinant = Q[0] * Q[2] - Q[1] * Q[1];
+    const wstar = [(Q[2] * b[0] - Q[1] * b[1]) / determinant,
+      (Q[0] * b[1] - Q[1] * b[0]) / determinant];
+    const [mu, Lf] = eigenvalues(Q);
+    return { n, d: 2, lambda, anisotropy, noise, seed, truth, data, Q, b,
+      wstar, mu, Lf, componentL, kappa: componentL / mu, kappaGD: Lf / mu };
+  }
+  function componentGradient(problem, i, w) {
+    const row = problem.data[i];
+    return sub(mv(row.Q, w), row.b);
+  }
+  function gradient(problem, w) { return sub(mv(problem.Q, w), problem.b); }
+  function fullGradient(problem, w) {
+    const g = [0, 0];
+    for (let i = 0; i < problem.n; i++) {
+      const gi = componentGradient(problem, i, w);
+      g[0] += gi[0] / problem.n; g[1] += gi[1] / problem.n;
+    }
+    return g;
+  }
+  function objectiveGap(problem, w) {
+    const e = sub(w, problem.wstar);
+    return Math.max(0, 0.5 * dot(e, mv(problem.Q, e)));
+  }
+  function variance(problem, w, snapshot = null) {
+    const g = gradient(problem, w), difference = snapshot ? sub(w, snapshot) : null;
+    let total = 0;
+    for (let i = 0; i < problem.n; i++) {
+      let error;
+      if (difference) {
+        const Qi = problem.data[i].Q;
+        error = mv([Qi[0] - problem.Q[0], Qi[1] - problem.Q[1], Qi[2] - problem.Q[2]], difference);
+      } else error = sub(componentGradient(problem, i, w), g);
+      total += dot(error, error) / problem.n;
+    }
+    return Math.max(0, total);
+  }
+  function correctedGradient(problem, i, w, snapshot, snapshotGradient = gradient(problem, snapshot)) {
+    const current = componentGradient(problem, i, w), reference = componentGradient(problem, i, snapshot);
+    return [current[0] - reference[0] + snapshotGradient[0], current[1] - reference[1] + snapshotGradient[1]];
+  }
+  function simulateRidge(problem, options = {}) {
+    const { stepFraction = 0.3, m = 60, K = 600, seed = 17,
+      w0 = [-1.8, 2.2] } = options;
+    integer(m, 'm', 1, 5000); integer(K, 'K', 1, 5000);
+    if (!(stepFraction > 0 && stepFraction <= 1)) throw new Error('Require 0 < stepFraction ≤ 1.');
+    w0.forEach(x => finite(x, 'Initial point'));
+    const eta = stepFraction / problem.componentL, etaGD = 1 / problem.Lf;
+    const numEpochs = Math.ceil(K / m), budget = numEpochs * problem.n + 2 * K;
+    function record(method, w, k, cost, epoch, type, snapshot = null) {
+      return { k, cost, w: w.slice(), gap: objectiveGap(problem, w),
+        variance: method === 'gd' ? 0 : variance(problem, w, snapshot),
+        snapshotGap: snapshot ? objectiveGap(problem, snapshot) : null,
+        snapshot: snapshot ? snapshot.slice() : null, epoch, type };
+    }
+    const gd = [record('gd', w0, 0, 0, 0, 'initial')];
+    let w = w0.slice();
+    // Keep a full GD path for the optional equal-update view.
+    // The equal-work view must filter GD records to cost <= budget.
+    const gdIterations = Math.max(K, Math.floor(budget / problem.n));
+    for (let k = 1; k <= gdIterations; k++) {
+      const g = fullGradient(problem, w);
+      w = [w[0] - etaGD * g[0], w[1] - etaGD * g[1]];
+      gd.push(record('gd', w, k, k * problem.n, 0, 'update'));
+    }
+    const randomSGD = rng(seed), sgd = [record('sgd', w0, 0, 0, 0, 'initial')];
+    w = w0.slice();
+    for (let k = 1; k <= budget; k++) {
+      const i = Math.floor(randomSGD() * problem.n), g = componentGradient(problem, i, w);
+      w = [w[0] - eta * g[0], w[1] - eta * g[1]];
+      sgd.push(record('sgd', w, k, k, 0, 'update'));
+    }
+    const randomVR = rng(seed), svrg = [record('svrg', w0, 0, 0, 0, 'initial', w0)];
+    w = w0.slice();
+    let k = 0, cost = 0, epoch = 0;
+    const snapshots = [{ w: w.slice(), gap: objectiveGap(problem, w), k, cost, epoch }];
+    while (k < K) {
+      const snapshot = w.slice(), q = fullGradient(problem, snapshot), sum = [0, 0];
+      cost += problem.n;
+      svrg.push(record('svrg', w, k, cost, epoch, 'refresh', snapshot));
+      const length = Math.min(m, K - k);
+      for (let j = 0; j < length; j++) {
+        sum[0] += w[0]; sum[1] += w[1];
+        const i = Math.floor(randomVR() * problem.n), v = correctedGradient(problem, i, w, snapshot, q);
+        w = [w[0] - eta * v[0], w[1] - eta * v[1]];
+        k++; cost += 2;
+        svrg.push(record('svrg', w, k, cost, epoch, 'update', snapshot));
+      }
+      // A partial final epoch is displayed but is not averaged as a full epoch.
+      if (length === m) {
+        w = [sum[0] / m, sum[1] / m]; epoch++;
+        svrg.push(record('svrg', w, k, cost, epoch, 'snapshot', w));
+        snapshots.push({ w: w.slice(), gap: objectiveGap(problem, w), k, cost, epoch });
+      }
+    }
+    return { problem, stepFraction, m, K, seed, w0: w0.slice(), eta, etaGD, gdEta: etaGD, budget, gdIterations,
+      gd, sgd, svrg, snapshots, costConvention: 'n per full gradient; 1 per SGD update; 2 per SVRG update, including the first in each epoch',
+      varianceConvention: 'Exact variance at the recorded point; snapshot events use the new snapshot. Diagnostic costs are excluded.' };
+  }
+  return { rng, stationarityRuns, scalarStats, scalarRuns, makeRidge, simulateRidge, componentGradient,
+    gradient, fullGradient, correctedGradient, objectiveGap, variance, eigenvalues };
+})();
+
+</script>
+<script id="svrg-ui">
+'use strict';
+(() => {
+const C=globalThis.SVRGCore,$=id=>document.getElementById(id),value=id=>Number($(id).value),css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const col=n=>css('--'+n),clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const fmt=x=>!Number.isFinite(x)?'—':x===0?'0':Math.abs(x)<1e-3||Math.abs(x)>=1e5?x.toExponential(2):Number(x.toPrecision(4)).toString();
+function fit(canvas){const r=canvas.getBoundingClientRect(),w=Math.max(1,r.width),h=Math.max(1,r.height),dpr=Math.min(devicePixelRatio||1,2);if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr)){canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);}const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);return{ctx,w,h};}
+function ticks(a,b,n=4){const raw=(b-a)/n,p=10**Math.floor(Math.log10(raw)),q=raw/p,s=(q<=1?1:q<=2?2:q<=5?5:10)*p,out=[];for(let x=Math.ceil(a/s)*s;x<=b+s*1e-7;x+=s)out.push(Math.abs(x)<s*1e-8?0:x);return out;}
+function frame(id,bounds,opts={}){const f=fit($(id)),{ctx,w,h}=f,[a,b,c,d]=bounds,left=opts.log?61:49,right=16,top=25,bottom=43;const X=x=>left+(x-a)/(b-a)*(w-left-right),Y=y=>h-bottom-((opts.log?Math.log10(Math.max(y,10**c)):y)-c)/(d-c)*(h-top-bottom);ctx.font='11px system-ui';ctx.lineWidth=1;ctx.strokeStyle=col('grid');ctx.fillStyle=col('muted');for(const x of ticks(a,b,Math.max(3,Math.floor(w/115)))){ctx.beginPath();ctx.moveTo(X(x),top);ctx.lineTo(X(x),h-bottom);ctx.stroke();ctx.textAlign='center';ctx.fillText(fmt(x),X(x),h-bottom+17);}for(const y of ticks(c,d,4)){if(opts.log&&!Number.isInteger(y))continue;const py=Y(opts.log?10**y:y);ctx.beginPath();ctx.moveTo(left,py);ctx.lineTo(w-right,py);ctx.stroke();ctx.textAlign='right';ctx.fillText(opts.log?'10^'+y:fmt(y),left-7,py+4);}ctx.strokeStyle=col('axis');ctx.strokeRect(left,top,w-left-right,h-top-bottom);ctx.fillStyle=col('muted');ctx.textAlign='center';ctx.fillText(opts.x||'k',(left+w-right)/2,h-5);ctx.textAlign='left';ctx.fillText(opts.y||'',left,13);return{...f,X,Y,bounds,left,right,top,bottom,clip(){ctx.save();ctx.beginPath();ctx.rect(left,top,w-left-right,h-top-bottom);ctx.clip();}};}
+function line(f,points,color,dash=[],width=2,alpha=1){if(!points.length)return;f.clip();const{ctx,X,Y}=f;ctx.strokeStyle=color;ctx.lineWidth=width;ctx.globalAlpha=alpha;ctx.setLineDash(dash);ctx.beginPath();let started=false;for(const p of points){if(!p.every(Number.isFinite)){started=false;continue;}if(!started){ctx.moveTo(X(p[0]),Y(p[1]));started=true;}else ctx.lineTo(X(p[0]),Y(p[1]));}ctx.stroke();ctx.restore();}
+function dot(f,x,y,color,shape='dot',size=4){f.clip();const{ctx,X,Y}=f,px=X(x),py=Y(y);ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=1.7;ctx.beginPath();if(shape==='cross'){ctx.moveTo(px-size,py-size);ctx.lineTo(px+size,py+size);ctx.moveTo(px+size,py-size);ctx.lineTo(px-size,py+size);ctx.stroke();}else if(shape==='diamond'){ctx.moveTo(px,py-size);ctx.lineTo(px+size,py);ctx.lineTo(px,py+size);ctx.lineTo(px-size,py);ctx.closePath();ctx.stroke();}else{ctx.arc(px,py,size,0,Math.PI*2);ctx.fill();}ctx.restore();}
+function curve(array,k){return array.slice(0,k+1).map((y,i)=>[i,y]);}
+class Player{constructor(prefix,paint){this.prefix=prefix;this.paint=paint;this.k=0;this.max=1;this.running=false;this.last=null;this.credit=0;this.raf=0;const host=document.querySelector('[data-player="'+prefix+'"]');host.innerHTML='<button class="primary" data-action="run">Run</button><button data-action="step">Step</button><button data-action="reset">Reset</button><button data-action="finish">Show result</button><label class="speed-label">Speed <select aria-label="'+prefix+' playback speed"><option value="0.4">Slow</option><option value="1" selected>Medium</option><option value="3">Fast</option></select></label>';this.runButton=host.querySelector('[data-action="run"]');this.speed=host.querySelector('select');if(matchMedia('(prefers-reduced-motion: reduce)').matches)this.speed.value='0.4';host.addEventListener('click',e=>{const a=e.target.dataset.action;if(a==='run')this.running?this.pause():this.start();if(a==='step'){this.pause();this.set(this.k+1);}if(a==='reset'){this.pause();this.set(0);}if(a==='finish'){this.pause();this.set(this.max);}});$(prefix+'-time').addEventListener('input',()=>{this.pause();this.set(value(prefix+'-time'));});}
+set(k){this.k=clamp(Math.round(k),0,this.max);$(this.prefix+'-time').value=this.k;this.runButton.textContent=this.running?'Pause':this.k===this.max?'Replay':'Run';this.paint();}
+configure(max){this.pause();this.max=Math.max(1,Math.round(max));$(this.prefix+'-time').max=this.max;this.set(0);}
+pause(){this.running=false;cancelAnimationFrame(this.raf);this.raf=0;this.last=null;this.credit=0;if(this.runButton)this.runButton.textContent=this.k===this.max?'Replay':'Run';}
+start(){if(this.k>=this.max)this.set(0);this.running=true;this.last=null;this.credit=0;this.runButton.textContent='Pause';const tick=stamp=>{if(!this.running)return;if(this.last!==null){const dt=clamp(stamp-this.last,0,100)/1000;this.credit+=dt*(this.max/14)*Number(this.speed.value);const n=Math.floor(this.credit);if(n){this.credit-=n;this.set(this.k+n);}}this.last=stamp;if(this.k>=this.max){this.pause();return;}this.raf=requestAnimationFrame(tick);};this.raf=requestAnimationFrame(tick);}}
+
+let stationaritySeed=83,stationarityData,stationarityPlayer;
+function buildStationarity(){
+ const sigma=value('stationarity-sigma'),T=value('stationarity-horizon');
+ $('stationarity-sigma-out').textContent=fmt(sigma);
+ stationarityData=C.stationarityRuns({T,R:256,sigma,w0:value('stationarity-start'),seed:stationaritySeed});
+ stationarityPlayer.configure(T);
+}
+function paintStationarity(){
+ if(!stationarityData)return;
+ const d=stationarityData,k=stationarityPlayer.k,norm=$('stationarity-metric').value==='norm',log=$('stationarity-log').checked;
+ const empirical=norm?d.averageNorm:d.averageSquared,bounds=norm?d.boundNorm:d.boundSquared;
+ $('stationarity-position').textContent='k = '+k;
+ $('stationarity-eta').textContent=fmt(d.eta);
+ $('stationarity-current').textContent=k?fmt(empirical[k]):'—';
+ $('stationarity-bound').textContent=k?fmt(bounds[k]):'—';
+ $('stationarity-chart-title').textContent=norm?'Average gradient norm':'Average squared gradient';
+ const expr='2(f(w₀) − f⋆)/(ηk) + ησ²';
+ $('stationarity-formula').innerHTML=norm?'(1/k) Σ<sub>j=0</sub><sup>k−1</sup> E|f′(w<sub>j</sub>)| ≤ √['+expr+'], &nbsp; k ≥ 1.':'(1/k) Σ<sub>j=0</sub><sup>k−1</sup> E|f′(w<sub>j</sub>)|² ≤ '+expr+', &nbsp; k ≥ 1.';
+ const xmin=Math.min(-.5,d.range[0]-.35),xmax=Math.max(3.6,d.range[1]+.35);
+ const f=frame('stationarity-landscape',[xmin,xmax,-.08,2.2],{x:'Parameter w',y:'Objective f(w)'}),landscape=[];
+ for(let j=0;j<=500;j++){const w=xmin+(xmax-xmin)*j/500;landscape.push([w,1-Math.cos(w)]);}
+ line(f,landscape,col('gd'),[],2);
+ for(let j=1;j<d.paths.length;j++){const w=d.paths[j][k];f.ctx.globalAlpha=.3;dot(f,w,1-Math.cos(w),col('sgd'),'dot',3);f.ctx.globalAlpha=1;}
+ const begin=Math.max(0,k-20);
+ for(let j=begin;j<k;j++){const w=d.samplePath[j];f.ctx.globalAlpha=.15+.5*(j-begin)/Math.max(1,k-begin);dot(f,w,1-Math.cos(w),col('sgd'),'dot',2.5);f.ctx.globalAlpha=1;}
+ dot(f,d.w0,d.gap0,col('muted'),'diamond',5);
+ const current=d.samplePath[k];dot(f,current,1-Math.cos(current),col('sgd'),'dot',6);
+ const max=Math.max(.01,bounds[1],...empirical.slice(1))*1.12;
+ const g=frame('stationarity-gap',[0,d.T,log?-6:0,log?Math.max(-5,Math.ceil(Math.log10(max))):max],{log,x:'Completed updates k',y:log?'Gradient statistic (log; floor 10⁻⁶)':'Gradient statistic'});
+ const points=array=>array.slice(1,k+1).map((v,j)=>[j+1,v]);
+ line(g,points(bounds),col('gold'),[6,4],1.7);
+ line(g,points(empirical),col('sgd'),[],2.4);
+ if(k){dot(g,k,empirical[k],col('sgd'));dot(g,k,bounds[k],col('gold'),'diamond',4);}
+ const endBound=d.boundNorm[d.T];
+ $('stationarity-message').textContent=k===0?'Choose a horizon, then run. The average is defined after at least one update; η = '+fmt(d.eta)+' stays fixed for all '+d.T+' updates.':'η = '+fmt(d.eta)+' remains fixed. '+(k===d.T?'At k = T, the bound on the average gradient norm is '+fmt(endBound)+', matching the T⁻¹⁄⁴ corollary.':'At this point the theorem averages the first '+k+' pre-update iterates. The T⁻¹⁄⁴ expression applies at the selected horizon T = '+d.T+'.');
+}
+stationarityPlayer=new Player('stationarity',paintStationarity);
+for(const id of ['stationarity-horizon','stationarity-sigma','stationarity-start'])$(id).addEventListener('input',buildStationarity);
+for(const id of ['stationarity-metric','stationarity-log'])$(id).addEventListener('change',paintStationarity);
+$('stationarity-resample').addEventListener('click',()=>{stationaritySeed++;buildStationarity();});
+
+let noiseSeed=24,noiseData,noisePlayer;
+function buildNoise(){const b=value('noise-b'),eta=value('noise-eta');$('noise-b-out').textContent=fmt(b);$('noise-eta-out').textContent=fmt(eta);noiseData=C.scalarRuns({r:0,b,stepFraction:eta,K:400,R:128,m:40,seed:noiseSeed,w0:value('noise-start')});noisePlayer.configure(400);}
+function paintNoise(){
+ if(!noiseData)return;
+ const k=noisePlayer.k,b=value('noise-b'),log=$('noise-log').checked,decay=$('noise-decreasing').checked,pl=$('noise-pl').checked,radius=Math.max(2.25,1.15*b);
+ document.querySelectorAll('.decay-item').forEach(el=>el.hidden=!decay);
+ document.querySelectorAll('.pl-item').forEach(el=>el.hidden=!pl);
+ document.querySelector('.noise-stats').classList.toggle('with-decay',decay);
+ $('noise-position').textContent='k = '+k;
+ $('noise-path-caption').textContent=decay?'The two highlighted SGD runs share the same random draws. Lighter paths show five more constant-step runs.':'The highlighted path shows one SGD run. Lighter paths show five more runs.';
+ const f=frame('noise-path',[0,400,-radius,radius],{x:'Iteration k',y:'Parameter w'});
+ line(f,[[0,0],[400,0]],col('muted'),[4,4],1);
+ for(const path of noiseData.pathsSGD.slice(1))line(f,curve(path,k),col('sgd'),[],1,.23);
+ line(f,curve(noiseData.pathsSGD[0],k),col('sgd'));
+ line(f,curve(noiseData.gdPath,k),col('gd'));
+ if(decay)line(f,curve(noiseData.sampleDecreasing,k),col('decay'),[],2.3);
+ dot(f,k,noiseData.pathsSGD[0][k],col('sgd'));
+ if(decay)dot(f,k,noiseData.sampleDecreasing[k],col('decay'),'diamond',5);
+ const floor=noiseData.limitingGap,upper=Math.max(2.2,1.2*floor,.6*b*b,pl?1.15*noiseData.plUpper[0]:0);
+ const g=frame('noise-gap',[0,400,log?-10:0,log?Math.ceil(Math.log10(upper)):upper],{log,x:'Iteration k',y:log?'Objective gap (log; floor 10⁻¹⁰)':'Objective gap'});
+ if(floor>0)line(g,[[0,floor],[400,floor]],col('gold'),[6,4],1.5);
+ line(g,curve(noiseData.gd,k),col('gd'));
+ line(g,curve(noiseData.meanSGD,k),col('sgd'),[],2.3);
+ if(decay)line(g,curve(noiseData.meanDecreasing,k),col('decay'),[],2.3);
+ line(g,curve(noiseData.exactSGD,k),col('text'),[5,4],1.4);
+ if(decay)line(g,curve(noiseData.exactDecreasing,k),col('text'),[5,4],1.4);
+ if(pl)line(g,curve(noiseData.plUpper,k),col('svrg'),[9,4],2.1);
+ $('noise-variance').textContent=fmt(b*b);
+ $('noise-floor').textContent=fmt(floor);
+ $('noise-current').textContent=fmt(noiseData.meanSGD[k]);
+ $('noise-decreasing-current').textContent=fmt(noiseData.meanDecreasing[k]);
+ $('noise-message').textContent=pl?'At k = '+k+', the PL upper bound is '+fmt(noiseData.plUpper[k])+', while the exact expected gap is '+fmt(noiseData.exactSGD[k])+'. The theorem bounds the expectation; a finite sample mean can fluctuate. Change η to see the speed–accuracy tradeoff.':'A larger step reduces the initial error faster but raises the limiting error. Start at the solution to see sampling noise move SGD away from it, or set b = 0 to recover deterministic GD.';
+}
+noisePlayer=new Player('noise',paintNoise);
+for(const id of ['noise-b','noise-eta','noise-start'])$(id).addEventListener('input',buildNoise);
+for(const id of ['noise-log','noise-pl','noise-decreasing'])$(id).addEventListener('change',paintNoise);$('noise-resample').addEventListener('click',()=>{noiseSeed++;buildNoise();});
+
+let cvSample=null,cvDraws=0;const cvRandom=C.rng(321);
+function paintCorrection(){
+ const w=value('cv-w'),snap=value('cv-snapshot'),r=value('cv-r'),b=value('cv-b'),s=C.scalarStats(w,snap,r,b),extent=Math.max(4,(1+r)*3+b,3+r*(3+Math.abs(snap)))*1.08;
+ for(const name of ['w','snapshot','r','b'])$('cv-'+name+'-out').textContent=fmt(value('cv-'+name));
+ for(const [id,corrected] of [['cv-raw',false],['cv-corrected',true]]){
+  const f=frame(id,[-3,3,-extent,extent],{x:'Parameter position',y:corrected?'Corrected gradient v':'Component gradient'});
+  line(f,[[-3,-3],[3,3]],col('text'),[5,4],1.6);
+  line(f,[[w,-extent],[w,extent]],col('sgd'),[3,4],1);
+  line(f,[[snap,-extent],[snap,extent]],col('svrg'),[8,4],1);
+  for(const sign of [-1,1]){
+   const fun=x=>corrected?x+sign*r*(x-snap):(1+sign*r)*x+sign*b,co=sign<0?col('gd'):col('gold'),active=cvSample===sign;
+   line(f,[[-3,fun(-3)],[3,fun(3)]],co,[],active?3.5:2,cvSample===null||active?1:.3);
+   dot(f,w,fun(w),co,'dot',active?6:3);
+   if(active&&!corrected)dot(f,snap,fun(snap),co,'diamond',7);
+  }
+  dot(f,w,w,col('text'),'diamond',5);
+  if(corrected)dot(f,snap,snap,col('svrg'),'diamond',6);
+ }
+ $('cv-raw-var').textContent=fmt(s.rawVariance);
+ $('cv-corrected-var').textContent=fmt(s.correctedVariance);
+ $('cv-difference-moment').textContent=fmt(s.differenceSecondMoment);
+ $('cv-smooth-bound').textContent=fmt(s.smoothnessBound);
+ $('cv-moment').textContent=fmt(s.secondMoment);
+ $('cv-sample-terms').hidden=cvSample===null;
+ if(cvSample!==null){
+  const j=cvSample<0?0:1;
+  $('cv-sample-label').textContent='Draw '+cvDraws+': s = '+(cvSample>0?'+1':'−1')+'. The highlighted component is used at BOTH points. Circle: current point; diamond: snapshot.';
+  $('cv-sample-current').textContent=fmt(s.gradients[j]);
+  $('cv-sample-reference').textContent=fmt(s.referenceGradients[j]);
+  $('cv-sample-full').textContent=fmt(snap);
+  $('cv-sample-result').textContent=fmt(s.corrected[j]);
+  $('cv-sample-terms').style.color=cvSample<0?col('gd'):col('gold');
+ }
+ $('cv-message').textContent=s.correctedVariance<1e-14?'Both corrected samples equal the exact gradient '+fmt(w)+'. Variance is zero; the second moment is '+fmt(w*w)+'.':Math.abs(s.correctedVariance-s.rawVariance)<1e-12?'Both estimators have the same variance here. Move the snapshot closer to the current point to reduce the corrected variance.':s.correctedVariance>s.rawVariance?'This snapshot increases the variance. A control variate is useful when the shared fluctuations cancel; snapshot refreshes matter.':'The corrected samples have the same mean '+fmt(w)+' with smaller fluctuations. Move the snapshot toward the current point to see exact cancellation.';
+}
+$('cv-draw').addEventListener('click',()=>{cvSample=cvRandom()<.5?-1:1;cvDraws++;paintCorrection();});
+for(const id of ['cv-w','cv-snapshot','cv-r','cv-b'])$(id).addEventListener('input',paintCorrection);
+$('cv-match').addEventListener('click',()=>{$('cv-snapshot').value=$('cv-w').value;paintCorrection();});
+$('cv-optimum').addEventListener('click',()=>{$('cv-w').value=0;$('cv-snapshot').value=0;paintCorrection();});
+$('cv-stale').addEventListener('click',()=>{$('cv-w').value=0;$('cv-snapshot').value=2.5;$('cv-r').value=.8;$('cv-b').value=1;paintCorrection();});
+
+let ridgeSeed=71,ridgeData,ridgePlayer;const problem=C.makeRidge({n:120,lambda:.03,anisotropy:10,noise:.7,seed:51}),methods=['gd','sgd','svrg'];
+function axis(){return $('ridge-axis').value;}
+function buildRidge(){const fraction=value('ridge-step'),m=value('ridge-epoch');$('ridge-step-out').textContent=fmt(fraction);ridgeData=C.simulateRidge(problem,{stepFraction:fraction,m,K:600,seed:ridgeSeed,w0:[3,-3]});$('ridge-constants').textContent='L = '+fmt(problem.componentL)+' · Lf = '+fmt(problem.Lf)+' · μ = '+fmt(problem.mu);resetRidgeAxis();}
+function resetRidgeAxis(){if(!ridgeData)return;ridgePlayer.configure(axis()==='cost'?ridgeData.budget:600);$('ridge-axis-caption').textContent=axis()==='cost'?'Full gradients and snapshot refreshes are charged to the work axis.':'Equal updates can have very different costs. See the gradient-call counters below.';}
+function visibleRecords(method){const key=axis(),end=ridgePlayer.k;return ridgeData[method].filter(record=>record[key]<=end);}
+function drawContours(f){const [a,b,c]=problem.Q,theta=.5*Math.atan2(2*b,a-c),co=Math.cos(theta),si=Math.sin(theta),disc=Math.hypot(a-c,2*b),hi=(a+c+disc)/2,lo=(a+c-disc)/2,center=problem.wstar;for(const level of [.001,.01,.05,.2,.5,1,2,5,10,20]){const u=Math.sqrt(2*level/hi),v=Math.sqrt(2*level/lo),points=[];for(let j=0;j<=120;j++){const t=2*Math.PI*j/120,x=u*Math.cos(t),y=v*Math.sin(t);points.push([center[0]+co*x-si*y,center[1]+si*x+co*y]);}line(f,points,col('axis'),[],.8,.55);}dot(f,...center,col('text'),'cross',6);}
+function paintRidge(){if(!ridgeData)return;const key=axis(),end=ridgePlayer.k,states=Object.fromEntries(methods.map(m=>[m,visibleRecords(m)])),label=key==='cost'?'Component-gradient evaluations':'Parameter updates k';$('ridge-position').textContent=(key==='cost'?'Work = ':'k = ')+end;const all=methods.flatMap(m=>ridgeData[m]),limit=Math.max(4,...problem.wstar.map(x=>Math.abs(x)+1)),f=frame('ridge-contour',[-limit,limit,-limit,limit],{x:'w₁',y:'w₂'});drawContours(f);for(const method of methods){const records=states[method],last=records.at(-1);line(f,records.map(v=>v.w),col(method),[],method==='sgd'?1.3:2.3,method==='sgd'?.75:1);if(method==='svrg')for(const rec of records)if(rec.type==='snapshot')dot(f,...rec.w,col(method),'diamond',4);if(last)dot(f,...last.w,col(method),method==='svrg'?'diamond':'dot',5);}
+const log=$('ridge-log').checked,maxGap=Math.max(...all.map(v=>v.gap),1e-3)*1.15,g=frame('ridge-gap',[0,ridgePlayer.max,log?-12:0,log?Math.ceil(Math.log10(maxGap)):maxGap],{log,x:label,y:log?'Objective gap (log; floor 10⁻¹²)':'Objective gap'});for(const method of methods){const records=states[method];line(g,records.map(v=>[v[key],v.gap]),col(method),[],method==='sgd'?1.4:2.2,method==='sgd'?.8:1);if(method==='svrg')for(const rec of records)if(rec.type==='snapshot')dot(g,rec[key],rec.gap,col(method),'diamond',3.5);const last=records.at(-1);if(last)dot(g,last[key],last.gap,col(method));}
+$('ridge-table').innerHTML=methods.map(method=>{const last=states[method].at(-1);return '<tr><td class="method" style="color:'+col(method)+'">'+method.toUpperCase()+'</td><td>'+last.k+'</td><td>'+last.cost+'</td><td>'+fmt(last.gap)+'</td><td>'+fmt(last.variance)+'</td></tr>';}).join('');const vr=states.svrg.at(-1);$('ridge-message').textContent='SVRG epoch '+vr.epoch+' · snapshot gap '+fmt(vr.snapshotGap)+'. '+(key==='cost'?'A full-gradient refresh consumes work before the next update.':'This view compares updates. GD spends 120 gradient calls on each step; check the counters above.')+' The sample paths need not decrease at every step.';}
+ridgePlayer=new Player('ridge',paintRidge);
+for(const id of ['ridge-step','ridge-epoch'])$(id).addEventListener('input',buildRidge);
+$('ridge-axis').addEventListener('change',resetRidgeAxis);$('ridge-log').addEventListener('change',paintRidge);$('ridge-resample').addEventListener('click',()=>{ridgeSeed++;buildRidge();});
+let resizeRaf=0;function repaint(){cancelAnimationFrame(resizeRaf);resizeRaf=requestAnimationFrame(()=>{paintStationarity();paintNoise();paintCorrection();paintRidge();});}
+window.addEventListener('resize',repaint);matchMedia('(prefers-color-scheme: dark)').addEventListener('change',repaint);for(const section of document.querySelectorAll('details.stage'))section.addEventListener('toggle',()=>{if(!section.open){if(section.id==='stationarity-stage')stationarityPlayer.pause();if(section.id==='noise-stage')noisePlayer.pause();if(section.id==='ridge-stage')ridgePlayer.pause();}repaint();});document.addEventListener('visibilitychange',()=>{if(document.hidden){stationarityPlayer.pause();noisePlayer.pause();ridgePlayer.pause();}});
+buildStationarity();buildNoise();paintCorrection();buildRidge();
+globalThis.Lecture11Demo={state:()=>({stationarity:{k:stationarityPlayer.k,running:stationarityPlayer.running,T:stationarityData.T,eta:stationarityData.eta,metric:$('stationarity-metric').value},correction:{sample:cvSample,draws:cvDraws},noise:{k:noisePlayer.k,running:noisePlayer.running},ridge:{k:ridgePlayer.k,running:ridgePlayer.running,axis:axis(),budget:ridgeData.budget},problem:{L:problem.componentL,Lf:problem.Lf,mu:problem.mu}})};
+})();
+</script>
+</body>
+</html>
