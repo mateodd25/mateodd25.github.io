@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Subgradients and nonsmooth optimization · Lecture 13</title>
+<meta name="description" content="Interactive Lecture 13 experiments: robust regression, sparsity, supporting lines, and the subgradient method.">
+<style>
+:root{color-scheme:light;--bg:#f7f8fa;--surface:#fff;--text:#182330;--muted:#637182;--line:#dbe1e7;--soft:#f1f4f7;--grid:#e7ebf0;--axis:#a6b1bd;--blue:#245dac;--green:#16816e;--orange:#cf652b;--gold:#a77716;--purple:#9155b5;--red:#bf3e49;--focus:#5c98d8}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){color-scheme:dark;--bg:#121820;--surface:#1a232e;--text:#e8edf5;--muted:#a4b2c4;--line:#344352;--soft:#202d3a;--grid:#303e4d;--axis:#708195;--blue:#7db3f9;--green:#64ceaf;--orange:#f7a16b;--gold:#e6bd62;--purple:#c797ef;--red:#ff8d97;--focus:#8ec6ff}}
+:root[data-theme=dark]{color-scheme:dark;--bg:#121820;--surface:#1a232e;--text:#e8edf5;--muted:#a4b2c4;--line:#344352;--soft:#202d3a;--grid:#303e4d;--axis:#708195;--blue:#7db3f9;--green:#64ceaf;--orange:#f7a16b;--gold:#e6bd62;--purple:#c797ef;--red:#ff8d97;--focus:#8ec6ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{max-width:1240px;margin:auto;padding:34px 26px 56px}.top{display:flex;justify-content:space-between;align-items:center;gap:16px}.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}h1{font-size:clamp(28px,4vw,42px);line-height:1.12;letter-spacing:-.035em;font-weight:650;margin:15px 0}h3{font-size:15px;margin:0 0 4px}p{margin:0 0 12px}.intro{max-width:850px;font-size:17px;color:var(--muted)}.stage{border:1px solid var(--line);border-radius:14px;background:var(--surface);margin:20px 0;overflow:hidden}.stage>summary{cursor:pointer;display:flex;gap:13px;align-items:center;padding:20px 22px;font-size:20px;font-weight:650;list-style:none}.stage>summary::-webkit-details-marker{display:none}.stage>summary::after{content:'Show';margin-left:auto;color:var(--muted);font-size:12px;font-weight:500}.stage[open]>summary::after{content:'Hide'}.num{border:1px solid var(--line);border-radius:50%;width:30px;height:30px;display:grid;place-items:center;flex-shrink:0;font-size:13px}.stage-body{padding:0 22px 22px}.lead,.sub,.small{color:var(--muted)}.sub,.small{font-size:12px}.lead{max-width:980px}.math{font:18px/1.7 Georgia,'Times New Roman',serif}.formula{overflow-x:auto;padding:12px 16px;background:var(--soft);border-radius:8px;margin:14px 0}.controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 24px;background:var(--soft);padding:16px;border-radius:9px;margin:15px 0}.control label{display:flex;justify-content:space-between;gap:12px;font-size:13px;margin-bottom:6px}.control output{font-variant-numeric:tabular-nums;font-weight:650}input[type=range]{width:100%;accent-color:var(--green)}input[type=number]{width:85px;max-width:100%;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:5px;padding:7px}button,select{font:inherit;font-size:13px;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:8px 10px;min-height:38px}select{max-width:100%}button{cursor:pointer}button:hover{border-color:var(--muted)}button:disabled{opacity:.45;cursor:default}.primary{background:var(--text);color:var(--surface);border-color:var(--text)}:focus-visible{outline:3px solid var(--focus);outline-offset:3px}.toolbar,.transport,.legend{display:flex;gap:10px 15px;align-items:center;flex-wrap:wrap}.toolbar,.transport{margin:14px 0}.toolbar label{display:flex;align-items:center;gap:7px;font-size:13px}.speed-label{margin-left:auto;font-size:12px;display:flex;align-items:center;gap:8px}.timeline{display:flex;gap:16px;align-items:center;margin:13px 0 18px}.timeline label{font-size:13px;min-width:64px;font-variant-numeric:tabular-nums}.timeline input{flex:1;min-width:0}.panels{display:grid;grid-template-columns:1fr 1fr;gap:18px}.panel{border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}.panel canvas{display:block;width:100%;height:330px}.legend{font-size:12px;color:var(--muted);margin:10px 0;gap:7px 16px}.legend span{display:flex;align-items:center;gap:6px}.sw{display:inline-block;width:18px;height:0;border-top:2.5px solid currentColor}.sw.dash{border-top-style:dashed}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}.stat{background:var(--soft);padding:11px 14px;border-radius:8px;font-size:12px;color:var(--muted)}.stat strong{display:block;font-size:20px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;margin-top:4px}.message{font-size:13px;border-left:3px solid var(--green);padding:10px 14px;background:var(--soft);margin:14px 0 0}.message.warn{border-color:var(--orange)}.setup{margin-top:16px;font-size:14px}.setup>summary{cursor:pointer;color:var(--muted);font-size:13px}.setup p{margin:10px 0}.table-wrap{overflow-x:auto;margin:16px 0;border:1px solid var(--line);border-radius:9px}table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}th,td{padding:10px 14px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}th{background:var(--soft);color:var(--muted);font-weight:550}td:first-child,th:first-child{text-align:left}tr:last-child td{border-bottom:0}footer{font-size:12px;color:var(--muted);margin-top:28px}noscript{display:block;padding:20px}.nowrap{white-space:nowrap}.plot-click{cursor:crosshair}
+@media(max-width:780px){main{padding:20px 14px 40px}.panels{grid-template-columns:1fr}.controls{grid-template-columns:1fr 1fr}.stage>summary{font-size:18px;padding:17px}.stage-body{padding:0 16px 18px}.panel canvas{height:310px}}
+@media(max-width:460px){.controls{grid-template-columns:1fr}.stats{grid-template-columns:1fr}.stage>summary{gap:9px}.panel{padding:10px}.panel canvas{height:290px}.speed-label{margin-left:0}.math{font-size:16px}.top{align-items:flex-start}}
+</style></head><body><main>
+<div class="top"><p class="eyebrow">Optimization for Data Science · Lecture 13</p><button id="theme" aria-label="Toggle light and dark theme">Switch theme</button></div>
+<h1>What changes when the gradient disappears?</h1>
+<p class="intro">From absolute residuals and sparse coefficients to supporting lines, unexpected uphill steps, and convergence through averaging.</p>
+<noscript>Enable JavaScript to use the interactive plots. This page works offline and needs no external libraries.</noscript>
+
+<details class="stage" id="regression-stage" open><summary><span class="num">1</span> Absolute residuals and outliers</summary><div class="stage-body">
+<p class="lead">Fit the same 25 observations with squared loss and absolute loss. Move two responses far from the main trend and watch which fitted line moves.</p>
+<div class="formula math">Least squares: min<sub>a,b</sub> (1/2n) Σᵢ (axᵢ + b − yᵢ)².<br>Least absolute deviations (LAD): min<sub>a,b</sub> (1/n) Σᵢ |axᵢ + b − yᵢ|.</div>
+<div class="controls"><div class="control"><label for="outlier">Outlier displacement <output id="outlier-out"></output></label><input id="outlier" type="range" min="0" max="12" step="0.25" value="6"></div><div class="control"><label>Presets</label><div class="toolbar"><button id="clean-data">No outliers</button><button id="large-outliers">Large outliers</button></div></div><div class="small">The observations and their small background noise are fixed. Only the two highlighted responses change.</div></div>
+<div class="panels"><div class="panel"><h3>Two different fitting objectives</h3><p class="sub">Both lines are optimized fully for the current dataset.</p><canvas id="regression-fit" role="img" aria-label="Observations with least squares and least absolute deviations fitted lines"></canvas></div><div class="panel"><h3>Where does the residual live?</h3><p class="sub">Absolute residual for each observation. Exact fits appear at zero.</p><canvas id="regression-residuals" role="img" aria-label="Absolute residuals under the least squares and LAD fits"></canvas></div></div>
+<div class="legend"><span style="color:var(--blue)"><i class="sw"></i>Least squares</span><span style="color:var(--green)"><i class="sw"></i>LAD</span><span style="color:var(--orange)">◇ Movable observations</span></div>
+<div class="table-wrap"><table><thead><tr><th>Fit</th><th>Slope</th><th>Intercept</th><th>Mean |residual|</th><th>Mean residual²</th><th>Exact fits</th></tr></thead><tbody id="regression-table"></tbody></table></div>
+<p class="message">The ℓ₁ penalty here acts on <strong>residuals</strong>. It can put residuals exactly at zero while tolerating a few large ones; it does not encourage zero regression coefficients. Robustness to response outliers is illustrated here, not a guarantee against arbitrary high-leverage inputs.</p>
+<details class="setup"><summary>How these fits are computed</summary><p>Least squares uses its two-parameter normal equations. For LAD, the demo examines lines through every pair of observations and chooses one with minimum absolute loss. A minimum of this full-rank, piecewise-linear two-parameter problem occurs at such a vertex. The bars show the fully optimized fits, not a finite subgradient run. “Exact fits” uses residual magnitude below 10⁻⁸.</p></details>
+</div></details>
+
+<details class="stage" id="lasso-stage"><summary><span class="num">2</span> An ℓ₁ penalty selects sparse coefficients</summary><div class="stage-body">
+<p class="lead">One equation, two unknowns. Least squares has a line of solutions; adding an ℓ₁ penalty selects a point on a coordinate axis.</p>
+<div class="formula math">f<sub>λ</sub>(w) = ½(w₁ + 2w₂ − 2)² + λ(|w₁| + |w₂|), &nbsp; λ ≥ 0.</div>
+<div class="controls"><div class="control"><label for="lambda">Penalty λ <output id="lambda-out"></output></label><input id="lambda" type="range" min="0" max="5" step="0.05" value="0.8"></div><div class="control"><label>Presets</label><div class="toolbar"><button data-lambda="0">No penalty</button><button data-lambda="0.8">Sparse fit</button><button data-lambda="4">All zero</button></div></div><p class="small">This is a geometric example with n = 1 and d = 2. The quadratic term makes this objective non-Lipschitz globally; the theorem in experiment 5 is applied to a different function.</p></div>
+<div class="panels"><div class="panel"><h3>A diamond meets a loss contour</h3><p class="sub">The dashed line is the set of exact fits. The diamond has radius ‖w<sub>λ</sub>‖₁.</p><canvas id="lasso-geometry" role="img" aria-label="L1 diamond and parallel least squares contours with a sparse lasso solution"></canvas></div><div class="panel"><h3>Selected coefficients</h3><p class="sub">Compare the sparse solution with the minimum-norm least-squares solution.</p><canvas id="lasso-bars" role="img" aria-label="Lasso and minimum Euclidean norm least squares coefficient bars"></canvas></div></div>
+<div class="legend"><span style="color:var(--green)">● Lasso solution</span><span style="color:var(--blue)">◇ Minimum-norm least squares</span><span style="color:var(--purple)"><i class="sw"></i>ℓ₁ diamond</span><span style="color:var(--orange)"><i class="sw"></i>Squared-loss level at w<sub>λ</sub></span><span style="color:var(--muted)"><i class="sw dash"></i>Exact-fit line</span></div>
+<div class="stats"><div class="stat">Selected w<sub>λ</sub><strong id="lasso-w"></strong></div><div class="stat">Residual w₁ + 2w₂ − 2<strong id="lasso-residual"></strong></div><div class="stat">Nonzero coefficients<strong id="lasso-count"></strong></div></div><p class="message" id="lasso-message"></p>
+<details class="setup"><summary>Exact solution and the role of the kink</summary><p>For λ &gt; 0 the unique minimizer is w<sub>λ</sub> = (0, max{0, 1 − λ/4}). Coordinate w₂ changes the prediction twice as much per unit of ℓ₁ cost as w₁, so the solution uses w₂ alone. For λ ≥ 4 both coefficients vanish. At λ = 0 the minimizer is not unique; the green point shows the sparse limiting choice (0, 1), and the blue diamond is (0.4, 0.8).</p><p>The diamond is the ℓ₁ ball through the penalized solution. It also illustrates the equivalent constrained fit at this radius. This is an example of sparsity, not a promise of exact support recovery for every dataset.</p></details>
+</div></details>
+
+<details class="stage" id="support-stage"><summary><span class="num">3</span> A whole set of supporting slopes</summary><div class="stage-body">
+<p class="lead">A subgradient defines a line that touches the graph and stays below it everywhere. Try slopes inside and outside the interval at a kink.</p>
+<div class="formula math">g ∈ ∂f(w) &nbsp; ⇔ &nbsp; f(z) ≥ f(w) + g(z − w) for every z.</div>
+<div class="controls"><div class="control"><label for="support-kind">Function</label><select id="support-kind"><option value="abs">Absolute value: |w|</option><option value="hinge">Hinge: max{0, 1 − w}</option><option value="max">Maximum of three affine functions</option></select></div><div class="control"><label for="support-x">Contact point w <output id="support-x-out"></output></label><input id="support-x" type="range" min="-2.5" max="2.5" step="0.05" value="0"></div><div class="control"><label for="support-g">Candidate slope g <output id="support-g-out"></output></label><input id="support-g" type="range" min="-2" max="2" step="0.05" value="0.5"></div></div>
+<div class="toolbar"><button id="at-kink">At a kink</button><button id="at-smooth">At a smooth point</button><button id="valid-slope">Choose a valid slope</button><button id="invalid-slope">Try an invalid slope</button></div>
+<div class="panels"><div class="panel"><h3 id="support-title">Absolute value</h3><p class="sub">Blue: function. Green/red: proposed supporting line.</p><canvas id="support-function" role="img" aria-label="Convex function and candidate supporting line at a chosen point"></canvas></div><div class="panel"><h3>The subdifferential at w</h3><p class="sub">The thick interval contains all valid slopes. The dot is your candidate.</p><canvas id="support-set" role="img" aria-label="Interval of valid subgradients and the selected slope"></canvas></div></div>
+<div class="stats"><div class="stat">∂f(w)<strong id="support-interval"></strong></div><div class="stat">Candidate g<strong id="support-candidate"></strong></div><div class="stat">Global supporting line?<strong id="support-valid"></strong></div></div><p class="message" id="support-message" role="status"></p>
+<details class="setup"><summary>Max rule and optimality</summary><p>Absolute value is max{−w, w}; the hinge is max{0, 1 − w}. For a maximum of affine functions, the subdifferential is the convex hull of the slopes of the active pieces. The third example is max{−w − 0.5, 0.4w + 0.3, 1.5w − 0.8}. At a smooth point only one slope is valid.</p><p>Optimality requires 0 ∈ ∂f(w), not that every possible subgradient be zero. The validity indicator uses the exact active slopes, rather than checking just the visible plot window.</p></details>
+</div></details>
+
+<details class="stage" id="direction-stage"><summary><span class="num">4</span> Uphill in value, closer in distance</summary><div class="stage-body">
+<p class="lead">The lecture example: choose a valid subgradient at (1, 0). A small step can increase the objective even as it moves closer to the minimizer.</p>
+<div class="formula math">f(w) = |w₁| + 2|w₂|, &nbsp; w = (1, 0), &nbsp; ∂f(w) = {1} × [−2, 2].<br>g = (1, b), &nbsp; w⁺ = w − ηg = (1 − η, −ηb), &nbsp; w⋆ = (0, 0).</div>
+<div class="controls"><div class="control"><label for="direction-b">Second subgradient coordinate b <output id="direction-b-out"></output></label><input id="direction-b" type="range" min="-2" max="2" step="0.05" value="2"></div><div class="control"><label for="direction-eta">Step η <output id="direction-eta-out"></output></label><input id="direction-eta" type="range" min="0" max="1.2" step="0.01" value="0.2"></div><div class="control"><label>Presets</label><div class="toolbar"><button id="lecture-example">Lecture example</button><button id="descent-example">Choose b = 0</button></div></div></div>
+<div class="panels"><div class="panel"><h3>The step in parameter space</h3><p class="sub">Diamonds are objective contours; the dashed circle marks distance 1.</p><canvas id="direction-geometry" role="img" aria-label="A subgradient step on diamond contours and a circle of equal distance to the optimum"></canvas></div><div class="panel"><h3>Two measures of progress</h3><p class="sub">Varying the step along the same selected direction. The dot is the chosen η.</p><canvas id="direction-progress" role="img" aria-label="Objective and distance to minimizer versus step size"></canvas></div></div>
+<div class="legend"><span style="color:var(--orange)"><i class="sw"></i>Objective f(w − ηg)</span><span style="color:var(--blue)"><i class="sw"></i>Distance ‖w − ηg‖</span><span style="color:var(--green)">● Proposed point</span><span>× Minimizer</span></div>
+<div class="stats"><div class="stat">Objective: before → after<strong id="direction-f"></strong></div><div class="stat">Distance: before → after<strong id="direction-distance"></strong></div><div class="stat">Subgradient norm ‖g‖<strong id="direction-norm"></strong></div></div><p class="message" id="direction-message" role="status"></p>
+<details class="setup"><summary>What survives without descent</summary><p>For 0 ≤ η ≤ 1, f(w − ηg) = 1 + η(2|b| − 1), while ‖w − ηg‖² = 1 − 2η + η²(1 + b²). For b = 2 the value rises at every positive step, but distance decreases when 0 &lt; η &lt; 2/5.</p><p>The subgradient inequality gives ⟨g, w − w⋆⟩ ≥ f(w) − f⋆. This angle condition underlies the distance-based proof. Large steps need not reduce distance, and a nonzero subgradient norm does not imply a positive objective gap at a kink.</p></details>
+</div></details>
+
+<details class="stage" id="convergence-stage"><summary><span class="num">5</span> Oscillating iterates, converging averages</summary><div class="stage-body">
+<p class="lead">Run the subgradient method on the same function. Compare the last point with the best point seen and the step-weighted average that the theorem controls.</p>
+<div class="formula math">w<sub>k+1</sub> = w<sub>k</sub> − η<sub>k</sub>g<sub>k</sub>, &nbsp; g<sub>k</sub> ∈ ∂f(w<sub>k</sub>), &nbsp; f(w) = |w₁| + 2|w₂|.<br>G = √5, &nbsp; D = ‖w₀‖, &nbsp; f⋆ = 0.</div>
+<div class="controls"><div class="control"><label for="schedule">Stepsize schedule</label><select id="schedule"><option value="fixed">Fixed-horizon: D / (G√T)</option><option value="constant">Constant: ηₖ = c</option><option value="sqrt">Decreasing: c / √(k + 1)</option><option value="harmonic">Decreasing: c / (k + 1)</option></select></div><div class="control"><label for="horizon">Run horizon T</label><select id="horizon"><option value="100">100 updates</option><option value="400" selected>400 updates</option><option value="1600">1,600 updates</option></select></div><div class="control"><label for="step-scale">Step scale c <output id="step-scale-out"></output></label><input id="step-scale" type="range" min="0.02" max="0.6" step="0.01" value="0.22"></div></div>
+<div class="toolbar"><label for="start-x">w₀,₁ <input id="start-x" type="number" min="-2" max="2" step="0.05" value="1"></label><label for="start-y">w₀,₂ <input id="start-y" type="number" min="-2" max="2" step="0.05" value="0.65"></label><button id="cycle-preset">Constant-step cycle</button><button id="tuned-preset">Horizon-tuned step</button><label><input id="convergence-log" type="checkbox" checked>Logarithmic vertical axis</label><label><input id="show-bound" type="checkbox" checked>Theorem bound</label></div>
+<div class="transport"><button id="run" class="primary">Run</button><button id="step">Step</button><button id="reset">Reset</button><button id="finish">Show result</button><button id="csv">Download CSV</button><label class="speed-label">Speed <select id="speed"><option value="0.4">Slow</option><option value="1" selected>Medium</option><option value="3">Fast</option></select></label></div>
+<div class="timeline"><label id="position" for="time">k = 0</label><input id="time" type="range" min="0" max="400" step="1" value="0"></div>
+<div class="panels"><div class="panel"><h3>Parameter path and weighted average</h3><p class="sub">Click to change the start, or use the numeric inputs above. Axes have equal scale.</p><canvas class="plot-click" id="convergence-path" role="img" aria-label="Subgradient iterates and weighted average on the nonsmooth objective contours"></canvas></div><div class="panel"><h3>Objective gap</h3><p class="sub">The bound applies to the average and best pre-update point, not the latest point.</p><canvas id="convergence-gap" role="img" aria-label="Last iterate, weighted average, best value and subgradient convergence bound versus iteration"></canvas></div></div>
+<div class="legend"><span style="color:var(--orange)"><i class="sw"></i>Last iterate w<sub>k</sub></span><span style="color:var(--green)"><i class="sw"></i>Weighted average w̄<sub>k</sub></span><span style="color:var(--blue)"><i class="sw"></i>Best among w₀,…,w<sub>k−1</sub></span><span style="color:var(--gold)"><i class="sw dash"></i>Theorem bound</span></div>
+<div class="stats"><div class="stat">Current step η<sub>k</sub><strong id="current-step"></strong></div><div class="stat">Current subgradient norm<strong id="current-gnorm"></strong></div><div class="stat">Averaged objective / upper bound<strong id="average-bound"></strong></div></div>
+<div class="formula math">w̄<sub>k</sub> = (Σ<sub>j=0</sub><sup>k−1</sup> η<sub>j</sub>w<sub>j</sub>) / (Σ<sub>j=0</sub><sup>k−1</sup> η<sub>j</sub>), &nbsp; k ≥ 1.<br>max{f(w̄<sub>k</sub>), min<sub>0≤j&lt;k</sub> f(w<sub>j</sub>)} ≤ [D² + G² Σ<sub>j&lt;k</sub> η<sub>j</sub>²] / [2 Σ<sub>j&lt;k</sub> η<sub>j</sub>].</div><p class="message" id="convergence-message" role="status"></p>
+<details class="setup"><summary>Indexing, subgradient choices, and the guarantee</summary><p>The display at k contains w<sub>k</sub> after k updates. Its average and best value use only w₀,…,w<sub>k−1</sub>. At k = 0 neither is defined. Every update uses g₁ = sign(w₁) and g₂ = 2 sign(w₂); at an exactly zero coordinate the demo selects g₁ = 0 or g₂ = 2, both valid subgradients. No near-zero values are rounded to zero.</p><p>The horizon-tuned step D/(G√T) remains fixed for the whole run. The bound at its final horizon is GD/√T; at intermediate k, the full displayed formula is used. Changing T restarts the run. For an initial point already at the optimum, the horizon-tuned option simply stays there.</p><p>A constant step can produce a cycle. The theorem's nonzero limiting upper bound is not an unavoidable error floor for every function or for every averaged sequence. The decreasing schedules have bounds that tend to zero. This simple example can converge faster than the worst-case guarantee.</p><p>The logarithmic chart puts exact zero and values below 10⁻⁵ on the bottom plotting row; the numeric readouts retain their values. The horizontal axis is always linear. A theorem bound on objective gap does not require the selected subgradient norm to go to zero.</p></details>
+</div></details>
+<footer>Lecture 13 · All examples are computed locally. No external libraries, downloads, or build step. The last experiment uses G for the Euclidean Lipschitz constant and D² in the convergence bound.</footer>
+</main>
+<script id="subgradient-core">
+globalThis.SubgradientCore = (() => {
+  'use strict';
+
+  const TIE_EPS = 1e-10;
+  const G = Math.sqrt(5);
+  const maxPieces = [
+    { slope: -1, intercept: -0.5 },
+    { slope: 0.4, intercept: 0.3 },
+    { slope: 1.5, intercept: -0.8 }
+  ];
+
+  function finiteNumber(number, name) {
+    if (!Number.isFinite(number)) throw new RangeError(name + ' must be finite.');
+    return number;
+  }
+
+  function regression(amount = 6) {
+    finiteNumber(amount, 'Outlier size');
+    const data = Array.from({ length: 25 }, (_, i) => {
+      const x = (i - 12) / 6;
+      const outlier = i >= 23;
+      const noise = 0.12 * Math.sin(1.7 * i) + 0.06 * Math.cos(0.83 * i);
+      const y = 0.7 * x + 0.3 + noise + (outlier ? amount : 0);
+      return { x, y, outlier };
+    });
+
+    function summarize(w) {
+      const residuals = data.map(point => w[0] * point.x + w[1] - point.y);
+      return {
+        w,
+        residuals,
+        mae: residuals.reduce((sum, r) => sum + Math.abs(r), 0) / data.length,
+        mse: residuals.reduce((sum, r) => sum + r * r, 0) / data.length,
+        zeros: residuals.filter(r => Math.abs(r) <= 1e-8).length
+      };
+    }
+
+    const meanX = data.reduce((sum, point) => sum + point.x, 0) / data.length;
+    const meanY = data.reduce((sum, point) => sum + point.y, 0) / data.length;
+    const covariance = data.reduce((sum, point) => sum + (point.x - meanX) * (point.y - meanY), 0);
+    const variance = data.reduce((sum, point) => sum + (point.x - meanX) ** 2, 0);
+    const lsSlope = covariance / variance;
+    const ls = summarize([lsSlope, meanY - lsSlope * meanX]);
+
+    // In two parameters a minimum of this coercive, piecewise-linear loss
+    // occurs at a vertex: a line interpolating two distinct observations.
+    let lad = null;
+    for (let i = 0; i < data.length; i++) {
+      for (let j = i + 1; j < data.length; j++) {
+        const slope = (data[j].y - data[i].y) / (data[j].x - data[i].x);
+        const candidate = summarize([slope, data[i].y - slope * data[i].x]);
+        if (lad === null || candidate.mae < lad.mae) lad = candidate;
+      }
+    }
+    return { data, ls, lad };
+  }
+
+  function lassoValue(w, lambda) {
+    return 0.5 * (w[0] + 2 * w[1] - 2) ** 2 + lambda * (Math.abs(w[0]) + Math.abs(w[1]));
+  }
+
+  function lasso(lambda = 0.5) {
+    finiteNumber(lambda, 'Regularization');
+    if (lambda < 0) throw new RangeError('Regularization must be nonnegative.');
+    const w = [0, Math.max(0, 1 - lambda / 4)];
+    return {
+      w,
+      minNorm: [0.4, 0.8],
+      value: lassoValue(w, lambda),
+      radius: Math.abs(w[0]) + Math.abs(w[1]),
+      residual: w[0] + 2 * w[1] - 2
+    };
+  }
+
+  function value(kind, x) {
+    if (kind === 'abs') return Math.abs(x);
+    if (kind === 'hinge') return Math.max(0, 1 - x);
+    if (kind === 'max') return Math.max(...maxPieces.map(piece => piece.slope * x + piece.intercept));
+    throw new RangeError('Unknown function: ' + kind);
+  }
+
+  function slopes(kind, x) {
+    if (kind === 'abs') {
+      if (Math.abs(x) <= TIE_EPS) return [-1, 1];
+      const slope = Math.sign(x);
+      return [slope, slope];
+    }
+    if (kind === 'hinge') {
+      if (Math.abs(x - 1) <= TIE_EPS) return [-1, 0];
+      const slope = x < 1 ? -1 : 0;
+      return [slope, slope];
+    }
+    if (kind === 'max') {
+      const maximum = value(kind, x);
+      const active = maxPieces.filter(piece => Math.abs(piece.slope * x + piece.intercept - maximum) <= TIE_EPS);
+      return [Math.min(...active.map(piece => piece.slope)), Math.max(...active.map(piece => piece.slope))];
+    }
+    throw new RangeError('Unknown function: ' + kind);
+  }
+
+  function support(kind, x, g) {
+    const [lo, hi] = slopes(kind, x);
+    return { value: value(kind, x), lo, hi, valid: g >= lo - TIE_EPS && g <= hi + TIE_EPS };
+  }
+
+  function normObjective(w) {
+    return Math.abs(w[0]) + 2 * Math.abs(w[1]);
+  }
+
+  function noDescent(eta = 0.2, b = 2) {
+    finiteNumber(eta, 'Step size');
+    finiteNumber(b, 'Subgradient coordinate');
+    if (b < -2 || b > 2) throw new RangeError('The second subgradient coordinate must lie in [-2, 2].');
+    const w = [1 - eta, -eta * b];
+    return { w, f: normObjective(w), distance: Math.hypot(...w), normG: Math.hypot(1, b), initialF: 1, initialDistance: 1 };
+  }
+
+  function trace({ K = 400, schedule = 'fixed', eta = 0.22, w0 = [1, 0.65], tie = 2 } = {}) {
+    if (!Number.isInteger(K) || K < 1) throw new RangeError('The horizon must be a positive integer.');
+    if (!['constant', 'fixed', 'sqrt', 'harmonic'].includes(schedule)) throw new RangeError('Unknown step schedule.');
+    finiteNumber(eta, 'Step size');
+    if (eta <= 0) throw new RangeError('The step scale must be positive.');
+    if (!Array.isArray(w0) || w0.length !== 2 || !w0.every(Number.isFinite)) throw new RangeError('The initial point must have two finite coordinates.');
+    finiteNumber(tie, 'Tie subgradient');
+    if (tie < -2 || tie > 2) throw new RangeError('The tie subgradient must lie in [-2, 2].');
+
+    const D = Math.hypot(...w0);
+    const fixedEta = D / (G * Math.sqrt(K));
+    const optimalStart = D === 0;
+    const weightedSum = [0, 0];
+    let w = w0.slice();
+    let sumEta = 0;
+    let sumEtaSquared = 0;
+    let best = null;
+    const states = [];
+
+    function stepSize(k) {
+      if (schedule === 'fixed') return fixedEta;
+      if (schedule === 'sqrt') return eta / Math.sqrt(k + 1);
+      if (schedule === 'harmonic') return eta / (k + 1);
+      return eta;
+    }
+
+    for (let k = 0; k <= K; k++) {
+      // Do not snap small nonzero coordinates to a kink: that could select
+      // a vector outside the actual subdifferential and invalidate the bound.
+      const g = [Math.sign(w[0]), w[1] === 0 ? tie : 2 * Math.sign(w[1])];
+      const nextStep = stepSize(k);
+      const f = normObjective(w);
+      let avg = null;
+      let bound = null;
+      if (k > 0) {
+        if (sumEta > 0) {
+          avg = weightedSum.map(total => total / sumEta);
+          bound = (D * D + G * G * sumEtaSquared) / (2 * sumEta);
+        } else {
+          // D=0 gives a zero horizon-tuned step. Every point is already the
+          // exact minimizer; use that point and its trivial zero certificate.
+          avg = w0.slice();
+          bound = 0;
+        }
+      }
+      states.push({ k, w: w.slice(), f, gnorm: Math.hypot(...g), avg, avgGap: avg === null ? null : normObjective(avg), best, bound, eta: nextStep, sumEta, sumEtaSquared });
+      if (k === K) break;
+
+      // At state k+1 the average and best value use w_0,...,w_k, while
+      // the displayed current point is w_{k+1}.
+      weightedSum[0] += nextStep * w[0];
+      weightedSum[1] += nextStep * w[1];
+      sumEta += nextStep;
+      sumEtaSquared += nextStep * nextStep;
+      best = best === null ? f : Math.min(best, f);
+      w = [w[0] - nextStep * g[0], w[1] - nextStep * g[1]];
+    }
+    return { K, G, D, schedule, eta, fixedEta, optimalStart, states };
+  }
+
+  return { regression, lasso, lassoValue, value, slopes, support, noDescent, trace };
+})();
+
+</script>
+<script id="subgradient-ui">
+'use strict';
+(() => {
+const C=globalThis.SubgradientCore,$=id=>document.getElementById(id),val=id=>Number($(id).value),clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const col=n=>getComputedStyle(document.documentElement).getPropertyValue('--'+n).trim();
+const fmt=x=>!Number.isFinite(x)?'—':x===0?'0':Math.abs(x)<.001?x.toExponential(2):Number(x.toPrecision(4)).toString();
+function fit(id){const canvas=$(id),r=canvas.getBoundingClientRect(),w=Math.max(1,r.width),h=Math.max(1,r.height),dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);return{canvas,ctx,w,h};}
+function ticks(a,b,n=4){const raw=(b-a)/n,p=10**Math.floor(Math.log10(raw)),q=raw/p,s=(q<=1?1:q<=2?2:q<=5?5:10)*p,ts=[];for(let x=Math.ceil(a/s)*s;x<=b+s*1e-8;x+=s)ts.push(Math.abs(x)<s*1e-8?0:x);return ts;}
+function frame(id,bounds,opts={}){const r=fit(id),{ctx,w,h}=r,left=opts.log?61:49,right=16,top=25,bottom=43;let[a,b,c,d]=bounds;const W=w-left-right,H=h-top-bottom;if(opts.equal){const ratio=W/H,mx=(a+b)/2,my=(c+d)/2;if((b-a)/(d-c)<ratio){const rx=(d-c)*ratio/2;a=mx-rx;b=mx+rx;}else{const ry=(b-a)/ratio/2;c=my-ry;d=my+ry;}}const X=x=>left+(x-a)/(b-a)*W,Y=y=>h-bottom-((opts.log?Math.log10(Math.max(y,10**c)):y)-c)/(d-c)*H;
+ctx.font='11px system-ui';ctx.lineWidth=1;ctx.strokeStyle=col('grid');ctx.fillStyle=col('muted');for(const x of (opts.xticks||ticks(a,b,Math.max(3,Math.floor(w/100))))){ctx.beginPath();ctx.moveTo(X(x),top);ctx.lineTo(X(x),h-bottom);ctx.stroke();ctx.textAlign='center';ctx.fillText(opts.formatX?opts.formatX(x):fmt(x),X(x),h-bottom+18);}if(!opts.noY)for(const y of ticks(c,d,4)){if(opts.log&&!Number.isInteger(y))continue;const p=Y(opts.log?10**y:y);ctx.beginPath();ctx.moveTo(left,p);ctx.lineTo(w-right,p);ctx.stroke();ctx.textAlign='right';ctx.fillText(opts.log?(y===c?'≤10^'+y:'10^'+y):fmt(y),left-7,p+4);}ctx.strokeStyle=col('axis');ctx.strokeRect(left,top,W,H);ctx.fillStyle=col('muted');ctx.textAlign='center';ctx.fillText(opts.x||'',left+W/2,h-5);ctx.textAlign='left';ctx.fillText(opts.y||'',left,13);return{...r,X,Y,a,b,c,d,left,right,top,bottom,clip(){ctx.save();ctx.beginPath();ctx.rect(left,top,W,H);ctx.clip();},unmap(px,py){return[a+(px-left)/W*(b-a),c+(h-bottom-py)/H*(d-c)];}};}
+function line(f,pts,color,dash=[],width=2,alpha=1){if(!pts.length)return;f.clip();const{ctx,X,Y}=f;ctx.strokeStyle=color;ctx.lineWidth=width;ctx.globalAlpha=alpha;ctx.setLineDash(dash);ctx.beginPath();let on=false;for(const[x,y]of pts){if(!Number.isFinite(x)||!Number.isFinite(y)){on=false;continue;}if(on)ctx.lineTo(X(x),Y(y));else{ctx.moveTo(X(x),Y(y));on=true;}}ctx.stroke();ctx.restore();}
+function dot(f,x,y,color,shape='dot',size=4){f.clip();const{ctx,X,Y}=f,px=X(x),py=Y(y);ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=2;ctx.beginPath();if(shape==='cross'){ctx.moveTo(px-size,py-size);ctx.lineTo(px+size,py+size);ctx.moveTo(px+size,py-size);ctx.lineTo(px-size,py+size);ctx.stroke();}else if(shape==='diamond'){ctx.moveTo(px,py-size);ctx.lineTo(px+size,py);ctx.lineTo(px,py+size);ctx.lineTo(px-size,py);ctx.closePath();ctx.stroke();}else{ctx.arc(px,py,size,0,2*Math.PI);ctx.fill();}ctx.restore();}
+function arrow(f,a,b,color){line(f,[a,b],color,[],2.5);const{ctx,X,Y}=f,x=X(b[0]),y=Y(b[1]),angle=Math.atan2(y-Y(a[1]),x-X(a[0]));f.clip();ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-10*Math.cos(angle-.4),y-10*Math.sin(angle-.4));ctx.lineTo(x-10*Math.cos(angle+.4),y-10*Math.sin(angle+.4));ctx.fill();ctx.restore();}
+function sample(fun,a,b,n=320){return Array.from({length:n+1},(_,i)=>{const x=a+(b-a)*i/n;return[x,fun(x)];});}
+function diamonds(f,max,color='axis'){for(let r=.5;r<=max;r+=.5)line(f,[[r,0],[0,r/2],[-r,0],[0,-r/2],[r,0]],col(color),[],1,.55);dot(f,0,0,col('text'),'cross',5);}
+function bar(f,x,width,y,color){f.clip();const{ctx,X,Y}=f;ctx.fillStyle=color;ctx.fillRect(X(x-width/2),Math.min(Y(y),Y(0)),Math.abs(X(x+width/2)-X(x-width/2)),Math.max(1,Math.abs(Y(y)-Y(0))));ctx.restore();}
+let regressionData,lassoData,traceData,pathFrame,player;
+function paintRegression(){if(!$('regression-stage').open)return;const d=regressionData;const fitEnds=[d.ls,d.lad].flatMap(m=>[-2.35,2.35].map(x=>m.w[0]*x+m.w[1]));const minY=Math.min(...d.data.map(p=>p.y),...fitEnds),maxY=Math.max(2,...d.data.map(p=>p.y),...fitEnds);const f=frame('regression-fit',[-2.35,2.35,minY-.5,maxY+.6],{x:'Input x',y:'Response y'});for(const p of d.data)dot(f,p.x,p.y,col(p.outlier?'orange':'muted'),p.outlier?'diamond':'dot',p.outlier?5:3.5);for(const[m,color]of[[d.ls,'blue'],[d.lad,'green']])line(f,sample(x=>m.w[0]*x+m.w[1],-2.35,2.35),col(color),[],2.6);
+const ymax=Math.max(.15,...d.ls.residuals.map(Math.abs),...d.lad.residuals.map(Math.abs))*1.12,r=frame('regression-residuals',[0,26,0,ymax],{x:'Observation i',y:'Absolute residual'});d.data.forEach((_,i)=>{bar(r,i+1-.19,.34,Math.abs(d.ls.residuals[i]),col('blue'));bar(r,i+1+.19,.34,Math.abs(d.lad.residuals[i]),col('green'));});$('regression-table').innerHTML=[['Least squares',d.ls],['LAD',d.lad]].map(([name,m])=>'<tr><td>'+name+'</td><td>'+fmt(m.w[0])+'</td><td>'+fmt(m.w[1])+'</td><td>'+fmt(m.mae)+'</td><td>'+fmt(m.mse)+'</td><td>'+m.zeros+'</td></tr>').join('');}
+function buildRegression(){const a=val('outlier');$('outlier-out').textContent=fmt(a);regressionData=C.regression(a);paintRegression();}
+function paintLasso(){if(!$('lasso-stage').open)return;const d=lassoData,lambda=val('lambda');const f=frame('lasso-geometry',[-1.6,1.6,-1.2,1.4],{x:'w₁',y:'w₂',equal:true});for(const r of [-3,-2,-1,0,1,2,3])line(f,[[f.a,(2+r-f.a)/2],[f.b,(2+r-f.b)/2]],col(r===0?'muted':'grid'),r===0?[6,5]:[],r===0?2:1);for(const residual of new Set([d.residual,-d.residual]))line(f,[[f.a,(2+residual-f.a)/2],[f.b,(2+residual-f.b)/2]],col('orange'),[],1.8,.85);const r=d.radius;line(f,[[r,0],[0,r],[-r,0],[0,-r],[r,0]],col('purple'),[],2.5);dot(f,0,0,col('text'),'cross',4);dot(f,...d.minNorm,col('blue'),'diamond',6);dot(f,...d.w,col('green'),'dot',5.5);const b=frame('lasso-bars',[.4,2.6,0,1.2],{x:'Coordinate',y:'Coefficient',xticks:[1,2],formatX:x=>x===1?'w₁':'w₂'});for(let i=0;i<2;i++){bar(b,i+1-.16,.26,d.minNorm[i],col('blue'));bar(b,i+1+.16,.26,d.w[i],col('green'));} $('lasso-w').textContent='('+d.w.map(fmt).join(', ')+')';$('lasso-residual').textContent=fmt(d.residual);$('lasso-count').textContent=d.w.filter(x=>x!==0).length+' / 2';$('lasso-message').textContent=lambda===0?'At λ = 0, every point on the dashed line minimizes least squares. The green point shows one sparse minimizer; there is no unique selected solution.':lambda>=4?'The penalty is large enough that zero belongs to the subdifferential at the origin. Both coefficients are zero.':'The first coefficient is exactly zero. Increasing λ shrinks the second coefficient and increases the fitting residual.';}
+function buildLasso(){const l=val('lambda');$('lambda-out').textContent=fmt(l);lassoData=C.lasso(l);paintLasso();}
+let contact=0;
+function paintSupport(){if(!$('support-stage').open)return;const kind=$('support-kind').value,g=val('support-g'),s=C.support(kind,contact,g),color=col(s.valid?'green':'red');$('support-x-out').textContent=fmt(contact);$('support-g-out').textContent=fmt(g);$('support-candidate').textContent=fmt(g);$('support-interval').textContent=s.lo===s.hi?'{'+fmt(s.lo)+'}':'['+fmt(s.lo)+', '+fmt(s.hi)+']';$('support-valid').textContent=s.valid?'Yes':'No';$('support-title').textContent={abs:'f(w) = |w|',hinge:'f(w) = max{0, 1 − w}',max:'f(w) = max{−w − 0.5, 0.4w + 0.3, 1.5w − 0.8}'}[kind];const f=frame('support-function',[-3,3,-1.5,5],{x:'Evaluation point z',y:'Function and affine model'});if(kind==='max')for(const[a,b]of[[-1,-.5],[.4,.3],[1.5,-.8]])line(f,[[-3,-3*a+b],[3,3*a+b]],col('muted'),[3,5],1,.5);line(f,sample(x=>C.value(kind,x),-3,3),col('blue'),[],3);line(f,[[-3,s.value+g*(-3-contact)],[3,s.value+g*(3-contact)]],color,[7,4],2.3);dot(f,contact,s.value,col('text'),'dot',5);const q=frame('support-set',[-2.2,2.2,-1,1],{x:'Slope g',y:'Valid slopes at w = '+fmt(contact),noY:true});line(q,[[-2.2,0],[2.2,0]],col('axis'),[],1);line(q,[[s.lo,0],[s.hi,0]],col('green'),[],9);dot(q,s.lo,0,col('green'),'dot',4.5);dot(q,s.hi,0,col('green'),'dot',4.5);dot(q,g,.35,color,'dot',6);line(q,[[g,.35],[g,.05]],color,[3,3],1.5);const isMin=s.lo<=0&&s.hi>=0;$('support-message').classList.toggle('warn',!s.valid);$('support-message').textContent=(s.valid?'This slope defines a global lower supporting line. ':'This line crosses above the function somewhere, so it is not a subgradient. ')+(isMin?'Here 0 ∈ ∂f(w): the contact point is a global minimizer.':'Here 0 ∉ ∂f(w): the contact point is not a minimizer.');}
+function pickKink(){contact={abs:0,hinge:1,max:-4/7}[$('support-kind').value];$('support-x').value=contact;const[lo,hi]=C.slopes($('support-kind').value,contact);$('support-g').value=(lo+hi)/2;paintSupport();}
+function paintDirection(){if(!$('direction-stage').open)return;const eta=val('direction-eta'),b=val('direction-b'),d=C.noDescent(eta,b);$('direction-b-out').textContent=fmt(b);$('direction-eta-out').textContent=fmt(eta);const f=frame('direction-geometry',[-1.6,1.6,-2.6,1.3],{x:'w₁',y:'w₂',equal:true});diamonds(f,8);const circ=Array.from({length:201},(_,i)=>[Math.cos(i*Math.PI/100),Math.sin(i*Math.PI/100)]);line(f,circ,col('blue'),[5,5],1.5,.7);dot(f,1,0,col('text'),'diamond',6);arrow(f,[1,0],d.w,col('green'));dot(f,...d.w,col('green'),'dot',5);const p=frame('direction-progress',[0,1.2,0,Math.max(2, C.noDescent(1.2,b).f)*1.12],{x:'Step size η',y:'Objective / distance'});line(p,[[0,1],[1.2,1]],col('muted'),[4,5],1);line(p,sample(x=>C.noDescent(x,b).f,0,1.2),col('orange'),[],2.5);line(p,sample(x=>C.noDescent(x,b).distance,0,1.2),col('blue'),[],2.5);dot(p,eta,d.f,col('orange'),'dot',5);dot(p,eta,d.distance,col('blue'),'dot',5);$('direction-f').textContent='1 → '+fmt(d.f);$('direction-distance').textContent='1 → '+fmt(d.distance);$('direction-norm').textContent=fmt(d.normG);const up=d.f>1+1e-12,closer=d.distance<1-1e-12;$('direction-message').textContent=eta===0?'No step yet. Move η to compare objective value with distance.':up&&closer?'The objective went up, but distance to the minimizer went down. A valid subgradient need not provide a descent direction.':up?'The objective increased. This step is also too large to reduce distance to the minimizer.':closer?'This choice reduces distance without increasing the objective. Other valid subgradients at the same point can behave differently.':'The angle condition alone does not guarantee progress for every step size.';}
+class Player{constructor(){this.k=0;this.max=400;this.running=false;this.last=null;this.credit=0;this.raf=0;}pause(){this.running=false;cancelAnimationFrame(this.raf);this.last=null;this.credit=0;this.label();}label(){$('run').textContent=this.running?'Pause':this.k>=this.max?'Replay':'Run';}set(k){this.k=clamp(Math.round(k),0,this.max);$('time').value=this.k;this.label();paintConvergence();}start(){if(this.k>=this.max)this.set(0);this.running=true;this.last=null;this.credit=0;this.label();const tick=stamp=>{if(!this.running)return;if(this.last!==null){const dt=clamp(stamp-this.last,0,100)/1000;this.credit+=dt*(this.max/15)*val('speed');const n=Math.floor(this.credit);if(n){this.credit-=n;this.set(this.k+n);}}this.last=stamp;if(this.k>=this.max){this.pause();return;}this.raf=requestAnimationFrame(tick);};this.raf=requestAnimationFrame(tick);}}
+function buildTrace(){player.pause();const K=val('horizon'),schedule=$('schedule').value;for(const id of ['start-x','start-y'])if(!Number.isFinite(val(id))||$(id).value==='')$(id).value=id==='start-x'?1:.65;const w0=[clamp(val('start-x'),-2,2),clamp(val('start-y'),-2,2)];$('start-x').value=w0[0];$('start-y').value=w0[1];traceData=C.trace({K,schedule,eta:val('step-scale'),w0,tie:2});$('step-scale').disabled=schedule==='fixed';$('step-scale-out').textContent=schedule==='fixed'?'Set by D, G, T':fmt(val('step-scale'));player.max=K;$('time').max=K;player.set(0);}
+function paintConvergence(){if(!traceData||!$('convergence-stage').open)return;const d=traceData,k=player.k,s=d.states[k],log=$('convergence-log').checked,show=$('show-bound').checked;const range=Math.max(1.2,...d.states.flatMap(t=>t.w.map(Math.abs)))*1.16;const p=frame('convergence-path',[-range,range,-range,range],{x:'w₁',y:'w₂',equal:true});pathFrame=p;diamonds(p,Math.ceil(range*3));line(p,d.states.slice(0,k+1).map(t=>t.w),col('orange'),[],1.5,.8);dot(p,...d.states[0].w,col('muted'),'diamond',5);dot(p,...s.w,col('orange'),'dot',5);if(k&&s.avg){line(p,d.states.slice(1,k+1).map(t=>t.avg),col('green'),[],2);dot(p,...s.avg,col('green'),'diamond',7);}const all=d.states.flatMap(t=>[t.f,t.avgGap,t.best,...(show?[t.bound]:[])]).filter(x=>Number.isFinite(x));const ymax=Math.max(1,...all)*1.15;const f=frame('convergence-gap',[0,d.K,log?-5:0,log?Math.ceil(Math.log10(ymax)):ymax],{x:'Updates k',y:log?'Gap (log scale; bottom includes zero)':'Objective gap',log});line(f,d.states.slice(0,k+1).map(t=>[t.k,t.f]),col('orange'),[],1.6,.8);if(k){line(f,d.states.slice(1,k+1).map(t=>[t.k,t.best]),col('blue'),[],2);line(f,d.states.slice(1,k+1).map(t=>[t.k,t.avgGap]),col('green'),[],2.5);if(show)line(f,d.states.slice(1,k+1).map(t=>[t.k,t.bound]),col('gold'),[6,4],2);}$('position').textContent='k = '+k;$('current-step').textContent=fmt(s.eta);$('current-gnorm').textContent=fmt(s.gnorm);$('average-bound').textContent=k?fmt(s.avgGap)+' / '+fmt(s.bound):'Not defined at k = 0';let message=k?'Last-point gap = '+fmt(s.f)+'. Best pre-update gap = '+fmt(s.best)+'. ':'Press Run or Step. No averaged iterate exists before the first update. ';if(d.optimalStart&&$('schedule').value==='fixed')message+='The start is already optimal; the horizon-tuned run stays there.';else if($('schedule').value==='fixed')message+='This run keeps η = '+fmt(d.fixedEta)+' fixed. At T = '+d.K+', the bound is GD/√T = '+fmt(d.G*d.D/Math.sqrt(d.K))+'.';else if($('schedule').value==='constant')message+='The constant-step bound tends to cG²/2 = '+fmt(val('step-scale')*5/2)+'. This is an upper bound, not a necessary error floor.';else message+='The weighted average uses each step size as its weight. The displayed bound tends to zero as the number of updates grows.';$('convergence-message').textContent=message;}
+function repaint(){paintRegression();paintLasso();paintSupport();paintDirection();paintConvergence();}
+$('theme').addEventListener('click',()=>{const dark=document.documentElement.dataset.theme?document.documentElement.dataset.theme==='dark':matchMedia('(prefers-color-scheme:dark)').matches;document.documentElement.dataset.theme=dark?'light':'dark';repaint();});
+$('outlier').addEventListener('input',buildRegression);$('clean-data').onclick=()=>{$('outlier').value=0;buildRegression();};$('large-outliers').onclick=()=>{$('outlier').value=10;buildRegression();};$('lambda').addEventListener('input',buildLasso);document.querySelectorAll('[data-lambda]').forEach(b=>b.onclick=()=>{$('lambda').value=b.dataset.lambda;buildLasso();});$('support-kind').onchange=pickKink;$('support-x').oninput=()=>{contact=val('support-x');paintSupport();};$('support-g').oninput=paintSupport;$('at-kink').onclick=pickKink;$('at-smooth').onclick=()=>{contact=2;$('support-x').value=2;$('support-g').value=C.slopes($('support-kind').value,contact)[0];paintSupport();};$('valid-slope').onclick=()=>{const[lo,hi]=C.slopes($('support-kind').value,contact);$('support-g').value=(lo+hi)/2;paintSupport();};$('invalid-slope').onclick=()=>{$('support-g').value=2;paintSupport();};$('direction-b').oninput=paintDirection;$('direction-eta').oninput=paintDirection;$('lecture-example').onclick=()=>{$('direction-b').value=2;$('direction-eta').value=.2;paintDirection();};$('descent-example').onclick=()=>{$('direction-b').value=0;paintDirection();};
+player=new Player();$('run').onclick=()=>player.running?player.pause():player.start();$('step').onclick=()=>{player.pause();player.set(player.k+1);};$('reset').onclick=()=>{player.pause();player.set(0);};$('finish').onclick=()=>{player.pause();player.set(player.max);};$('time').oninput=()=>{player.pause();player.set(val('time'));};for(const id of ['schedule','horizon','start-x','start-y'])$(id).addEventListener('change',buildTrace);$('step-scale').oninput=buildTrace;for(const id of ['convergence-log','show-bound'])$(id).onchange=paintConvergence;$('cycle-preset').onclick=()=>{$('schedule').value='constant';$('step-scale').value=.22;$('start-x').value=1;$('start-y').value=.65;buildTrace();};$('tuned-preset').onclick=()=>{$('schedule').value='fixed';$('start-x').value=1;$('start-y').value=.65;buildTrace();};$('convergence-path').onclick=e=>{if(!pathFrame)return;const r=e.currentTarget.getBoundingClientRect(),[x,y]=pathFrame.unmap(e.clientX-r.left,e.clientY-r.top);$('start-x').value=clamp(x,-2,2).toFixed(3);$('start-y').value=clamp(y,-2,2).toFixed(3);buildTrace();};$('csv').onclick=()=>{const rows=[['k','w1','w2','last_gap','subgradient_norm','step','average_w1','average_w2','average_gap','best_preupdate_gap','bound'],...traceData.states.map(s=>[s.k,...s.w,s.f,s.gnorm,s.eta,...(s.avg||['','']),s.avgGap??'',s.best??'',s.bound??''])];const url=URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')],{type:'text/csv'}));const a=document.createElement('a');a.href=url;a.download='lecture13-subgradient-'+$('schedule').value+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+document.querySelectorAll('.stage').forEach(stage=>stage.addEventListener('toggle',()=>{if(stage.id==='convergence-stage'&&!stage.open)player.pause();if(stage.open)repaint();}));document.addEventListener('visibilitychange',()=>{if(document.hidden)player.pause();});let resizeToken;window.addEventListener('resize',()=>{cancelAnimationFrame(resizeToken);resizeToken=requestAnimationFrame(repaint);});matchMedia('(prefers-color-scheme:dark)').addEventListener('change',repaint);if(matchMedia('(prefers-reduced-motion: reduce)').matches)$('speed').value='0.4';
+buildRegression();buildLasso();buildTrace();repaint();
+// Exposed only for deterministic browser checks; the UI uses the same player.
+globalThis.SubgradientDemo={player,getTrace:()=>traceData,repaint};
+})();
+</script></body></html>
