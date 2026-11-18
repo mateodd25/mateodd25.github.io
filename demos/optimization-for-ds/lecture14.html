@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Subgradient convergence and proximal methods · Lecture 14</title>
+<style>
+:root{color-scheme:light;--bg:#f7f8fa;--surface:#fff;--text:#182330;--muted:#637182;--line:#dbe1e7;--soft:#f1f4f7;--grid:#e7ebf0;--axis:#a6b1bd;--blue:#245dac;--green:#16816e;--orange:#cf652b;--gold:#a77716;--purple:#9155b5;--red:#bf3e49;--focus:#5c98d8}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){color-scheme:dark;--bg:#121820;--surface:#1a232e;--text:#e8edf5;--muted:#a4b2c4;--line:#344352;--soft:#202d3a;--grid:#303e4d;--axis:#708195;--blue:#7db3f9;--green:#64ceaf;--orange:#f7a16b;--gold:#e6bd62;--purple:#c797ef;--red:#ff8d97;--focus:#8ec6ff}}
+:root[data-theme=dark]{color-scheme:dark;--bg:#121820;--surface:#1a232e;--text:#e8edf5;--muted:#a4b2c4;--line:#344352;--soft:#202d3a;--grid:#303e4d;--axis:#708195;--blue:#7db3f9;--green:#64ceaf;--orange:#f7a16b;--gold:#e6bd62;--purple:#c797ef;--red:#ff8d97;--focus:#8ec6ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}main{max-width:1240px;margin:auto;padding:34px 26px 56px}.top{display:flex;justify-content:space-between;align-items:center;gap:16px}.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}h1{font-size:clamp(28px,4vw,42px);line-height:1.12;letter-spacing:-.035em;font-weight:650;margin:15px 0}h3{font-size:15px;margin:0 0 4px}p{margin:0 0 12px}.intro{max-width:850px;font-size:17px;color:var(--muted)}.stage{border:1px solid var(--line);border-radius:14px;background:var(--surface);margin:20px 0;overflow:hidden}.stage>summary{cursor:pointer;display:flex;gap:13px;align-items:center;padding:20px 22px;font-size:20px;font-weight:650;list-style:none}.stage>summary::-webkit-details-marker{display:none}.stage>summary::after{content:'Show';margin-left:auto;color:var(--muted);font-size:12px;font-weight:500}.stage[open]>summary::after{content:'Hide'}.num{border:1px solid var(--line);border-radius:50%;width:30px;height:30px;display:grid;place-items:center;flex-shrink:0;font-size:13px}.stage-body{padding:0 22px 22px}.lead,.sub,.small{color:var(--muted)}.sub,.small{font-size:12px}.lead{max-width:980px}.math{font:18px/1.7 Georgia,'Times New Roman',serif}.formula{overflow-x:auto;padding:12px 16px;background:var(--soft);border-radius:8px;margin:14px 0}.controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 24px;background:var(--soft);padding:16px;border-radius:9px;margin:15px 0}.control label{display:flex;justify-content:space-between;gap:12px;font-size:13px;margin-bottom:6px}.control output{font-variant-numeric:tabular-nums;font-weight:650}input[type=range]{width:100%;accent-color:var(--green)}input[type=number]{width:85px;max-width:100%;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:5px;padding:7px}button,select{font:inherit;font-size:13px;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:8px 10px;min-height:38px}select{max-width:100%}button{cursor:pointer}button:hover{border-color:var(--muted)}button:disabled{opacity:.45;cursor:default}.primary{background:var(--text);color:var(--surface);border-color:var(--text)}:focus-visible{outline:3px solid var(--focus);outline-offset:3px}.toolbar,.transport,.legend{display:flex;gap:10px 15px;align-items:center;flex-wrap:wrap}.toolbar,.transport{margin:14px 0}.toolbar label{display:flex;align-items:center;gap:7px;font-size:13px}.speed-label{margin-left:auto;font-size:12px;display:flex;align-items:center;gap:8px}.timeline{display:flex;gap:16px;align-items:center;margin:13px 0 18px}.timeline label{font-size:13px;min-width:64px;font-variant-numeric:tabular-nums}.timeline input{flex:1;min-width:0}.panels{display:grid;grid-template-columns:1fr 1fr;gap:18px}.panel{border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}.panel canvas{display:block;width:100%;height:330px}.legend{font-size:12px;color:var(--muted);margin:10px 0;gap:7px 16px}.legend span{display:flex;align-items:center;gap:6px}.sw{display:inline-block;width:18px;height:0;border-top:2.5px solid currentColor}.sw.dash{border-top-style:dashed}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}.stat{background:var(--soft);padding:11px 14px;border-radius:8px;font-size:12px;color:var(--muted)}.stat strong{display:block;font-size:20px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;margin-top:4px}.message{font-size:13px;border-left:3px solid var(--green);padding:10px 14px;background:var(--soft);margin:14px 0 0}.message.warn{border-color:var(--orange)}.setup{margin-top:16px;font-size:14px}.setup>summary{cursor:pointer;color:var(--muted);font-size:13px}.setup p{margin:10px 0}.table-wrap{overflow-x:auto;margin:16px 0;border:1px solid var(--line);border-radius:9px}table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}th,td{padding:10px 14px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}th{background:var(--soft);color:var(--muted);font-weight:550}td:first-child,th:first-child{text-align:left}tr:last-child td{border-bottom:0}footer{font-size:12px;color:var(--muted);margin-top:28px}noscript{display:block;padding:20px}.nowrap{white-space:nowrap}.plot-click{cursor:crosshair}
+@media(max-width:780px){main{padding:20px 14px 40px}.panels{grid-template-columns:1fr}.controls{grid-template-columns:1fr 1fr}.stage>summary{font-size:18px;padding:17px}.stage-body{padding:0 16px 18px}.panel canvas{height:310px}}
+@media(max-width:460px){.controls{grid-template-columns:1fr}.stats{grid-template-columns:1fr}.stage>summary{gap:9px}.panel{padding:10px}.panel canvas{height:290px}.speed-label{margin-left:0}.math{font-size:16px}.top{align-items:flex-start}}
+
+[hidden]{display:none!important}
+.stage > summary{padding-block:18px}
+.stats.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:780px){.stats.four{grid-template-columns:1fr 1fr}}
+@media(max-width:460px){.stats.four{grid-template-columns:1fr}}
+</style></head><body><main><div class="top"><p class="eyebrow">Optimization for Data Science · Lecture 14</p><button id="theme" aria-label="Toggle light and dark theme">Switch theme</button></div>
+<h1>Subgradient convergence and proximal methods</h1>
+<p class="intro">Watch averaging control the subgradient method, see what a proximal step minimizes, and combine a gradient step with shrinkage or projection.</p>
+<noscript>Enable JavaScript to use the interactive plots. This page works offline.</noscript>
+
+<details class="stage" id="sg-stage" open><summary><span class="num">1</span> Subgradient convergence through averaging</summary><div class="stage-body">
+<p class="lead">Run the subgradient method on the example from Lecture 13. Compare the moving iterate with its weighted average and the upper bound proved in Lecture 14.</p>
+<div class="formula math">f(w) = |w₁| + 2|w₂|, &nbsp; w⋆ = 0, &nbsp; G = √5.<br>
+f(w̄<sub>k</sub>) − f⋆ ≤ [D² + G² Σ<sub>j=0</sub><sup>k−1</sup> η<sub>j</sub>²] / [2 Σ<sub>j=0</sub><sup>k−1</sup> η<sub>j</sub>], &nbsp; D = ‖w₀‖₂.</div>
+<div class="controls">
+<div class="control"><label for="sg-schedule">Step-size schedule</label><select id="sg-schedule"><option value="fixed">Horizon-tuned · D/(G√T)</option><option value="constant">Constant · c</option><option value="sqrt">Decreasing · c/√(k+1)</option></select></div>
+<div class="control"><label for="sg-horizon">Run horizon T</label><select id="sg-horizon"><option>100</option><option selected>400</option><option>1600</option></select></div>
+<div class="control"><label for="sg-scale">Step scale c <output id="sg-scale-out"></output></label><input id="sg-scale" type="range" min=".02" max=".5" step=".01" value=".22"></div>
+</div>
+<div class="toolbar"><button id="sg-cycle">Constant-step oscillation</button><button id="sg-tuned">Horizon-tuned step</button><label><input type="checkbox" id="sg-log" checked>Logarithmic objective axis</label><label><input type="checkbox" id="sg-bound" checked>Show theorem bound</label></div>
+<div class="transport" id="sg-transport"></div><div class="timeline"><label id="sg-position" for="sg-time">k = 0</label><input id="sg-time" type="range" min="0" max="400" step="1" value="0"></div>
+<div class="panels">
+<div class="panel"><h3>Iterates and weighted average</h3><p class="sub">Diamonds are level sets of f. Both axes have the same scale.</p><canvas id="sg-path" role="img" aria-label="Subgradient trajectory and weighted average on diamond contours"></canvas></div>
+<div class="panel"><h3>Objective convergence and the guarantee</h3><p class="sub">The bound applies to the weighted average of w₀,…,w<sub>k−1</sub>.</p><canvas id="sg-gap" role="img" aria-label="Last iterate and averaged objective gaps compared with the theoretical upper bound"></canvas></div></div>
+<div class="legend"><span style="color:var(--orange)"><i class="sw"></i>Last iterate</span><span style="color:var(--green)"><i class="sw"></i>Weighted average</span><span style="color:var(--gold)"><i class="sw dash"></i>Theorem bound</span><span style="color:var(--text)">× Minimizer</span></div>
+<div class="stats"><div class="stat">Current objective gap<strong id="sg-current"></strong></div><div class="stat">Averaged objective gap<strong id="sg-average"></strong></div><div class="stat">Theoretical upper bound<strong id="sg-guarantee"></strong></div></div>
+<p class="message" id="sg-message"></p>
+<details class="setup"><summary>The one-step estimate and telescoping argument</summary>
+<p class="math">‖w<sub>j+1</sub> − w⋆‖² ≤ ‖w<sub>j</sub> − w⋆‖² − 2η<sub>j</sub>(f(w<sub>j</sub>) − f⋆) + η<sub>j</sub>²G².</p>
+<p>Sum from j = 0 to k − 1. The intermediate squared distances cancel. Dropping −‖w<sub>k</sub>−w⋆‖², dividing by 2Ση<sub>j</sub>, and applying convexity gives the displayed bound. At k = 0 the average is undefined.</p>
+<p id="sg-proof"></p>
+<p>The start is w₀ = (1, 0.65). At a zero coordinate this demo chooses subgradient 0 for the first coordinate and 2 for the second. Every step uses a valid subgradient. The horizon-tuned step stays fixed throughout the run. The logarithmic plot places gaps at or below 10⁻⁵ on the bottom row; readouts retain the actual values.</p>
+</details></div></details>
+
+<details class="stage" id="prox-stage" open><summary><span class="num">2</span> What does the proximal map minimize?</summary><div class="stage-body">
+<p class="lead">Move the input v or change η. The quadratic term anchors the solution near v, while the absolute-value term pulls it toward zero.</p>
+<div class="formula math">h(z) = |z|, &nbsp; prox<sub>ηh</sub>(v) = arg min<sub>z</sub> { |z| + (z − v)²/(2η) } = sign(v) max{|v| − η, 0}.</div>
+<div class="controls"><div class="control"><label for="px-input">Input v <output id="px-input-out"></output></label><input id="px-input" type="range" min="-3" max="3" step=".025" value="1.7"></div><div class="control"><label for="px-eta">Proximal parameter η <output id="px-eta-out"></output></label><input id="px-eta" type="range" min=".25" max="2" step=".05" value="1"></div><div class="control"><label>Presets</label><div class="toolbar"><button id="px-zero">Set v = 0.5η</button><button id="px-edge">Set v = η</button><button id="px-negative">Negative input</button></div></div></div>
+<div class="panels"><div class="panel"><h3>The proximal subproblem</h3><p class="sub">The green point minimizes the sum of the blue and orange curves.</p><canvas id="px-objective" role="img" aria-label="Absolute value penalty, quadratic anchor, and their sum with the proximal minimizer"></canvas>
+<div class="legend"><span style="color:var(--blue)"><i class="sw"></i>|z|</span><span style="color:var(--orange)"><i class="sw dash"></i>(z−v)²/(2η)</span><span style="color:var(--green)"><i class="sw"></i>Sum</span></div></div>
+<div class="panel"><h3>Soft thresholding</h3><p class="sub">Every input in [−η, η] maps exactly to zero.</p><canvas id="px-map" role="img" aria-label="Soft thresholding input-output map with current input marked"></canvas>
+<div class="legend"><span style="color:var(--green)"><i class="sw"></i>prox<sub>ηh</sub>(v)</span><span style="color:var(--muted)"><i class="sw dash"></i>Identity map</span></div></div></div>
+<div class="stats"><div class="stat">Input v<strong id="px-v"></strong></div><div class="stat">Proximal point w⁺<strong id="px-result"></strong></div><div class="stat">Selected subgradient (v−w⁺)/η<strong id="px-subgrad"></strong></div></div>
+<p class="message" id="px-message"></p>
+<details class="setup"><summary>Optimality condition from the notes</summary><p class="math">w⁺ = prox<sub>ηh</sub>(v) ⇔ (v − w⁺)/η ∈ ∂h(w⁺).</p><p>For h(z) = |z|, the subdifferential at zero is [−1, 1]. The proximal point equals zero exactly when v/η belongs to this interval. At a positive proximal point the selected subgradient is 1; at a negative point it is −1.</p></details>
+</div></details>
+
+<details class="stage" id="fb-stage" open><summary><span class="num">3</span> A forward step followed by shrinkage or projection</summary><div class="stage-body">
+<p class="lead">Minimize a quadratic loss with either an ℓ₁ penalty or a disk constraint. Inspect each forward and backward step while watching the full trajectory converge.</p>
+<div class="formula math">F(w) = f(w) + h(w), &nbsp; z<sub>k</sub> = w<sub>k</sub> − η∇f(w<sub>k</sub>), &nbsp; w<sub>k+1</sub> = prox<sub>ηh</sub>(z<sub>k</sub>).<br><span id="fb-formula"></span></div>
+<div class="controls">
+<div class="control"><label for="fb-mode">Nonsmooth term h</label><select id="fb-mode"><option value="lasso">ℓ₁ penalty · λ‖w‖₁</option><option value="disk">Indicator of the disk · ι_C(w)</option></select></div>
+<div class="control"><label for="fb-value"><span id="fb-value-label">Penalty λ</span><output id="fb-value-out"></output></label><input id="fb-value" type="range" min="0" max="5" step=".1" value="2"></div>
+<div class="control"><label for="fb-rate">Stepsize ηL <output id="fb-rate-out"></output></label><input id="fb-rate" type="range" min=".1" max="1" step=".05" value="1"></div>
+</div>
+<div class="toolbar"><button id="fb-sparse">Sparse solution</button><button id="fb-projection">Projection onto the disk</button><label><input type="checkbox" id="fb-arrows" checked>Show next forward / backward step</label><label><input type="checkbox" id="fb-log" checked>Logarithmic objective axis</label></div>
+<div class="transport" id="fb-transport"></div><div class="timeline"><label id="fb-position" for="fb-time">k = 0</label><input id="fb-time" type="range" min="0" max="80" step="1" value="0"></div>
+<div class="panels"><div class="panel"><h3>Trajectory in parameter space</h3><p class="sub">Contours show the smooth loss f. The cross marks the composite minimizer.</p><canvas id="fb-path" role="img" aria-label="Proximal-gradient path with smooth loss contours and separate forward and backward steps"></canvas></div><div class="panel"><h3>Objective convergence</h3><p class="sub">Observed gap F(wₖ) − F⋆ for the selected quadratic example.</p><canvas id="fb-gap" role="img" aria-label="Composite objective gap along proximal-gradient iterations"></canvas></div></div>
+<div class="legend"><span style="color:var(--blue)"><i class="sw"></i>Iterates wₖ</span><span style="color:var(--orange)"><i class="sw"></i>Forward step to zₖ</span><span style="color:var(--green)"><i class="sw"></i>Backward step to wₖ₊₁</span><span style="color:var(--text)">× Minimizer</span></div>
+<div class="stats"><div class="stat">Current point wₖ<strong id="fb-current"></strong></div><div class="stat">Next proximal point wₖ₊₁<strong id="fb-next"></strong></div><div class="stat">Current objective gap<strong id="fb-error"></strong></div></div>
+<p class="message" id="fb-message"></p>
+<details class="setup"><summary>The model, the two proximal maps, and “backward”</summary>
+<p>Here f(w) = ½(w−a)ᵀQ(w−a), where a = (2, ½) and Q has rows (2, 1) and (1, 2). Its gradient is 3-Lipschitz. The start is w₀ = (0.8, −0.6), and each run uses the same fixed η.</p>
+<p>For h(w) = λ‖w‖₁, shrink each coordinate of zₖ by ηλ, stopping at zero. For h = ι_C with C = {w : ‖w‖₂ ≤ R}, the proximal map is the Euclidean projection onto C.</p>
+<p class="math">w<sub>k+1</sub> = w<sub>k</sub> − η[∇f(w<sub>k</sub>) + g<sub>k</sub>], &nbsp; g<sub>k</sub> ∈ ∂h(w<sub>k+1</sub>).</p>
+<p>The smooth gradient is evaluated at the current point; the nonsmooth subgradient is evaluated at the next point. The logarithmic gap plot uses 10⁻¹² as its bottom row. Values smaller than this share that row; readouts retain the computed gap.</p>
+<p id="fb-certificate"></p>
+</details></div></details>
+</main>
+<script id="lecture14-core">
+const G=Math.sqrt(5);
+function normObjective(w) {
+  return Math.abs(w[0]) + 2 * Math.abs(w[1]);
+}
+function finiteNumber(n,name){if(!Number.isFinite(n))throw new RangeError(name);return n;}
+  function trace({ K = 400, schedule = 'fixed', eta = 0.22, w0 = [1, 0.65], tie = 2 } = {}) {
+    if (!Number.isInteger(K) || K < 1) throw new RangeError('The horizon must be a positive integer.');
+    if (!['constant', 'fixed', 'sqrt', 'harmonic'].includes(schedule)) throw new RangeError('Unknown step schedule.');
+    finiteNumber(eta, 'Step size');
+    if (eta <= 0) throw new RangeError('The step scale must be positive.');
+    if (!Array.isArray(w0) || w0.length !== 2 || !w0.every(Number.isFinite)) throw new RangeError('The initial point must have two finite coordinates.');
+    finiteNumber(tie, 'Tie subgradient');
+    if (tie < -2 || tie > 2) throw new RangeError('The tie subgradient must lie in [-2, 2].');
+
+    const D = Math.hypot(...w0);
+    const fixedEta = D / (G * Math.sqrt(K));
+    const optimalStart = D === 0;
+    const weightedSum = [0, 0];
+    let w = w0.slice();
+    let sumEta = 0;
+    let sumEtaSquared = 0;
+    let best = null;
+    const states = [];
+
+    function stepSize(k) {
+      if (schedule === 'fixed') return fixedEta;
+      if (schedule === 'sqrt') return eta / Math.sqrt(k + 1);
+      if (schedule === 'harmonic') return eta / (k + 1);
+      return eta;
+    }
+
+    for (let k = 0; k <= K; k++) {
+      // Do not snap small nonzero coordinates to a kink: that could select
+      // a vector outside the actual subdifferential and invalidate the bound.
+      const g = [Math.sign(w[0]), w[1] === 0 ? tie : 2 * Math.sign(w[1])];
+      const nextStep = stepSize(k);
+      const f = normObjective(w);
+      let avg = null;
+      let bound = null;
+      if (k > 0) {
+        if (sumEta > 0) {
+          avg = weightedSum.map(total => total / sumEta);
+          bound = (D * D + G * G * sumEtaSquared) / (2 * sumEta);
+        } else {
+          // D=0 gives a zero horizon-tuned step. Every point is already the
+          // exact minimizer; use that point and its trivial zero certificate.
+          avg = w0.slice();
+          bound = 0;
+        }
+      }
+      states.push({ k, w: w.slice(), f, gnorm: Math.hypot(...g), avg, avgGap: avg === null ? null : normObjective(avg), best, bound, eta: nextStep, sumEta, sumEtaSquared });
+      if (k === K) break;
+
+      // At state k+1 the average and best value use w_0,...,w_k, while
+      // the displayed current point is w_{k+1}.
+      weightedSum[0] += nextStep * w[0];
+      weightedSum[1] += nextStep * w[1];
+      sumEta += nextStep;
+      sumEtaSquared += nextStep * nextStep;
+      best = best === null ? f : Math.min(best, f);
+      w = [w[0] - nextStep * g[0], w[1] - nextStep * g[1]];
+    }
+    return { K, G, D, schedule, eta, fixedEta, optimalStart, states };
+  }
+
+
+
+const ForwardBackward = (() => {
+  const target = [2, 0.5];
+  function gradient([x,y]) { return [2*x + y - 4.5, x + 2*y - 3]; }
+  function loss(w) {
+    const x = w[0] - target[0], y = w[1] - target[1];
+    return x*x + x*y + y*y;
+  }
+  function objective(w, mode, value) {
+    if (mode === 'lasso') return loss(w) + value * (Math.abs(w[0]) + Math.abs(w[1]));
+    return Math.hypot(...w) <= value + 1e-12 ? loss(w) : Infinity;
+  }
+  function prox(z, mode, value, eta) {
+    if (mode === 'lasso') return z.map(t => Math.sign(t) * Math.max(0, Math.abs(t) - eta*value));
+    const norm = Math.hypot(...z);
+    return norm <= value ? z.slice() : z.map(t => t * value / norm);
+  }
+  function update(w,mode,value,eta) {
+    const g = gradient(w);
+    const z = w.map((t,i) => t - eta*g[i]);
+    return {z, next:prox(z,mode,value,eta)};
+  }
+  function solution(mode, value) {
+    if (mode === 'lasso') {
+      if (value <= 1.5) return target.map(t => t - value/3);
+      return [Math.max(0, 2.25 - value/2), 0];
+    }
+    if (Math.hypot(...target) <= value) return target.slice();
+    // Solve (Q + tI)w = Qa, choosing t so that ||w|| equals the radius.
+    function at(t) {
+      const d = 2+t, det = d*d - 1;
+      return [(4.5*d - 3)/det, (3*d - 4.5)/det];
+    }
+    let low=0, high=1;
+    while (Math.hypot(...at(high)) > value) high *= 2;
+    for (let i=0; i<55; i++) {
+      const mid = (low + high)/2;
+      if (Math.hypot(...at(mid)) > value) low = mid; else high = mid;
+    }
+    return at(high);
+  }
+  return {gradient,loss,objective,prox,update,solution};
+})();
+</script>
+<script>
+'use strict';
+(() => {
+const $ = id => document.getElementById(id);
+const val = id => Number($(id).value);
+const clamp = (x,a,b) => Math.max(a,Math.min(b,x));
+const col=n=>getComputedStyle(document.documentElement).getPropertyValue('--'+n).trim();
+const fmt=x=>!Number.isFinite(x)?'—':x===0?'0':Math.abs(x)<.001?x.toExponential(2):Number(x.toPrecision(4)).toString();
+function fit(id){const canvas=$(id),r=canvas.getBoundingClientRect(),w=Math.max(1,r.width),h=Math.max(1,r.height),dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);return{canvas,ctx,w,h};}
+function ticks(a,b,n=4){const raw=(b-a)/n,p=10**Math.floor(Math.log10(raw)),q=raw/p,s=(q<=1?1:q<=2?2:q<=5?5:10)*p,ts=[];for(let x=Math.ceil(a/s)*s;x<=b+s*1e-8;x+=s)ts.push(Math.abs(x)<s*1e-8?0:x);return ts;}
+function frame(id,bounds,opts={}){const r=fit(id),{ctx,w,h}=r,left=opts.log?61:49,right=16,top=25,bottom=43;let[a,b,c,d]=bounds;const W=w-left-right,H=h-top-bottom;if(opts.equal){const ratio=W/H,mx=(a+b)/2,my=(c+d)/2;if((b-a)/(d-c)<ratio){const rx=(d-c)*ratio/2;a=mx-rx;b=mx+rx;}else{const ry=(b-a)/ratio/2;c=my-ry;d=my+ry;}}const X=x=>left+(x-a)/(b-a)*W,Y=y=>h-bottom-((opts.log?Math.log10(Math.max(y,10**c)):y)-c)/(d-c)*H;
+ctx.font='11px system-ui';ctx.lineWidth=1;ctx.strokeStyle=col('grid');ctx.fillStyle=col('muted');for(const x of (opts.xticks||ticks(a,b,Math.max(3,Math.floor(w/100))))){ctx.beginPath();ctx.moveTo(X(x),top);ctx.lineTo(X(x),h-bottom);ctx.stroke();ctx.textAlign='center';ctx.fillText(opts.formatX?opts.formatX(x):fmt(x),X(x),h-bottom+18);}if(!opts.noY)for(const y of ticks(c,d,4)){if(opts.log&&!Number.isInteger(y))continue;const p=Y(opts.log?10**y:y);ctx.beginPath();ctx.moveTo(left,p);ctx.lineTo(w-right,p);ctx.stroke();ctx.textAlign='right';ctx.fillText(opts.log?(y===c?'≤10^'+y:'10^'+y):fmt(y),left-7,p+4);}ctx.strokeStyle=col('axis');ctx.strokeRect(left,top,W,H);ctx.fillStyle=col('muted');ctx.textAlign='center';ctx.fillText(opts.x||'',left+W/2,h-5);ctx.textAlign='left';ctx.fillText(opts.y||'',left,13);return{...r,X,Y,a,b,c,d,left,right,top,bottom,clip(){ctx.save();ctx.beginPath();ctx.rect(left,top,W,H);ctx.clip();},unmap(px,py){return[a+(px-left)/W*(b-a),c+(h-bottom-py)/H*(d-c)];}};}
+function line(f,pts,color,dash=[],width=2,alpha=1){if(!pts.length)return;f.clip();const{ctx,X,Y}=f;ctx.strokeStyle=color;ctx.lineWidth=width;ctx.globalAlpha=alpha;ctx.setLineDash(dash);ctx.beginPath();let on=false;for(const[x,y]of pts){if(!Number.isFinite(x)||!Number.isFinite(y)){on=false;continue;}if(on)ctx.lineTo(X(x),Y(y));else{ctx.moveTo(X(x),Y(y));on=true;}}ctx.stroke();ctx.restore();}
+function dot(f,x,y,color,shape='dot',size=4){f.clip();const{ctx,X,Y}=f,px=X(x),py=Y(y);ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=2;ctx.beginPath();if(shape==='cross'){ctx.moveTo(px-size,py-size);ctx.lineTo(px+size,py+size);ctx.moveTo(px+size,py-size);ctx.lineTo(px-size,py+size);ctx.stroke();}else if(shape==='diamond'){ctx.moveTo(px,py-size);ctx.lineTo(px+size,py);ctx.lineTo(px,py+size);ctx.lineTo(px-size,py);ctx.closePath();ctx.stroke();}else{ctx.arc(px,py,size,0,2*Math.PI);ctx.fill();}ctx.restore();}
+function arrow(f,a,b,color){line(f,[a,b],color,[],2.5);const{ctx,X,Y}=f,x=X(b[0]),y=Y(b[1]),angle=Math.atan2(y-Y(a[1]),x-X(a[0]));f.clip();ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-10*Math.cos(angle-.4),y-10*Math.sin(angle-.4));ctx.lineTo(x-10*Math.cos(angle+.4),y-10*Math.sin(angle+.4));ctx.fill();ctx.restore();}
+function sample(fun,a,b,n=320){return Array.from({length:n+1},(_,i)=>{const x=a+(b-a)*i/n;return[x,fun(x)];});}
+function diamonds(f,max,color='axis'){for(let r=.5;r<=max;r+=.5)line(f,[[r,0],[0,r/2],[-r,0],[0,-r/2],[r,0]],col(color),[],1,.55);dot(f,0,0,col('text'),'cross',5);}
+function bar(f,x,width,y,color){f.clip();const{ctx,X,Y}=f;ctx.fillStyle=color;ctx.fillRect(X(x-width/2),Math.min(Y(y),Y(0)),Math.abs(X(x+width/2)-X(x-width/2)),Math.max(1,Math.abs(Y(y)-Y(0))));ctx.restore();}
+
+const pair = w => '('+w.map(fmt).join(', ')+')';
+
+class Player {
+  constructor(prefix, max, paint) {
+    this.prefix=prefix;
+    this.max=max;
+    this.paint=paint;
+    this.k=0;
+    this.running=false;
+    this.last=null;
+    this.credit=0;
+    this.raf=0;
+    const container=$(prefix+'-transport');
+    container.innerHTML='<button class="primary" id="'+prefix+'-run">Run</button>'+
+      '<button id="'+prefix+'-step">Step</button><button id="'+prefix+'-reset">Reset</button>'+
+      '<button id="'+prefix+'-finish">Show result</button>'+
+      '<label class="speed-label" for="'+prefix+'-speed">Speed <select id="'+prefix+'-speed">'+
+      '<option value="0.25">Slow</option><option value="1" selected>Normal</option><option value="2">Fast</option></select></label>';
+    $(prefix+'-run').onclick=()=>this.running?this.pause():this.start();
+    $(prefix+'-step').onclick=()=>{this.pause();this.set(this.k+1);};
+    $(prefix+'-reset').onclick=()=>{this.pause();this.set(0);};
+    $(prefix+'-finish').onclick=()=>{this.pause();this.set(this.max);};
+    $(prefix+'-time').oninput=()=>{
+      const selected=val(prefix+'-time');
+      this.pause();
+      this.set(selected);
+    };
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches) $(prefix+'-speed').value='0.25';
+  }
+  label() {
+    $(this.prefix+'-run').textContent=this.running?'Pause':this.k===this.max?'Replay':'Run';
+    $(this.prefix+'-position').textContent='k = '+this.k;
+    $(this.prefix+'-time').value=this.k;
+    $(this.prefix+'-step').disabled=this.k===this.max;
+  }
+  pause() {
+    this.running=false;
+    cancelAnimationFrame(this.raf);
+    this.last=null;
+    this.credit=0;
+    this.label();
+  }
+  set(k) {
+    this.k=clamp(Math.round(k),0,this.max);
+    this.label();
+    this.paint();
+  }
+  start() {
+    if(this.k===this.max)this.set(0);
+    this.running=true;
+    this.last=null;
+    this.credit=0;
+    this.label();
+    const tick=stamp=>{
+      if(!this.running)return;
+      if(this.last!==null) {
+        const dt=clamp(stamp-this.last,0,100)/1000;
+        this.credit+=dt*(this.max/18)*val(this.prefix+'-speed');
+        const updates=Math.floor(this.credit);
+        if(updates){this.credit-=updates;this.set(this.k+updates);}
+      }
+      this.last=stamp;
+      if(this.k===this.max){this.pause();return;}
+      this.raf=requestAnimationFrame(tick);
+    };
+    this.raf=requestAnimationFrame(tick);
+  }
+}
+
+let sgData, fbData;
+const sgPlayer=new Player('sg',400,paintSG);
+const fbPlayer=new Player('fb',80,paintFB);
+
+function buildSG() {
+  sgPlayer.pause();
+  const K=val('sg-horizon'), schedule=$('sg-schedule').value;
+  sgData=trace({K,schedule,eta:val('sg-scale'),w0:[1,.65],tie:2});
+  $('sg-scale').disabled=schedule==='fixed';
+  $('sg-scale-out').textContent=schedule==='fixed'?'Set by D, G, T':fmt(val('sg-scale'));
+  sgPlayer.max=K;
+  $('sg-time').max=K;
+  sgPlayer.set(0);
+}
+
+function paintSG() {
+  if(!sgData||!$('sg-stage').open)return;
+  const d=sgData,k=sgPlayer.k,s=d.states[k];
+  const range=Math.max(1.2,...d.states.flatMap(t=>t.w.map(Math.abs)))*1.15;
+  const path=frame('sg-path',[-range,range,-range,range],{x:'w₁',y:'w₂',equal:true});
+  diamonds(path,Math.ceil(range*3));
+  line(path,d.states.slice(0,k+1).map(t=>t.w),col('orange'),[],1.5,.8);
+  dot(path,...d.states[0].w,col('muted'),'diamond',5);
+  dot(path,...s.w,col('orange'),'dot',5);
+  if(k) {
+    line(path,d.states.slice(1,k+1).map(t=>t.avg),col('green'),[],2.5);
+    dot(path,...s.avg,col('green'),'diamond',7);
+  }
+  const log=$('sg-log').checked,show=$('sg-bound').checked;
+  const ymax=Math.max(1,...d.states.flatMap(t=>[t.f,t.avgGap,show?t.bound:0]).filter(Number.isFinite))*1.15;
+  const gap=frame('sg-gap',[0,d.K,log?-5:0,log?Math.ceil(Math.log10(ymax)):ymax],{x:'Updates k',y:log?'Objective gap (log scale)':'Objective gap',log});
+  line(gap,d.states.slice(0,k+1).map(t=>[t.k,t.f]),col('orange'),[],1.8);
+  dot(gap,k,s.f,col('orange'),'dot',4);
+  if(k) {
+    line(gap,d.states.slice(1,k+1).map(t=>[t.k,t.avgGap]),col('green'),[],2.5);
+    dot(gap,k,s.avgGap,col('green'),'dot',4);
+    if(show) {
+      line(gap,d.states.slice(1,k+1).map(t=>[t.k,t.bound]),col('gold'),[6,4],2);
+      dot(gap,k,s.bound,col('gold'),'dot',4);
+    }
+  }
+  $('sg-current').textContent=fmt(s.f);
+  $('sg-average').textContent=k?fmt(s.avgGap):'Undefined at k = 0';
+  $('sg-guarantee').textContent=k?fmt(s.bound):'Undefined at k = 0';
+  $('sg-message').textContent=$('sg-schedule').value==='fixed'?
+    'This run uses η = '+fmt(d.fixedEta)+' throughout. At T = '+d.K+', the theorem bounds the averaged gap by GD/√T = '+fmt(d.G*d.D/Math.sqrt(d.K))+'.':
+    $('sg-schedule').value==='constant'?
+    'The last iterate can keep oscillating while the weighted average improves. The constant-step upper bound tends to cG²/2 = '+fmt(val('sg-scale')*5/2)+'.':
+    'The decreasing steps also weight the average. The full theorem bound is shown at each k.';
+  $('sg-proof').textContent=k?
+    'At k = '+k+', the numerator is D² + G²Σηⱼ² = '+fmt(d.D**2)+' + '+fmt(5*s.sumEtaSquared)+
+    ' and the denominator is 2Σηⱼ = '+fmt(2*s.sumEta)+'. Their ratio is '+fmt(s.bound)+'.':
+    'Take one update to see the bound evaluated numerically.';
+}
+
+function paintProx() {
+  if(!$('prox-stage').open)return;
+  const v=val('px-input'),eta=val('px-eta');
+  const w=Math.sign(v)*Math.max(0,Math.abs(v)-eta);
+  const anchor=z=>(z-v)**2/(2*eta);
+  const total=z=>Math.abs(z)+anchor(z);
+  const ymax=Math.max(3,total(0),total(v),total(w)+3)*1.15;
+  const objective=frame('px-objective',[-3.4,3.4,0,ymax],{x:'Candidate z',y:'Subproblem value'});
+  line(objective,sample(z=>Math.abs(z),-3.4,3.4),col('blue'),[],2);
+  line(objective,sample(anchor,-3.4,3.4),col('orange'),[6,4],2);
+  line(objective,sample(total,-3.4,3.4),col('green'),[],3);
+  line(objective,[[v,0],[v,ymax]],col('muted'),[3,4],1);
+  dot(objective,v,0,col('muted'),'diamond',6);
+  dot(objective,w,total(w),col('green'),'dot',6);
+  const map=frame('px-map',[-3.4,3.4,-3.4,3.4],{x:'Input v',y:'Output proxηh(v)',equal:true});
+  line(map,[[-3.4,-3.4],[3.4,3.4]],col('muted'),[5,5],1.3);
+  line(map,[[-3.4,-3.4+eta],[-eta,0],[eta,0],[3.4,3.4-eta]],col('green'),[],3);
+  line(map,[[v,0],[v,w],[0,w]],col('orange'),[4,3],1.5);
+  dot(map,v,w,col('orange'),'dot',6);
+  $('px-input-out').textContent=fmt(v);
+  $('px-eta-out').textContent=fmt(eta);
+  $('px-v').textContent=fmt(v);
+  $('px-result').textContent=fmt(w);
+  $('px-subgrad').textContent=fmt((v-w)/eta);
+  $('px-message').textContent=w===0?
+    'The minimum occurs at the kink. Since |v| ≤ η, (v−w⁺)/η belongs to [−1, 1] = ∂h(0).':
+    'The proximal point moves toward zero by η = '+fmt(eta)+'. At w⁺ = '+fmt(w)+', the optimality condition selects subgradient '+fmt(Math.sign(w))+'.';
+}
+
+function buildFB() {
+  fbPlayer.pause();
+  const mode=$('fb-mode').value,value=val('fb-value'),eta=val('fb-rate')/3;
+  const optimum=ForwardBackward.solution(mode,value),star=ForwardBackward.objective(optimum,mode,value);
+  let w=[.8,-.6];
+  const states=[];
+  for(let k=0;k<=fbPlayer.max;k++) {
+    const {z,next}=ForwardBackward.update(w,mode,value,eta);
+    states.push({k,w:w.slice(),z,next,gap:Math.max(0,ForwardBackward.objective(w,mode,value)-star)});
+    w=next;
+  }
+  fbData={states,mode,value,eta,optimum,star};
+  $('fb-value-out').textContent=fmt(value);
+  $('fb-rate-out').textContent=fmt(3*eta);
+  $('fb-formula').textContent=mode==='lasso'?
+    'h(w) = λ‖w‖₁. Apply soft thresholding with threshold ηλ to each coordinate.':
+    'h(w) = ι_C(w), C = {w : ‖w‖₂ ≤ R}. Apply the Euclidean projection onto C.';
+  fbPlayer.set(0);
+}
+
+function paintFB() {
+  if(!fbData||!$('fb-stage').open)return;
+  const d=fbData,k=fbPlayer.k,s=d.states[k],disk=d.mode==='disk',r=disk?d.value:0;
+  const points=d.states.flatMap(t=>[t.w,t.z,t.next]).concat([d.optimum,[2,.5],[-1,-1],[r,r],[-r,-r]]);
+  const minX=Math.min(...points.map(p=>p[0]))-.3,maxX=Math.max(...points.map(p=>p[0]))+.3;
+  const minY=Math.min(...points.map(p=>p[1]))-.3,maxY=Math.max(...points.map(p=>p[1]))+.3;
+  const path=frame('fb-path',[minX,maxX,minY,maxY],{x:'w₁',y:'w₂',equal:true});
+  const circle=radius=>Array.from({length:161},(_,i)=>[radius*Math.cos(i*Math.PI/80),radius*Math.sin(i*Math.PI/80)]);
+  if(disk) {
+    path.clip();path.ctx.fillStyle=col('green');path.ctx.globalAlpha=.07;
+    path.ctx.beginPath();path.ctx.arc(path.X(0),path.Y(0),Math.abs(path.X(r)-path.X(0)),0,2*Math.PI);path.ctx.fill();path.ctx.restore();
+  }
+  for(const level of [.05,.2,.5,1,2,3.5,5.5,8,12,18]) {
+    const ellipse=Array.from({length:161},(_,i)=>{
+      const angle=i*Math.PI/80,u=Math.sqrt(2*level)*Math.cos(angle),v=Math.sqrt(2*level/3)*Math.sin(angle);
+      return[2+(u+v)/Math.SQRT2,.5+(-u+v)/Math.SQRT2];
+    });
+    line(path,ellipse,col('axis'),[],1,.6);
+  }
+  if(disk)line(path,circle(r),col('green'),[6,4],2);
+  line(path,d.states.slice(0,k+1).map(t=>t.w),col('blue'),[],2.3);
+  dot(path,...d.states[0].w,col('muted'),'diamond',5);
+  if($('fb-arrows').checked) {
+    if(Math.hypot(s.z[0]-s.w[0],s.z[1]-s.w[1])>1e-8)arrow(path,s.w,s.z,col('orange'));
+    if(Math.hypot(s.next[0]-s.z[0],s.next[1]-s.z[1])>1e-8)arrow(path,s.z,s.next,col('green'));
+    dot(path,...s.z,col('orange'),'diamond',6);
+    dot(path,...s.next,col('green'),'dot',5);
+  }
+  dot(path,...s.w,col('blue'),'dot',5);
+  dot(path,...d.optimum,col('text'),'cross',7);
+  const log=$('fb-log').checked,ymax=Math.max(.1,...d.states.map(t=>t.gap))*1.15;
+  const gap=frame('fb-gap',[0,fbPlayer.max,log?-12:0,log?Math.ceil(Math.log10(ymax)):ymax],{x:'Updates k',y:log?'Composite objective gap (log scale)':'Composite objective gap',log});
+  line(gap,d.states.slice(0,k+1).map(t=>[t.k,t.gap]),col('blue'),[],2.5);
+  dot(gap,k,s.gap,col('blue'),'dot',4.5);
+  $('fb-current').textContent=pair(s.w);
+  $('fb-next').textContent=pair(s.next);
+  $('fb-error').textContent=fmt(s.gap);
+  const norm=Math.hypot(...s.z);
+  $('fb-message').textContent=disk?
+    'The forward point is zₖ = '+pair(s.z)+'. '+(norm>d.value+1e-12?'It lies outside C and is projected radially onto the boundary.':'It lies inside C, so projection leaves it in place.'):
+    'The forward point is zₖ = '+pair(s.z)+'. Shrinking by ηλ = '+fmt(d.eta*d.value)+
+    ' gives '+s.next.filter(t=>t===0).length+' zero coordinate(s) in the next iterate.';
+  const g=s.z.map((v,i)=>(v-s.next[i])/d.eta);
+  $('fb-certificate').textContent='At this step gₖ = (zₖ−wₖ₊₁)/η = '+pair(g)+
+    '. The minimizer for this example is w⋆ = '+pair(d.optimum)+'.';
+}
+
+const remembered={lasso:2,disk:1};
+function changeMode() {
+  const mode=$('fb-mode').value,disk=mode==='disk';
+  $('fb-value').min=disk?1:0;
+  $('fb-value').max=disk?2.5:5;
+  $('fb-value').value=remembered[mode];
+  $('fb-value-label').textContent=disk?'Disk radius R':'Penalty λ';
+  buildFB();
+}
+for(const id of ['sg-schedule','sg-horizon'])$(id).onchange=buildSG;
+$('sg-scale').oninput=buildSG;
+for(const id of ['sg-log','sg-bound'])$(id).onchange=paintSG;
+$('sg-cycle').onclick=()=>{$('sg-schedule').value='constant';$('sg-scale').value=.22;buildSG();};
+$('sg-tuned').onclick=()=>{$('sg-schedule').value='fixed';buildSG();};
+$('px-input').oninput=paintProx;$('px-eta').oninput=paintProx;
+$('px-zero').onclick=()=>{$('px-input').value=.5*val('px-eta');paintProx();};
+$('px-edge').onclick=()=>{$('px-input').value=val('px-eta');paintProx();};
+$('px-negative').onclick=()=>{$('px-input').value=-2.5;paintProx();};
+$('fb-mode').onchange=changeMode;
+$('fb-value').oninput=()=>{remembered[$('fb-mode').value]=val('fb-value');buildFB();};
+$('fb-rate').oninput=buildFB;
+for(const id of ['fb-log','fb-arrows'])$(id).onchange=paintFB;
+$('fb-sparse').onclick=()=>{remembered.lasso=2;$('fb-mode').value='lasso';changeMode();};
+$('fb-projection').onclick=()=>{remembered.disk=1;$('fb-mode').value='disk';changeMode();};
+function repaint(){paintSG();paintProx();paintFB();}
+$('theme').onclick=()=>{
+  const root=document.documentElement;
+  const dark=root.dataset.theme?root.dataset.theme==='dark':matchMedia('(prefers-color-scheme:dark)').matches;
+  root.dataset.theme=dark?'light':'dark';
+  repaint();
+};
+document.querySelectorAll('.stage').forEach(stage=>stage.addEventListener('toggle',()=>{
+  if(!stage.open) {
+    if(stage.id==='sg-stage')sgPlayer.pause();
+    if(stage.id==='fb-stage')fbPlayer.pause();
+  }else repaint();
+}));
+document.addEventListener('visibilitychange',()=>{if(document.hidden){sgPlayer.pause();fbPlayer.pause();}});
+let resizeFrame;
+window.addEventListener('resize',()=>{cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(repaint);});
+matchMedia('(prefers-color-scheme:dark)').addEventListener('change',repaint);
+buildSG();buildFB();paintProx();
+globalThis.Lecture14Demo={sgPlayer,fbPlayer,getSG:()=>sgData,getFB:()=>fbData,repaint};
+})();
+</script></body></html>
